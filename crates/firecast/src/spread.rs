@@ -45,6 +45,9 @@ pub struct EnsembleConfig {
     pub wind_dir_sigma_deg: f64,
     pub dead_moisture_sigma_pct: f64,
     pub live_moisture_sigma_pct: f64,
+    /// Optional observed burned area (row-major mask) to start from instead of a
+    /// point: its boundary cells ignite at t = 0 (perimeter re-initialisation).
+    pub initial_burned: Option<Vec<bool>>,
 }
 
 impl EnsembleConfig {
@@ -65,6 +68,7 @@ impl EnsembleConfig {
             wind_dir_sigma_deg: 12.0,
             dead_moisture_sigma_pct: 1.0,
             live_moisture_sigma_pct: 10.0,
+            initial_burned: None,
         }
     }
 }
@@ -293,6 +297,18 @@ pub fn run_member(
     p: Perturbation,
     horizon_s: f64,
 ) -> Option<MemberResult> {
+    run_member_from(landscape, hours, p, horizon_s, None)
+}
+
+/// Run one member from a point ignition or, when `initial` is given, from an
+/// observed burned area whose boundary cells ignite at t = 0.
+pub fn run_member_from(
+    landscape: &Landscape,
+    hours: &[HourConditions],
+    p: Perturbation,
+    horizon_s: f64,
+    initial: Option<&[bool]>,
+) -> Option<MemberResult> {
     let (w, h) = (landscape.width, landscape.height);
     let ix = (p.ignition.0 / landscape.cell_m).floor() as isize;
     let iy = (p.ignition.1 / landscape.cell_m).floor() as isize;
@@ -300,19 +316,56 @@ pub fn run_member(
         landscape,
         ix.clamp(0, w as isize - 1),
         iy.clamp(0, h as isize - 1),
-    )?;
+    )
+    .or_else(|| initial.and_then(|m| m.iter().position(|b| *b)))?;
     let beds = beds_for(hours, &p);
-    let mut cache: Vec<Vec<Option<Option<Spread>>>> = vec![vec![None; w * h]; hours.len()];
+    // Dijkstra pops cells in time order, so the hour only moves forward: cache one
+    // hour of cell states at a time (bounded memory for multi-day runs).
+    let mut cache: Vec<Option<Option<Spread>>> = vec![None; w * h];
+    let mut cache_hour = usize::MAX;
     let mut get = |hour: usize, cell: usize| -> Option<Spread> {
-        *cache[hour][cell]
-            .get_or_insert_with(|| cell_spread(landscape, hours, &beds, &p, hour, cell))
+        if hour != cache_hour {
+            cache.iter_mut().for_each(|c| *c = None);
+            cache_hour = hour;
+        }
+        *cache[cell].get_or_insert_with(|| cell_spread(landscape, hours, &beds, &p, hour, cell))
     };
     let mut arrival = vec![f32::INFINITY; w * h];
     let mut best = vec![f64::INFINITY; w * h];
     let mut done = vec![false; w * h];
     let mut heap = BinaryHeap::new();
-    best[start] = 0.0;
-    heap.push(Node(0.0, start));
+    match initial.filter(|m| m.len() == w * h && m.iter().any(|b| *b)) {
+        Some(mask) => {
+            for cell in 0..w * h {
+                if !mask[cell] {
+                    continue;
+                }
+                let (x, y) = ((cell % w) as isize, (cell / w) as isize);
+                let edge = [(1isize, 0isize), (-1, 0), (0, 1), (0, -1)]
+                    .iter()
+                    .any(|(dx, dy)| {
+                        let (nx, ny) = (x + dx, y + dy);
+                        nx >= 0
+                            && ny >= 0
+                            && (nx as usize) < w
+                            && (ny as usize) < h
+                            && !mask[ny as usize * w + nx as usize]
+                    });
+                best[cell] = 0.0;
+                if edge {
+                    heap.push(Node(0.0, cell));
+                } else {
+                    // Interior already burned: no fuel left to carry new spread.
+                    done[cell] = true;
+                    arrival[cell] = 0.0;
+                }
+            }
+        }
+        None => {
+            best[start] = 0.0;
+            heap.push(Node(0.0, start));
+        }
+    }
     while let Some(Node(t, cell)) = heap.pop() {
         if done[cell] || t > best[cell] {
             continue;
@@ -402,7 +455,13 @@ pub fn run_ensemble(
                         .map(|(i, p)| {
                             (
                                 ci * chunk + i,
-                                run_member(landscape, hours, *p, config.horizon_s),
+                                run_member_from(
+                                    landscape,
+                                    hours,
+                                    *p,
+                                    config.horizon_s,
+                                    config.initial_burned.as_deref(),
+                                ),
                             )
                         })
                         .collect::<Vec<_>>()

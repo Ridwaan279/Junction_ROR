@@ -24,7 +24,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [-9.6, 36.9],
   [-6.1, 42.2],
 ];
-const style: StyleSpecification = {
+export const style: StyleSpecification = {
   version: 8,
   sources: {
     osm: {

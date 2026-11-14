@@ -178,7 +178,9 @@ pub fn anderson(number: u8) -> Option<&'static FuelModel> {
 /// Land-cover classes relevant to Portuguese wildland. Each maps to an
 /// approximate standard model; these are not the calibrated Portuguese custom
 /// models of Fernandes et al. and are labelled as approximations everywhere.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, PartialOrd, Ord)]
+#[derive(
+    Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, serde::Deserialize, PartialOrd, Ord,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum LandCover {
     Eucalyptus,

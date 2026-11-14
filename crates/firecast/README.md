@@ -53,6 +53,25 @@ Reported vegetation sets the regional fuel, and a reported drought class lowers 
 moisture. The reported spread direction is never forced into the model. It is
 compared with the model's run direction and shown as an agreement check.
 
+## Historical replay (`historical.rs`)
+
+When no fire is burning, a sourced historical dataset stands in for the live feeds:
+dated GWIS perimeters (via GDACS), hourly ERA5 weather, a terrain snapshot and dated
+web reports. See `data/historical/README.md`.
+
+The replay forecasts from the ignition point to the first observed perimeter, then
+restarts from every observed perimeter and forecasts the next one. Each forecast is
+scored with the Sørensen–Dice coefficient on total and on newly burned area, plus the
+share of observed growth inside the 10 % probability band and the growth direction.
+Every 3 hours it also records smoke, conditions, and a drone fleet sized from the
+active front and growth rate. The fleet is routed from bases 3 km outside the fire in
+the cleanest air, avoiding likely fire within the hour and slowing down in smoke.
+
+```sh
+cargo run --release -p emberwatch-firecast --example build_dataset
+cargo run --release -p emberwatch-firecast --example replay
+```
+
 ## Running
 
 ```sh

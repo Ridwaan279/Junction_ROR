@@ -56,7 +56,8 @@ pub fn plan_drone(
                 humidity: 0.0,
                 elevation_m: (elev / count.max(1.0)).clamp(-400.0, 8000.0),
                 blocked: p >= NO_FLY_PROBABILITY,
-                smoke_penalty: (c / 25.0).clamp(0.0, 100.0),
+                // Planner multiplies travel time by (1 + penalty): 35 µg/m³ ≈ +23 %, ≥ 300 µg/m³ = ×3.
+                smoke_penalty: (c / 150.0).clamp(0.0, 2.0),
             });
         }
     }

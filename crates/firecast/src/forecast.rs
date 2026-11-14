@@ -86,6 +86,39 @@ pub struct FirecastResult {
 
 /// Bilinear wind on the spread grid from a coarse lattice of field samples.
 fn wind_grid(env: &FireEnvironment, t: DateTime<Utc>) -> Vec<(f32, f32)> {
+    wind_grid_for(
+        &env.weather,
+        &env.frame,
+        env.width,
+        env.height,
+        env.cell_m,
+        t,
+    )
+}
+
+/// Bilinear wind on any square grid from a 17 × 17 lattice of weather-field samples.
+pub fn wind_grid_for(
+    weather: &crate::weather::WeatherField,
+    frame: &LocalFrame,
+    width: usize,
+    height: usize,
+    cell_m: f64,
+    t: DateTime<Utc>,
+) -> Vec<(f32, f32)> {
+    struct G<'a> {
+        weather: &'a crate::weather::WeatherField,
+        frame: &'a LocalFrame,
+        width: usize,
+        height: usize,
+        cell_m: f64,
+    }
+    let env = G {
+        weather,
+        frame,
+        width,
+        height,
+        cell_m,
+    };
     const N: usize = 17;
     let span = env.width as f64 * env.cell_m;
     let lattice: Vec<(f64, f64)> = (0..N * N)
@@ -133,7 +166,7 @@ fn ring_to_lon_lat(frame: &LocalFrame, cell_m: f64, ring: &[(f64, f64)]) -> Vec<
     coords
 }
 
-fn multipolygon(
+pub(crate) fn multipolygon(
     frame: &LocalFrame,
     cell_m: f64,
     field: &[f64],
@@ -157,11 +190,11 @@ fn multipolygon(
     (!coords.is_empty()).then(|| json!({"type":"MultiPolygon","coordinates":coords}))
 }
 
-fn line(frame: &LocalFrame, a: (f64, f64), b: (f64, f64)) -> Value {
+pub(crate) fn line(frame: &LocalFrame, a: (f64, f64), b: (f64, f64)) -> Value {
     json!({"type":"LineString","coordinates":[frame.to_lon_lat(a.0, a.1), frame.to_lon_lat(b.0, b.1)]})
 }
 
-fn round(v: f64, d: i32) -> f64 {
+pub(crate) fn round(v: f64, d: i32) -> f64 {
     let f = 10f64.powi(d);
     (v * f).round() / f
 }

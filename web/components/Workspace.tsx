@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import MapView from "./MapView";
 import FirecastPanel from "./FirecastPanel";
+import HistoricalView from "./HistoricalView";
 import { firecastFor, isFirecast } from "@/lib/firecast";
 import Icon from "./Icon";
 import { useWorkspace } from "@/lib/use-workspace";
@@ -15,7 +16,8 @@ export default function Workspace() {
     useWorkspace();
   const [locale, setLocale] = useState<Locale>("pt"),
     [tab, setTab] = useState<Tab>("overview"),
-    [selectedId, setSelectedId] = useState<string | null>(null);
+    [selectedId, setSelectedId] = useState<string | null>(null),
+    [view, setView] = useState<"workspace" | "historical">("workspace");
   const select = useCallback((id: string) => {
     setSelectedId(id);
     setTab("overview");
@@ -94,6 +96,14 @@ export default function Workspace() {
           ))}
         </nav>
         <div className="topbar-end">
+          <button
+            className={"history-switch" + (view === "historical" ? " active" : "")}
+            aria-pressed={view === "historical"}
+            onClick={() => setView(view === "historical" ? "workspace" : "historical")}
+          >
+            <Icon name="reset" size={14} />
+            {locale === "pt" ? "Arganil 2025 (histórico)" : "Arganil 2025 (historical)"}
+          </button>
           <div
             className={"connection " + (!connected ? "connection-warning" : "")}
           >
@@ -116,6 +126,10 @@ export default function Workspace() {
           </div>
         </div>
       </header>
+      {view === "historical" ? (
+        <HistoricalView locale={locale} onExit={() => setView("workspace")} />
+      ) : (
+      <>
       <div className={"mode-banner mode-" + scenario.mode}>
         <span className="mode-pill">
           <i />
@@ -301,6 +315,8 @@ export default function Workspace() {
         </div>
         <p className="replay-note">{t.replayNote}</p>
       </footer>
+      </>
+      )}
     </main>
   );
 }

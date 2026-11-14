@@ -74,7 +74,7 @@ impl HttpSources {
         Ok(bytes)
     }
 
-    async fn get_json(&self, url: &str, limit: usize) -> Result<Value, FirecastError> {
+    pub(crate) async fn get_json(&self, url: &str, limit: usize) -> Result<Value, FirecastError> {
         let bytes = self.get_bytes(url, limit).await?;
         let value: Value =
             serde_json::from_slice(&bytes).map_err(|_| FirecastError::Parse(host(url)))?;
@@ -112,6 +112,26 @@ impl HttpSources {
             to.format("%Y-%m-%dT%H:%M"),
         );
         let value = self.get_json(&url, 4 * 1024 * 1024).await?;
+        Ok((parse_open_meteo(&value, points)?, url))
+    }
+
+    /// Hourly ERA5 reanalysis (Open-Meteo archive) for whole UTC days, inclusive.
+    pub async fn weather_archive(
+        &self,
+        points: &[[f64; 2]],
+        first_day: chrono::NaiveDate,
+        last_day: chrono::NaiveDate,
+    ) -> Result<(WeatherField, String), FirecastError> {
+        let lat: Vec<String> = points.iter().map(|p| format!("{:.4}", p[1])).collect();
+        let lon: Vec<String> = points.iter().map(|p| format!("{:.4}", p[0])).collect();
+        let hourly = "temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,\
+wind_speed_100m,wind_direction_100m,cloud_cover,shortwave_radiation,precipitation,vapour_pressure_deficit";
+        let url = format!(
+            "https://archive-api.open-meteo.com/v1/archive?latitude={}&longitude={}&start_date={first_day}&end_date={last_day}&hourly={hourly}&wind_speed_unit=ms&timezone=GMT",
+            lat.join(","),
+            lon.join(","),
+        );
+        let value = self.get_json(&url, 16 * 1024 * 1024).await?;
         Ok((parse_open_meteo(&value, points)?, url))
     }
 
@@ -412,8 +432,13 @@ pub fn parse_open_meteo(value: &Value, points: &[[f64; 2]]) -> Result<WeatherFie
             series("wind_speed_10m"),
             series("wind_direction_10m"),
             series("wind_gusts_10m"),
-            series("wind_speed_120m"),
-            series("wind_direction_120m"),
+            // 120 m (forecast models) or 100 m (ERA5 reanalysis) as the transport level.
+            Some(series("wind_speed_120m"))
+                .filter(|v| v.iter().any(Option::is_some))
+                .unwrap_or_else(|| series("wind_speed_100m")),
+            Some(series("wind_direction_120m"))
+                .filter(|v| v.iter().any(Option::is_some))
+                .unwrap_or_else(|| series("wind_direction_100m")),
             series("cloud_cover"),
             series("shortwave_radiation"),
             series("precipitation"),

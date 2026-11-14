@@ -15,6 +15,7 @@ pub mod forecast;
 pub mod fuel;
 pub mod geo;
 pub mod hazards;
+pub mod historical;
 pub mod intel;
 pub mod landcover;
 pub mod moisture;
