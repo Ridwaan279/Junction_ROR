@@ -1,8 +1,37 @@
 # Portugal data-source research
 
 Checked **14 November 2026** against the primary sources linked below.
-These are research findings and implementation requirements, not a completed
-integration test. No Context.dev scrape of Fogos.pt was executed in this task.
+The original planning research is followed by the dated implementation probes
+below. A bounded Context.dev public-page scrape has now been executed; it did
+not establish complete incident extraction, ongoing reuse rights or production readiness.
+
+## Agent B implementation probes — 14 November 2026
+
+The `emberwatch-intelligence` Rust crate now has Context REST/public-page,
+IPMA, bounded Portuguese report, and signed webhook modules. Tests use synthetic
+literals only; no captured Fogos incident dataset is committed.
+
+| Check | Observed result | Consequence |
+|---|---|---|
+| Context account | Authenticated usage read succeeded; available credits covered the bounded probes. Auto-topup was disabled. | Account allocation is observed, not a general free-tier entitlement or permission to spend the balance. The server API environment key was absent in this session. |
+| [Fogos robots](https://fogos.pt/robots.txt) through Context | Request `13221348-cccc-4031-8540-9ffc6f426ebd` returned a rule disallowing `/gaia` and sitemap links. `/pt` was not disallowed by the returned policy. | Do not visit `/gaia`. Robots permission is distinct from a website reuse licence, which remains unresolved. This supersedes the earlier failed robots fetch below. |
+| [Fogos public map](https://fogos.pt/pt) through Context | One fresh Markdown + nullable JSON capture, request `46d9e921-543f-4a27-aef6-1f171157e59f`, returned per-output success. The rendered text had headings and an aggregate counter but no incident rows. Structured output explicitly marked coverage partial. No explicit empty statement was present. | Zero extracted rows **does not mean zero incidents**. Extraction feasibility for populated public list/detail rows remains unverified. Public links to `/pt/lista` and `/pt/tabela` were discovered, but no additional Fogos capture was made. No API/network endpoint was queried. |
+| Rust Context application boundary | A local HTTP contract test checks bearer auth, fresh captures, nullable schema, partial output and actionable 429 behavior. `CONTEXT_DEV_API_KEY` was absent. | The plugin probe is a real Context request; a live request through the Rust Context client has **not** been demonstrated. Run the crate's one-shot `probe -- fogos` example after configuring the server key. |
+| [IPMA documentation](https://api.ipma.pt/) | Hourly observations use `-99.0` for missing values, wind in m/s or km/h, direction codes 1/9=N, 2=NE through 8=NW, 0=undefined. The documented naive timestamp examples do not explicitly establish a timezone. | No invented gusts. Unknown timezone stays unresolved; the adapter skips unresolvable timestamp groups. Explicit `UtcConfigured` is flagged as an operator assumption. IPMA attribution/linked-logo and usage-contact conditions still apply before deployment. |
+| Live Rust IPMA probe | One `cargo +stable run -p emberwatch-intelligence --example probe -- ipma` call fetched the documented station and observation JSON successfully. Default unknown-timezone policy skipped 24 naive timestamp groups and returned partial health with no normalized weather records. | Transport/payload shape is exercised live. No precise timestamp normalization is claimed without a documented/explicit timezone policy. No contact email was sent. |
+| [Context webhook guide](https://docs.context.dev/webhooks.md) | Verified current raw-body `t=<unix seconds>,v1=<hex>` HMAC-SHA256 protocol, full returned signing-secret string, five-minute attempt tolerance, stable event ID across retries, header/envelope matching, durable inbox before acknowledgement. | Rust verification and durable-inbox trait are implemented. A mounts the route and owns atomic deduplication. No monitor/webhook was created or changed. |
+| [Change payload reference](https://docs.context.dev/api-reference/monitors/webhook-payload.md) and [run payload reference](https://docs.context.dev/api-reference/monitors/webhook-run-completed.md) | Both render an OpenAPI block containing `paths: {}` without the advertised concrete event payload schema. | Documentation gap: actual source ID JSON pointer and data schema need a representative signed delivery. The receiver requires an explicit trusted source binding and fails closed. Verified receipts are not automatically incident evidence. |
+| [Copernicus bulletin 174](https://mapping.emergency.copernicus.eu/news/information-bulletin-174-copernicus-emergency-management-service-monitors-wildfires-in-portugal/) | Official bulletin is dated 1 October 2024. It describes EMSR760 activation on 16 September and first Sever do Vouga delineation delivery the following day, with products from 17–18 September. | The bulletin itself cannot be available in a 15–18 September replay. Product-level URLs/files, exact publication instants, licence/attribution checks, and archive coverage remain unverified. No product has been downloaded/imported. |
+
+Current provider references were read for [scrape request/response](https://docs.context.dev/api-reference/web-scraping/scrape.md),
+[web search](https://docs.context.dev/api-reference/web-scraping/search.md), and
+[monitor events](https://docs.context.dev/monitors/webhooks.md). Report search is
+bounded to five allowlisted Portuguese sites. ANEPC-derived articles retain the
+`anepc` origin group; other unreviewed reports are not treated as independent
+confirmations. Deterministic cited PT/EN text fallback is implemented; Gemini,
+automatic geocoding, recurring monitors and voice are not claimed as integrated.
+Fogos recurring extraction stays disabled until source checks pass. Its public
+redistribution permission, full coverage and real record extraction remain open.
 
 ## Decision: Context.dev reads Fogos.pt public pages
 
