@@ -1,4 +1,4 @@
-# Portuguese material atlas — WIP
+# Portuguese material atlas
 
 Generated on 15 November 2026 using the built-in `image_gen` tool. No API key,
 paid map service, downloaded façade photograph or external texture pack is used.
@@ -15,11 +15,12 @@ addresses or evidence of a building's actual appearance. See
 for regional context. Individual material assignments are synthetic; mapped
 footprints and approximate height attributes still come from OSM/OpenMapTiles.
 
-The current native MapLibre pattern preview is off by default because roof
-patterns can appear oversized and texture scale/aliasing remains unfinished.
-`building-mesh.ts` starts a replacement renderer's metre-based geometry and UVs;
-it is not connected to the map yet. Pitched roofs and surveyed façade geometry
-are not included.
+`building-materials.ts` renders nearby mapped polygons with the geometry/UVs in
+`building-mesh.ts`. Façades repeat every 6 m (two illustrative storeys), while
+terracotta and granite repeat every 2 m. Mipmaps and optional anisotropic
+filtering reduce shimmer; texture coordinates retain their size as the camera
+zooms. Textures are on by default and can be switched off. Pitched roofs and
+surveyed façade geometry are not included.
 
 ## Final generation prompt
 

@@ -18,13 +18,20 @@ export function polygonCenter(polygon: Polygon): Point2 {
   return [(west + east) / 2, (south + north) / 2];
 }
 
-export function appendBuildingMesh(buffers: MeshBuffers, polygon: Polygon, origin: Point2, scale: number, groundM: number, baseM: number, heightM: number, facade: BuildingMaterial) {
+export function appendBuildingMesh(buffers: MeshBuffers, polygon: Polygon, origin: Point2, scale: number, groundM: number, baseM: number, heightM: number, facade: BuildingMaterial, groundAt?: (point: Point2) => number) {
+  if (!polygon.coordinates[0] || polygon.coordinates[0].length < 3 || !polygon.coordinates.flat().every((p) => p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1]))) return;
   const rings = polygon.coordinates.map((ring) => {
     const points = ring.length > 1 && ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1] ? ring.slice(0, -1) : ring;
     return points.map((point): Point2 => { const p = mercator(point); return [(p[0] - origin[0]) / scale, (p[1] - origin[1]) / scale]; });
   }).filter((ring) => ring.length >= 3);
   if (!rings.length) return;
-  const bottom = groundM + baseM, top = groundM + heightM;
+  const top = groundM + heightM;
+  const bottomAt = (point: Point2) => {
+    if (!groundAt) return groundM + baseM;
+    const mx = point[0] * scale + origin[0], my = point[1] * scale + origin[1];
+    const latitude = Math.atan(Math.sinh(Math.PI * (1 - 2 * my))) * 180 / Math.PI;
+    return Math.min(groundM, groundAt([mx * 360 - 180, latitude])) + baseM - 0.1;
+  };
   const push = (buffer: number[], point: Point2, z: number, u: number, v: number, normal: number[]) => buffer.push(point[0] * scale, point[1] * scale, z * scale, u, v, ...normal);
   const flat: number[] = [], holes: number[] = [];
   let count = 0;
@@ -43,10 +50,12 @@ export function appendBuildingMesh(buffers: MeshBuffers, polygon: Polygon, origi
       if (length < 0.01) continue;
       const normal = [sign * dy / length, -sign * dx / length, 0];
       const u0 = distance / repeat, u1 = (distance + length) / repeat;
-      const v0 = baseM / repeat, v1 = heightM / repeat;
+      const v1 = heightM / repeat;
       const wall = buffers[facade];
-      push(wall, a, bottom, u0, v0, normal); push(wall, b, bottom, u1, v0, normal); push(wall, a, top, u0, v1, normal);
-      push(wall, a, top, u0, v1, normal); push(wall, b, bottom, u1, v0, normal); push(wall, b, top, u1, v1, normal);
+      const bottomA = bottomAt(a), bottomB = bottomAt(b);
+      const v0A = (bottomA - groundM) / repeat, v0B = (bottomB - groundM) / repeat;
+      push(wall, a, bottomA, u0, v0A, normal); push(wall, b, bottomB, u1, v0B, normal); push(wall, a, top, u0, v1, normal);
+      push(wall, a, top, u0, v1, normal); push(wall, b, bottomB, u1, v0B, normal); push(wall, b, top, u1, v1, normal);
       distance += length;
     }
   }

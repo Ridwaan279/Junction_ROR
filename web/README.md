@@ -26,14 +26,16 @@ Place labels are optional to keep the city geometry clear; street names remain.
 City presets use 1× terrain exaggeration. Building heights are in metres and
 are not multiplied by the terrain exaggeration control.
 
-Texture WIP checkpoint: the camera now allows zoom 22 and tilt 85°. **Close view**
+The camera allows zoom 22 and tilt 85°. **Close view**
 and **View this building closer** move towards building scale. Deeper zoom does
-not add source geometry detail. **Portuguese textures (preview)** opts into a
-generated stucco/azulejo/granite/terracotta atlas; it is off by default because
-native extrusion patterns still have oversized roof tiles and aliasing at close
-range. A metre-based mesh builder is included but its WebGL renderer, mipmapping,
-terrain alignment and selection integration remain unfinished. Close-up desktop
-and mobile checks must follow that integration. The image generation method,
+not add source geometry detail. **Portuguese textures** enables a
+generated stucco/azulejo/granite/terracotta atlas, on by default. A custom WebGL2
+layer repeats façades every 6 m and roof/stone surfaces every 2 m, independently
+of zoom, with mipmaps and anisotropic filtering when supported. It renders up to
+3,000 nearby mapped polygons within 1.4 km from zoom 16.5. More distant areas
+retain flat footprints; lower zoom, disabled textures or a texture failure use
+plain native extrusions. Foundations sample terrain, roofs stay level, and
+click selection tests the drawn wall/roof triangles. The image generation method,
 asset details and full prompt are in the [material provenance](public/textures/portugal/README.md).
 
 Building footprints come from OpenStreetMap through OpenFreeMap/OpenMapTiles.
