@@ -81,3 +81,30 @@ fn paused_clock_does_not_advance_and_seek_is_bounded() {
     assert!(engine.play(f64::INFINITY).is_err());
     assert!(engine.seek(start - Duration::seconds(1)).is_err());
 }
+
+#[tokio::test]
+#[ignore = "requires a dedicated PostgreSQL/PostGIS TEST_DATABASE_URL"]
+async fn postgres_round_trip_preserves_archive_and_deduplicates_retries() {
+    let url = std::env::var("TEST_DATABASE_URL").expect("dedicated TEST_DATABASE_URL");
+    let store = persistence::PgStore::connect(&url).await.unwrap();
+    let engine = Engine::synthetic().unwrap();
+    store.save(&engine).await.unwrap();
+    store.save(&engine).await.unwrap();
+    let mut restored = store.load("synthetic-portugal").await.unwrap().unwrap();
+    assert_eq!(restored.snapshot().evidence.len(), 1);
+    let pool = sqlx::PgPool::connect(&url).await.unwrap();
+    let (count,): (i64,) = sqlx::query_as("SELECT count(*) FROM evidence WHERE run_id = $1")
+        .bind("synthetic-portugal")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    assert_eq!(count, 2);
+    restored
+        .seek(Utc.with_ymd_and_hms(2026, 11, 14, 12, 10, 0).unwrap())
+        .unwrap();
+    assert_eq!(restored.snapshot().evidence.len(), 2);
+    assert_eq!(
+        restored.snapshot().evidence[0].provenance.captured_at,
+        Utc.with_ymd_and_hms(2026, 11, 14, 12, 0, 0).unwrap()
+    );
+}

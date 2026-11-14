@@ -292,18 +292,25 @@ async fn sse_events(
     let receiver = state.events.subscribe();
     let engine = state.engine.lock().await;
     scope(&engine, &query.run_id)?;
-    let initial = engine.envelope(
-        state.sequence.fetch_add(1, Ordering::Relaxed),
-        "run.reset",
-        json!(engine.snapshot()),
-    );
+    let initial_sequence = state.sequence.fetch_add(1, Ordering::Relaxed);
+    let initial = engine.envelope(initial_sequence, "run.reset", json!(engine.snapshot()));
     let run_id = query.run_id.clone();
     let scenario_id = engine.scenario.id.clone();
     let epoch = engine.scenario.epoch;
     drop(engine);
     let updates = BroadcastStream::new(receiver).filter_map(move |item| {
         let envelope = match item {
-            Ok(envelope) if envelope.run_id == run_id => Some(envelope),
+            Ok(envelope)
+                if envelope.run_id == run_id
+                    && envelope
+                        .id
+                        .rsplit(':')
+                        .next()
+                        .and_then(|part| part.parse::<u64>().ok())
+                        .is_some_and(|sequence| sequence > initial_sequence) =>
+            {
+                Some(envelope)
+            }
             Ok(_) => None,
             Err(_) => Some(EventEnvelope {
                 id: "resync".into(),
