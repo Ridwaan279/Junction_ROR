@@ -5,8 +5,9 @@ Context.dev, "The Web Is Your Real-Time Database".
 
 Decisions: **mainland Portugal**, **Context.dev scraping Fogos.pt public pages**,
 and a **Rust backend**. This replaces v2's geography, language, sources, replay,
-backend, and agent assignments. The repository currently contains planning
-only; paths and capabilities below are intended deliverables.
+backend, and agent assignments. Agent A's Rust platform is implemented on
+the agent-A branch; README.md describes the runnable slice and remaining work.
+Capabilities below remain the target unless identified as implemented there.
 
 Read [AGENTS.md](../AGENTS.md) for collaboration rules and
 [DATA_SOURCES.md](DATA_SOURCES.md) for dated source evidence and open questions.
@@ -381,13 +382,14 @@ Use four worktrees/branches when possible; coordinator implements A and three
 workers cover B/C/D, fitting four active slots. Never switch a shared checkout
 under another agent. One owner edits root Cargo/lockfile/contracts. Integrate
 at hours 8/16/26/34, earlier for small compatible handoffs, and sync workers to
-the new baseline. This documentation task does not launch implementation agents.
+the new baseline. Agent A's implementation publishes contracts for the other
+workstreams; those agents start when assigned.
 
 ## 12. Agent assignments and done criteria
 
 | Agent / branch | Exclusive ownership | Deliverables and acceptance |
 |---|---|---|
-| **A: platform/integrator**, `codex/core` | Root config/lockfile, domain/platform/server crates, contracts, migrations, infra, integration tests, AGENTS/PLAN | Axum/source scheduler, SQLx/PostGIS, FIRMS/Open-Meteo/uploads, identity/lineage fusion, deterministic replay, SSE and deploy. Done: play/pause/seek/reset/reconnect work; restart/upsert does not duplicate reports; clean run instructions and integration results. |
+| **A: platform/integrator**, `agent-A` | Root config/lockfile, domain/platform/server crates, contracts, migrations, infra, integration tests, AGENTS/PLAN | Axum/source scheduler, SQLx/PostGIS, FIRMS/Open-Meteo/uploads, identity/lineage fusion, deterministic replay, SSE and deploy. Done: play/pause/seek/reset/reconnect work; restart/upsert does not duplicate reports; clean run instructions and integration results. |
 | **B: intelligence**, `codex/intelligence` | Intelligence crate, its tests/local fixtures, DATA_SOURCES | Rust Context client, Fogos public-page extraction/report, IPMA, Portuguese news/geocoding hints/cited summary, signed/deduplicated webhook module, usage metadata. Done: inspected capture where permitted/possible; tested partial/empty/blocked/missing fields and IPMA null/direction/time; copied upstream lineage preserved; unresolved source checks explicit. |
 | **C: forecast/response**, `codex/response` | Response crate, its tests/local fixtures | Rust grid/wind/A*/return-reserve checks, simulation/replan, severity proposal, grounded explanation and PT/EN text/optional voice. Done: seeded reproducibility, west wind pushes east, obstacles never crossed, unreachable mission rejected, hard hazard reroutes, measured runtime and text fallback. |
 | **D: terrain UI**, `codex/ui` | Web app, web manifest/lockfile/tests | Portugal map, cited timeline, source health/coverage, mode/clock controls, SSE/resync, forecast/drone/inbox, visible attribution and PT/EN. Done: fixture click-through by hour 8–10, integrated API by 26, failure cannot display all-clear, replay clears old layers, usable measured map performance. |

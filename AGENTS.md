@@ -4,8 +4,9 @@
 
 Read this file, [docs/PLAN.md](docs/PLAN.md), and
 [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) before implementing a task.
-The repository currently contains planning documents, not a working application.
-Paths below describe the intended scaffold; do not report them as implemented.
+The Rust domain/platform/server workspace is implemented on the Agent A branch.
+The frontend, intelligence and response crates remain separate agent work.
+Read README.md for run commands, contracts and current implementation limits.
 
 ## Product decisions
 
@@ -31,11 +32,11 @@ Paths below describe the intended scaffold; do not report them as implemented.
 Follow PLAN section 12. When parallel implementation is requested, use four
 workstreams: the coordinator implements platform/integration while three workers
 implement intelligence, response, and UI. This fits four active agent slots.
-This planning task itself does not launch implementation agents.
+Implement the assigned workstream; parallel workers start only when requested.
 
 | Owner | Branch | Exclusive write scope once scaffolded |
 |---|---|---|
-| A: platform / coordinator | `codex/core` | Root build/config files; `contracts/**`; `crates/domain/**`; `crates/platform/**`; `crates/server/**`; `migrations/**`; `infra/**`; integration tests; this file; `docs/PLAN.md` |
+| A: platform / coordinator | `agent-A` | Root build/config files; `contracts/**`; `crates/domain/**`; `crates/platform/**`; `crates/server/**`; `migrations/**`; `infra/**`; integration tests; this file; `docs/PLAN.md` |
 | B: intelligence / sources | `codex/intelligence` | `crates/intelligence/**`; its tests and local fixtures; `docs/DATA_SOURCES.md` |
 | C: forecast / response | `codex/response` | `crates/response/**`; its tests and local fixtures |
 | D: terrain UI | `codex/ui` | `web/**`, including its manifest, lockfile, and tests |

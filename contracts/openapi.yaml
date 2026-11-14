@@ -1,0 +1,199 @@
+openapi: 3.1.0
+info:
+  title: EmberWatch platform
+  version: 0.1.0
+  description: Portugal public evidence and deterministic synthetic/historical replay. Coordinates use WGS84; timestamps use UTC. No real dispatch.
+servers:
+  - url: http://localhost:8000
+paths:
+  /healthz:
+    get:
+      responses:
+        '200': {description: "Health, storage mode and live run ID"}
+  /api/runs/{id}:
+    get:
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200':
+          description: Visible run snapshot, without future replay evidence
+          content:
+            application/json:
+              schema: {$ref: './schema.json#/$defs/Scenario'}
+  /api/incidents:
+    get:
+      parameters:
+        - {$ref: '#/components/parameters/RunId'}
+        - {name: bbox, in: query, schema: {type: string}, description: "west,south,east,north"}
+        - {name: since, in: query, schema: {type: string, format: date-time}}
+      responses:
+        '200':
+          description: Incident array
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: './schema.json#/$defs/Incident'}}
+  /api/incidents/{id}:
+    get:
+      parameters:
+        - {$ref: '#/components/parameters/ResourceId'}
+        - {$ref: '#/components/parameters/RunId'}
+      responses:
+        '200': {description: Scoped incident, content: {application/json: {schema: {$ref: './schema.json#/$defs/Incident'}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/incidents/{id}/timeline:
+    get:
+      parameters:
+        - {$ref: '#/components/parameters/ResourceId'}
+        - {$ref: '#/components/parameters/RunId'}
+      responses:
+        '200':
+          description: Available evidence revisions for this incident
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: './schema.json#/$defs/Evidence'}}
+  /api/scenarios:
+    get:
+      responses:
+        '200':
+          description: Scenario views with available evidence only
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: './schema.json#/$defs/Scenario'}}
+    post:
+      security: [{Operator: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: './schema.json#/$defs/ScenarioSpec'}
+      responses:
+        '201': {description: Created paused scenario}
+  /api/scenarios/{id}/load:
+    post:
+      security: [{Operator: []}]
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                evidence: {type: array, items: {$ref: './schema.json#/$defs/Evidence'}}
+                weather: {type: array, items: {$ref: './schema.json#/$defs/WeatherSample'}}
+      responses: {'200': {description: Updated visible scenario}}
+  /api/scenarios/{id}/upload:
+    post:
+      security: [{Operator: []}]
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format, data, source_id]
+              properties:
+                format: {enum: [csv, geojson, jsonl]}
+                data: {type: string}
+                source_id: {type: string, pattern: '^upload:'}
+      responses: {'200': {description: Import counts and availability range}}
+  /api/scenarios/{id}/play:
+    post:
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {speed: {type: number, minimum: 0.1, maximum: 3600}}
+      responses: {'200': {description: Scenario view}}
+  /api/scenarios/{id}/pause:
+    post:
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Paused scenario view}}
+  /api/scenarios/{id}/seek:
+    post:
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [at]
+              properties: {at: {type: string, format: date-time}}
+      responses: {'200': {description: Scenario with new epoch; playback paused}}
+  /api/sources:
+    get:
+      responses:
+        '200':
+          description: Source metadata and health; unavailable sources remain explicit
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: './schema.json#/$defs/SourceDescriptor'}}
+  /api/sources/{id}:
+    patch:
+      security: [{Operator: []}]
+      parameters: [{name: id, in: path, required: true, schema: {type: string}}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, required: [enabled], properties: {enabled: {type: boolean}}}
+      responses: {'200': {description: Source descriptor}, '503': {description: Source not configured/validated}}
+  /api/sources/{id}/run:
+    post:
+      security: [{Operator: []}]
+      parameters: [{name: id, in: path, required: true, schema: {type: string}}]
+      responses: {'200': {description: Ingested batch}, '422': {description: Cadence not elapsed}, '503': {description: Source unavailable}}
+  /api/stations:
+    get:
+      parameters:
+        - {$ref: '#/components/parameters/RunId'}
+        - {name: at, in: query, schema: {type: string, format: date-time}}
+        - {name: bbox, in: query, schema: {type: string}}
+      responses: {'200': {description: "Available weather samples, optionally within one hour of at"}}
+  /api/wind-field:
+    get:
+      parameters:
+        - {$ref: '#/components/parameters/RunId'}
+        - {name: at, in: query, schema: {type: string, format: date-time}}
+        - {name: bbox, in: query, schema: {type: string}}
+      responses: {'200': {description: Available model/station samples; not yet an interpolated grid}}
+  /api/events:
+    get:
+      parameters:
+        - {$ref: '#/components/parameters/RunId'}
+        - {name: Last-Event-ID, in: header, schema: {type: integer, minimum: 0}}
+      responses:
+        '200':
+          description: Scoped SSE; reconnect replays retained events, or run.reset directs snapshot resync
+          content:
+            text/event-stream:
+              schema: {type: string}
+  /api/incidents/{id}/forecast:
+    get:
+      parameters:
+        - {$ref: '#/components/parameters/ResourceId'}
+        - {$ref: '#/components/parameters/RunId'}
+      responses: {'501': {description: Agent C implementation pending}}
+  /api/incidents/{id}/dispatch:
+    post:
+      parameters:
+        - {$ref: '#/components/parameters/ResourceId'}
+        - {$ref: '#/components/parameters/RunId'}
+      responses: {'501': {description: Agent C simulation pending}}
+  /api/drones:
+    get:
+      parameters: [{$ref: '#/components/parameters/RunId'}]
+      responses: {'501': {description: Agent C implementation pending}}
+components:
+  securitySchemes:
+    Operator: {type: http, scheme: bearer}
+  parameters:
+    RunId: {name: run_id, in: query, schema: {type: string, format: uuid}, description: Defaults to the live run returned by healthz}
+    ResourceId: {name: id, in: path, required: true, schema: {type: string, format: uuid}}
+  responses:
+    NotFound:
+      description: Resource not present in the selected run

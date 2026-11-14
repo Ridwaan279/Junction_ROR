@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: emberwatch
+      POSTGRES_PASSWORD: emberwatch-local
+      POSTGRES_DB: emberwatch
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emberwatch -d emberwatch"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    environment:
+      BIND_ADDR: 0.0.0.0:8000
+      DATABASE_URL: postgres://emberwatch:emberwatch-local@db:5432/emberwatch
+      ENABLE_LIVE_SOURCES: "false"
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  database:
