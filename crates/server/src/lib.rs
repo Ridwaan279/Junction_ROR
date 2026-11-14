@@ -23,6 +23,7 @@ use std::{
 use tokio::sync::{Mutex, broadcast};
 use tokio_stream::wrappers::BroadcastStream;
 use tower_http::cors::CorsLayer;
+pub mod firecast_api;
 pub mod platform_api;
 pub mod platform_ui;
 mod webhook;
@@ -34,6 +35,7 @@ struct AppState {
     events: broadcast::Sender<EventEnvelope>,
     sequence: Arc<AtomicU64>,
     compute: emberwatch_response::ComputePool,
+    firecast: firecast_api::FirecastState,
 }
 #[derive(Deserialize)]
 struct RunQuery {
@@ -53,7 +55,16 @@ fn scope(engine: &Engine, run_id: &str) -> ApiResult<()> {
     Ok(())
 }
 
+/// Router with manual, offline forecasting (tests and embedded use).
 pub fn router(engine: Engine, store: Option<PgStore>) -> Router {
+    router_with(engine, store, firecast_api::FirecastOptions::offline())
+}
+
+pub fn router_with(
+    engine: Engine,
+    store: Option<PgStore>,
+    firecast: firecast_api::FirecastOptions,
+) -> Router {
     let (events, _) = broadcast::channel(64);
     let state = AppState {
         engine: Arc::new(Mutex::new(engine)),
@@ -61,14 +72,20 @@ pub fn router(engine: Engine, store: Option<PgStore>) -> Router {
         events,
         sequence: Arc::new(AtomicU64::new(1)),
         compute: emberwatch_response::ComputePool::new(2).expect("bounded compute pool"),
+        firecast: firecast_api::FirecastState::new(firecast),
     };
     let ticker = state.clone();
     tokio::spawn(async move {
         let mut timer = tokio::time::interval(Duration::from_secs(1));
         timer.tick().await;
         let mut previous = tokio::time::Instant::now();
+        let mut ticks: u64 = 0;
         loop {
             timer.tick().await;
+            ticks += 1;
+            if ticks % 3 == 1 {
+                firecast_api::auto_trigger(&ticker).await;
+            }
             let elapsed = previous.elapsed();
             previous = tokio::time::Instant::now();
             let mut engine = ticker.engine.lock().await;
@@ -108,6 +125,7 @@ pub fn router(engine: Engine, store: Option<PgStore>) -> Router {
         .route("/api/incidents/{id}/timeline", get(timeline))
         .route("/api/incidents/{id}/forecast", get(forecast))
         .route("/api/incidents/{id}/dispatch", post(dispatch))
+        .route("/api/incidents/{id}/firecast", post(firecast_api::handler))
         .route("/api/sources", get(sources))
         .route("/api/stations", get(stations))
         .route("/api/drones", get(drones))
@@ -161,6 +179,51 @@ async fn dispatch(
     let at = snapshot.scenario.current_at;
     let epoch = snapshot.scenario.epoch;
     drop(engine);
+    if let Some(result) = state.firecast.cached(&id, epoch).await {
+        // Hazard-aware mission from the physics forecast: predicted fire is no-fly,
+        // predicted smoke is penalised, the task point is a flank of the 1-hour front.
+        let plan_context = context.clone();
+        let plan_incident = incident.clone();
+        let evidence = snapshot.evidence.clone();
+        let (plan, briefing) = state
+            .compute
+            .run(move || {
+                let plan = emberwatch_firecast::plan_drone(&plan_context, &plan_incident, &result)
+                    .map_err(emberwatch_response::ComputeError::InvalidInput)?;
+                let briefing = emberwatch_response::build_briefing(
+                    &plan_context,
+                    &plan_incident,
+                    &evidence,
+                    Some(&plan),
+                )?;
+                Ok((plan, briefing))
+            })
+            .await
+            .map_err(|e| ApiError(StatusCode::UNPROCESSABLE_ENTITY, e.to_string()))?;
+        let mut engine = state.engine.lock().await;
+        if engine.scenario.epoch != epoch {
+            return Err(ApiError(
+                StatusCode::CONFLICT,
+                "scenario changed during computation; retry".into(),
+            ));
+        }
+        let mut candidate = engine.clone();
+        candidate.drone_plans.retain(|f| f.incident_id != id);
+        candidate.drone_plans.push(plan);
+        candidate.briefings.retain(|f| f.incident_id != id);
+        candidate.briefings.push(briefing);
+        if let Some(store) = &state.store {
+            store.save(&candidate).await.map_err(|_| {
+                ApiError(
+                    StatusCode::SERVICE_UNAVAILABLE,
+                    "persistence unavailable".into(),
+                )
+            })?;
+        }
+        *engine = candidate;
+        publish(&state, &engine, "drone.plan");
+        return Ok(Json(engine.snapshot()));
+    }
     let (forecast, plan, briefing) = state
         .compute
         .run(move || {

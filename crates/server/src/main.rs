@@ -22,7 +22,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|_| "127.0.0.1:8080".into());
     let (platform, access) = emberwatch_server::platform_api::initialize(&bind).await?;
     let platform_storage = platform.storage_kind();
-    let app = emberwatch_server::router(engine, store).nest(
+    let firecast = emberwatch_server::firecast_api::FirecastOptions::from_env();
+    println!(
+        "Fire forecasts: auto={} network={} weather={} context_dev={}",
+        firecast.auto,
+        firecast.network,
+        if firecast.weather_synthetic {
+            "synthetic"
+        } else {
+            "live"
+        },
+        std::env::var("CONTEXT_DEV_API_KEY").is_ok()
+    );
+    let app = emberwatch_server::router_with(engine, store, firecast).nest(
         "/platform",
         emberwatch_server::platform_api::integrated_router(platform, access),
     );

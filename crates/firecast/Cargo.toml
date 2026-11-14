@@ -1,0 +1,21 @@
+[package]
+name = "emberwatch-firecast"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+emberwatch-domain.workspace = true
+emberwatch-response.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+reqwest.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+futures.workspace = true
+png = "0.17"
+
+[dev-dependencies]
+axum.workspace = true

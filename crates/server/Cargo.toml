@@ -10,6 +10,7 @@ emberwatch-domain.workspace = true
 emberwatch-platform.workspace = true
 emberwatch-intelligence.workspace = true
 emberwatch-response.workspace = true
+emberwatch-firecast.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 chrono.workspace = true
