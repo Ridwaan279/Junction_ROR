@@ -166,16 +166,15 @@ pub fn build_briefing(
     plan: Option<&DronePlan>,
 ) -> Result<Briefing, ComputeError> {
     validate_inputs(context, incident, evidence, &[])?;
-    if let Some(plan) = plan {
-        if plan.run_id != context.run_id
+    if plan.is_some_and(|plan| {
+        plan.run_id != context.run_id
             || plan.incident_id != incident.id
             || plan.epoch != context.epoch
             || plan.generated_at > context.clock.now()
-        {
-            return Err(ComputeError::InvalidInput(
-                "plan belongs to another run, incident, epoch or future time".into(),
-            ));
-        }
+    }) {
+        return Err(ComputeError::InvalidInput(
+            "plan belongs to another run, incident, epoch or future time".into(),
+        ));
     }
     let mut citations: Vec<_> = evidence
         .iter()

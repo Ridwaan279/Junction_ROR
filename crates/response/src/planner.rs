@@ -37,6 +37,14 @@ pub fn plan_mission(grid: &Grid, request: &MissionRequest) -> Result<Mission, Co
     validate_request(request)?;
     let outbound = route(grid, request.start, request.target, request)?;
     let returning = route(grid, request.target, request.start, request)?;
+    mission_from_routes(outbound, returning, request)
+}
+
+fn mission_from_routes(
+    outbound: Route,
+    returning: Route,
+    request: &MissionRequest,
+) -> Result<Mission, ComputeError> {
     let total_seconds =
         outbound.duration_seconds + request.task_seconds + returning.duration_seconds;
     let battery_after_pct =
@@ -50,6 +58,59 @@ pub fn plan_mission(grid: &Grid, request: &MissionRequest) -> Result<Mission, Co
         total_seconds,
         battery_after_pct,
     })
+}
+
+fn reprice_route(
+    grid: &Grid,
+    previous: &Route,
+    start: CellPosition,
+    target: CellPosition,
+    request: &MissionRequest,
+) -> Result<Route, ComputeError> {
+    if previous.cells.first() != Some(&start)
+        || previous.cells.last() != Some(&target)
+        || previous
+            .cells
+            .iter()
+            .any(|&p| grid.cell(p).is_none_or(|c| c.blocked))
+    {
+        return Err(ComputeError::Unreachable);
+    }
+    let mut distance_m = 0.0;
+    let mut duration_seconds = 0.0;
+    for pair in previous.cells.windows(2) {
+        let (distance, seconds) =
+            edge(grid, pair[0], pair[1], request).ok_or(ComputeError::Unreachable)?;
+        distance_m += distance;
+        duration_seconds += seconds;
+    }
+    Ok(Route {
+        cells: previous.cells.clone(),
+        distance_m,
+        duration_seconds,
+    })
+}
+
+fn reprice_mission(
+    grid: &Grid,
+    request: &MissionRequest,
+    previous: &Mission,
+) -> Result<Mission, ComputeError> {
+    let outbound = reprice_route(
+        grid,
+        &previous.outbound,
+        request.start,
+        request.target,
+        request,
+    )?;
+    let returning = reprice_route(
+        grid,
+        &previous.returning,
+        request.target,
+        request.start,
+        request,
+    )?;
+    mission_from_routes(outbound, returning, request)
 }
 
 fn validate_request(request: &MissionRequest) -> Result<(), ComputeError> {
@@ -231,27 +292,39 @@ pub fn replan(
             "invalid replan threshold".into(),
         ));
     }
-    let hazard = [&previous.outbound, &previous.returning]
-        .iter()
-        .any(|route| {
-            route
-                .cells
-                .iter()
-                .any(|&p| grid.cell(p).is_none_or(|c| c.blocked))
-                || route
-                    .cells
-                    .windows(2)
-                    .any(|pair| edge(grid, pair[0], pair[1], request).is_none())
-        });
+    validate_request(request)?;
+    // Never compare a current candidate against a stored estimate from old
+    // weather, smoke or battery conditions. Reprice both old directed legs and
+    // include the current task and reserve before any hysteresis decision.
+    let previous_current = reprice_mission(grid, request, previous);
     let mission = plan_mission(grid, request)?;
-    let improvement = if previous.total_seconds > 0.0 {
-        100.0 * (previous.total_seconds - mission.total_seconds) / previous.total_seconds
+    let (previous_seconds, forced_reason) = match &previous_current {
+        Ok(priced) => (priced.total_seconds, None),
+        Err(ComputeError::Unreachable) => (
+            0.0,
+            Some("New hard hazard or impassable edge invalidates the previous route"),
+        ),
+        Err(ComputeError::InsufficientBattery) => (
+            0.0,
+            Some(
+                "Current wind/smoke travel costs invalidate the previous mission's battery reserve",
+            ),
+        ),
+        Err(error) => return Err(error.clone()),
+    };
+    let improvement = if previous_seconds > 0.0 {
+        100.0 * (previous_seconds - mission.total_seconds) / previous_seconds
     } else {
         0.0
     };
-    if hazard || improvement >= minimum_improvement_pct && mission != *previous {
-        let reason = if hazard {
-            "New hard hazard invalidates the previous route".into()
+    if forced_reason.is_some()
+        || improvement >= minimum_improvement_pct
+            && previous_current
+                .as_ref()
+                .is_ok_and(|priced| mission != *priced)
+    {
+        let reason = if let Some(reason) = forced_reason {
+            reason.into()
         } else {
             format!("Wind/smoke travel-time improvement {improvement:.1}% exceeds hysteresis")
         };
@@ -430,5 +503,53 @@ mod tests {
             replan(&grid, &req, &prior, 5.0).unwrap(),
             ReplanDecision::Keep
         );
+    }
+
+    #[test]
+    fn new_smoke_invalidating_old_reserve_bypasses_hysteresis() {
+        let old_grid = Grid::new(5, 3, 500.0, vec![Cell::default(); 15]).unwrap();
+        let req = MissionRequest {
+            battery_capacity_seconds: 700.0,
+            ..request()
+        };
+        let previous = plan_mission(&old_grid, &req).unwrap();
+        assert_eq!(previous.total_seconds, 460.0);
+        let mut cells = vec![Cell::default(); 15];
+        cells[7].smoke_penalty = 10.0;
+        let changed_grid = Grid::new(5, 3, 500.0, cells).unwrap();
+
+        // The old straight path now costs 1460 s including the task, beyond
+        // the 560 s usable battery. The two diagonal detours remain feasible.
+        let ReplanDecision::Replace { mission, reasons } =
+            replan(&changed_grid, &req, &previous, 100.0).unwrap()
+        else {
+            panic!("an old path violating reserve must never survive hysteresis")
+        };
+        assert!((mission.total_seconds - 542.842_712_474_619).abs() < 1e-9);
+        assert!(mission.battery_after_pct >= 20.0);
+        assert!(
+            !mission
+                .outbound
+                .cells
+                .contains(&CellPosition { x: 2, y: 1 })
+        );
+        assert!(reasons.iter().any(|reason| reason.contains("reserve")));
+    }
+
+    #[test]
+    fn soft_improvement_compares_old_and_new_routes_under_current_costs() {
+        let old_grid = Grid::new(5, 3, 500.0, vec![Cell::default(); 15]).unwrap();
+        let req = request();
+        let previous = plan_mission(&old_grid, &req).unwrap();
+        let mut cells = vec![Cell::default(); 15];
+        cells[7].smoke_penalty = 10.0;
+        let changed_grid = Grid::new(5, 3, 500.0, cells).unwrap();
+
+        // With 1600 s usable battery the repriced 1460 s old mission is still
+        // feasible. A 542.84 s alternative improves current cost by > 60%.
+        assert!(matches!(
+            replan(&changed_grid, &req, &previous, 5.0),
+            Ok(ReplanDecision::Replace { .. })
+        ));
     }
 }

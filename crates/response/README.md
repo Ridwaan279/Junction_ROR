@@ -60,7 +60,10 @@ Configured gust limits are enforced when gust input exists. No aviation,
 airspace completeness or measured-gust safety assurance is implied.
 
 Hard blocked cells and newly blocked diagonal edges bypass replan hysteresis.
-Soft travel-time changes need the caller's minimum improvement threshold.
+The previous outbound and return paths are repriced with current wind, smoke,
+climb, task and battery inputs. A previous path that no longer preserves reserve
+also bypasses hysteresis. Soft travel-time improvements compare both routes
+under the same current costs and need the caller's minimum improvement threshold.
 Replan errors mean the mission is invalid; callers must not continue the old
 route. Telemetry samples absolute run-clock time through idle, enroute, on-task,
 return and charging. Position interpolation is simplified by route-distance
