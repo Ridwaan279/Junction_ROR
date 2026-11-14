@@ -50,6 +50,8 @@ pub struct Spread {
     pub flame_length_m: f64,
     /// True when Rothermel's wind limit (U ≤ 0.9 I_R) capped the effective wind.
     pub wind_limited: bool,
+    /// Crown fraction burned (Scott & Reinhardt 2001): 0 surface, 1 active crown fire.
+    pub crown_fraction: f64,
 }
 
 impl Spread {
@@ -217,6 +219,89 @@ pub fn spread(
         intensity_kw_m: intensity_btu * BTU_FT_S_TO_KW_M,
         flame_length_m: flame_ft * 0.3048,
         wind_limited,
+        crown_fraction: 0.0,
+    }
+}
+
+/// Canopy fuel properties for crown-fire assessment.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+pub struct Canopy {
+    /// Canopy base height, m.
+    pub base_height_m: f64,
+    /// Canopy bulk density, kg/m³.
+    pub bulk_density_kg_m3: f64,
+    /// Available canopy fuel load, kg/m².
+    pub fuel_load_kg_m2: f64,
+    /// Foliar moisture content, percent.
+    pub foliar_moisture_pct: f64,
+}
+
+/// Van Wagner (1977) critical surface intensity for crown initiation, kW/m.
+pub fn crown_initiation_kw_m(canopy: &Canopy) -> f64 {
+    (0.010 * canopy.base_height_m * (460.0 + 25.9 * canopy.foliar_moisture_pct)).powf(1.5)
+}
+
+pub fn fire_type(crown_fraction: f64) -> &'static str {
+    if crown_fraction <= 0.0 {
+        "surface"
+    } else if crown_fraction < 0.9 {
+        "passive crown (torching)"
+    } else {
+        "active crown"
+    }
+}
+
+/// Crown-fire adjustment as in FARSITE/FlamMap (Finney 1998):
+/// * initiation when surface intensity ≥ Van Wagner's I₀;
+/// * crown rate R_c = 3.34 · R₁₀ (Rothermel 1991), `r10_mps` being fuel model 10 with
+///   a 0.4 wind reduction of the open 20-ft wind;
+/// * crown fraction burned CFB = 1 − exp(−a (R_s − R_init)) with a chosen so CFB = 0.9 at
+///   Van Wagner's active-crown threshold 3/CBD (Scott & Reinhardt 2001);
+/// * spread R = R_s + CFB (R_c − R_s), intensity includes burning canopy fuel (18 MJ/kg),
+///   crown flame length after Thomas (1963), ellipse at least 1 + 0.125·U₂₀ (mi/h).
+pub fn crown_adjust(
+    surface: Spread,
+    bed: &FuelBed,
+    canopy: &Canopy,
+    r10_mps: f64,
+    open_wind20_mps: f64,
+) -> Spread {
+    let i0 = crown_initiation_kw_m(canopy);
+    if surface.intensity_kw_m < i0 || canopy.bulk_density_kg_m3 <= 0.0 {
+        return surface;
+    }
+    let hpa_kj_m2 = bed.heat_per_area * 11.3565;
+    let r_init = i0 / hpa_kj_m2.max(1.0); // m/s
+    let r_active = 3.0 / canopy.bulk_density_kg_m3 / 60.0; // m/s
+    let r_crown = 3.34 * r10_mps;
+    let a = if r_active > r_init {
+        -(0.1f64.ln()) / (0.9 * (r_active - r_init))
+    } else {
+        f64::INFINITY
+    };
+    let cfb = (1.0 - (-a * (surface.head_ros_mps - r_init).max(0.0)).exp()).clamp(0.0, 1.0);
+    let cfb = if r_crown >= r_active && surface.head_ros_mps >= r_init {
+        cfb.max(0.9)
+    } else {
+        cfb
+    };
+    let ros = surface.head_ros_mps + cfb * (r_crown - surface.head_ros_mps).max(0.0);
+    let intensity = (hpa_kj_m2 + cfb * canopy.fuel_load_kg_m2 * 18_000.0) * ros;
+    let lb = surface
+        .length_to_breadth
+        .max((1.0 + 0.125 * open_wind20_mps / 0.447_04).min(8.0));
+    Spread {
+        head_ros_mps: ros,
+        intensity_kw_m: intensity,
+        flame_length_m: if cfb >= 0.5 {
+            0.0266 * intensity.powf(2.0 / 3.0)
+        } else {
+            surface.flame_length_m
+        },
+        length_to_breadth: lb,
+        eccentricity: (lb * lb - 1.0).max(0.0).sqrt() / lb,
+        crown_fraction: cfb,
+        ..surface
     }
 }
 
@@ -288,5 +373,52 @@ mod tests {
         assert!(deg > 0.0 && deg < 90.0, "{deg}");
         assert!(s.intensity_kw_m > 0.0 && s.flame_length_m > 0.0);
         assert_eq!(length_to_breadth(0.0), 1.0);
+    }
+}
+
+#[cfg(test)]
+mod crown_tests {
+    use super::*;
+    use crate::fuel::anderson;
+
+    #[test]
+    fn van_wagner_initiation_matches_hand_value() {
+        // CBH 3 m, FMC 110 %: (0.01·3·(460 + 2849))^1.5 ≈ 989 kW/m
+        let c = Canopy {
+            base_height_m: 3.0,
+            bulk_density_kg_m3: 0.15,
+            fuel_load_kg_m2: 1.0,
+            foliar_moisture_pct: 110.0,
+        };
+        assert!((crown_initiation_kw_m(&c) - 989.5).abs() < 2.0);
+        assert_eq!(fire_type(0.0), "surface");
+        assert_eq!(fire_type(1.0), "active crown");
+    }
+
+    #[test]
+    fn strong_wind_makes_dry_forest_crown_and_weak_wind_stays_surface() {
+        let m = Moisture {
+            dead_1h: 0.05,
+            dead_10h: 0.06,
+            dead_100h: 0.07,
+            live: 0.8,
+        };
+        let bed = fuel_bed(anderson(10).unwrap(), &m).unwrap();
+        let canopy = Canopy {
+            base_height_m: 3.0,
+            bulk_density_kg_m3: 0.15,
+            fuel_load_kg_m2: 1.0,
+            foliar_moisture_pct: 110.0,
+        };
+        let strong_open = 12.0 / 1.15;
+        let strong = spread(&bed, strong_open * 0.36, 0.0, 0.0, 0.0);
+        let r10 = spread(&bed, strong_open * 0.4, 0.0, 0.0, 0.0).head_ros_mps;
+        let crown = crown_adjust(strong, &bed, &canopy, r10, strong_open);
+        assert!(crown.crown_fraction > 0.0, "{crown:?}");
+        assert!(crown.head_ros_mps > strong.head_ros_mps);
+        assert!(crown.intensity_kw_m > strong.intensity_kw_m);
+        let calm = spread(&bed, 0.3, 0.0, 0.0, 0.0);
+        let calm_r10 = spread(&bed, 0.4, 0.0, 0.0, 0.0).head_ros_mps;
+        assert_eq!(crown_adjust(calm, &bed, &canopy, calm_r10, 1.0), calm);
     }
 }

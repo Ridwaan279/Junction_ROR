@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import MapView from "./MapView";
+import FirecastPanel from "./FirecastPanel";
+import { firecastFor, isFirecast } from "@/lib/firecast";
 import Icon from "./Icon";
 import { useWorkspace } from "@/lib/use-workspace";
 import { copy, healthLabel, label, type Locale } from "@/lib/i18n";
@@ -9,7 +11,7 @@ import { coverageMessage, displayTime, safeUrl } from "@/lib/model";
 import type { Evidence, Incident, Snapshot } from "@/lib/contracts";
 type Tab = "overview" | "sources" | "fleet" | "inbox";
 export default function Workspace() {
-  const { snapshot, connection, error, busy, command, resync, dispatch } =
+  const { snapshot, connection, error, busy, command, resync, dispatch, forecast } =
     useWorkspace();
   const [locale, setLocale] = useState<Locale>("pt"),
     [tab, setTab] = useState<Tab>("overview"),
@@ -213,6 +215,10 @@ export default function Workspace() {
               incident={selected}
               snapshot={snapshot}
               locale={locale}
+              onForecast={
+                forecast && selected ? () => void forecast(selected.id) : undefined
+              }
+              busy={busy}
             />
           )}
           {tab === "sources" && <Sources snapshot={snapshot} locale={locale} />}
@@ -345,10 +351,14 @@ function IncidentDetails({
   incident,
   snapshot,
   locale,
+  onForecast,
+  busy,
 }: {
   incident: Incident | undefined;
   snapshot: Snapshot;
   locale: Locale;
+  onForecast?: () => void;
+  busy: boolean;
 }) {
   const t = copy[locale],
     evidence = snapshot.evidence.filter((e) =>
@@ -435,7 +445,16 @@ function IncidentDetails({
             )}
           </div>
         </div>
-      ) : (
+      ) : null}
+      {incident && (
+        <FirecastPanel
+          forecast={firecastFor(snapshot, incident.id)}
+          locale={locale}
+          onRun={onForecast}
+          busy={busy}
+        />
+      )}
+      {!incident && (
         <div className="empty-state">
           <Icon name="pin" size={28} />
           <h3>{t.noIncident}</h3>
@@ -587,8 +606,15 @@ function Response({
           </p>
         )}
         <h3>{t.spread}</h3>
-        {snapshot.forecasts.length ? (
-          snapshot.forecasts.map((f) => (
+        {snapshot.forecasts.some(isFirecast) && (
+          <p className="source-note firecast-pointer">
+            {locale === "pt"
+              ? "A previsão física de propagação e fumo está no separador Visão geral. As missões evitam a área prevista do incêndio e o fumo."
+              : "The physics spread and smoke forecast is in the Overview tab. Missions avoid the predicted fire area and smoke."}
+          </p>
+        )}
+        {snapshot.forecasts.some((f) => !isFirecast(f)) ? (
+          snapshot.forecasts.filter((f) => !isFirecast(f)).map((f) => (
             <article className="output-card" key={f.id}>
               <span className="simulation-label">{t.simulation}</span>
               <h4>
@@ -605,7 +631,7 @@ function Response({
               ))}
             </article>
           ))
-        ) : (
+        ) : snapshot.forecasts.length ? null : (
           <div className="empty-output">
             <Icon name="layers" size={25} />
             <strong>{t.noForecast}</strong>

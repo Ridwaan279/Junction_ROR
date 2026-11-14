@@ -19,7 +19,7 @@ use chrono::{DateTime, Utc};
 use emberwatch_domain::{Evidence, Forecast, Incident, RunContext, Weather};
 use serde_json::{Value, json};
 
-pub const MODEL_VERSION: &str = "firecast-v1 (Rothermel–Albini surface spread, Anderson ellipse, MTT ensemble; Briggs/Pasquill Gaussian plume)";
+pub const MODEL_VERSION: &str = "firecast-v1 (Rothermel–Albini surface + Van Wagner/Rothermel 1991 crown spread, Anderson ellipse, MTT ensemble; Briggs/Pasquill Gaussian plume)";
 pub const SMOKE_THRESHOLDS_UG_M3: [f64; 3] = [35.0, 150.0, 500.0];
 pub const PROBABILITIES: [f64; 3] = [0.1, 0.5, 0.9];
 
@@ -217,7 +217,9 @@ pub fn compute(
         ignition_weather.push(wx);
     }
     let ignition_local = env.frame.to_local(ignition);
-    let sigma = (env.request.uncertainty_m / 2.0).clamp(0.0, 750.0);
+    // Spread is conditional on the reported point; location uncertainty is shown
+    // separately on the map, so ignition jitter only covers sub-cell placement.
+    let sigma = (env.request.uncertainty_m / 2.0).clamp(0.0, 150.0);
     let horizon_s = elapsed + HORIZON_H as f64 * 3600.0;
     let now_hour = ((elapsed / 3600.0) as usize).min(total_hours as usize);
     let ensemble_cfg = EnsembleConfig::new(
@@ -430,7 +432,7 @@ pub fn compute(
             let (x, y) = ((i as f64 + 0.5) / 7.0 * span, (j as f64 + 0.5) / 7.0 * span);
             if let Some(wx) = env.weather.sample(env.frame.to_lon_lat(x, y), now) {
                 let (e, n) = wx.wind_vector();
-                let len = 220.0 * wx.wind_mps.min(20.0);
+                let len = 110.0 * wx.wind_mps.clamp(2.0, 20.0);
                 let norm = wx.wind_mps.max(1e-6);
                 features.push(json!({"type":"Feature","geometry":line(&env.frame, (x, y), (x + e / norm * len, y + n / norm * len)),
                     "properties":{"layer":"wind","speed_mps":round(wx.wind_mps,1),"from_deg":round(wx.wind_from_deg,0),"gust_mps":wx.gust_mps.map(|g| round(g,1))}}));
@@ -468,7 +470,7 @@ pub fn compute(
     ));
     let mut limitations = vec![
         "Experimental physics model, not calibrated against Portuguese fires; not operational guidance.".to_string(),
-        "Surface fire only: crown fire, ember spotting and suppression effects are not modelled, so extreme runs can be underestimated.".into(),
+        "Crown fire uses typical canopy values per vegetation class (not measured); ember spotting and suppression are not modelled, so extreme runs can still be underestimated.".into(),
         "Wind is interpolated from forecast points without terrain channelling (no WindNinja-style downscaling).".into(),
         "Fuel models are standard Anderson equivalents for Portuguese vegetation, not calibrated local fuel models.".into(),
         "Smoke is a steady-state Gaussian plume with default mixing heights; concentrations are order-of-magnitude.".into(),
@@ -484,8 +486,11 @@ pub fn compute(
     if ensemble.edge_reached {
         limitations.push("Fire reached the 19 km model domain edge in at least one ensemble member; area beyond is not simulated.".into());
     }
-    if env.request.uncertainty_m > 1500.0 {
-        limitations.push("Reported location uncertainty exceeds 1.5 km; ignition sampling is capped at 1.5 km (2σ).".into());
+    if env.request.uncertainty_m > 300.0 {
+        limitations.push(format!(
+            "Spread is simulated from the reported point; the ±{:.0} m location uncertainty is drawn separately and is not propagated into the probabilities.",
+            env.request.uncertainty_m
+        ));
     }
     let input_urls: Vec<String> = env
         .inputs
@@ -512,6 +517,7 @@ pub fn compute(
             "intensity_kw_m": round(s.intensity_kw_m, 0), "flame_length_m": round(s.flame_length_m, 1),
             "length_to_breadth": round(s.length_to_breadth, 2), "effective_wind_kmh": round(s.effective_wind_mps * 3.6, 1),
             "wind_limited": s.wind_limited, "suppression": suppression_class(s.intensity_kw_m),
+            "crown_fraction": round(s.crown_fraction, 2), "fire_type": crate::rothermel::fire_type(s.crown_fraction),
         })),
         "ignition": {
             "position": ignition, "uncertainty_m": env.request.uncertainty_m, "elevation_m": round(env.dem.at(central.ignition_cell % w, central.ignition_cell / w), 0),
@@ -542,7 +548,9 @@ pub fn compute(
         "references": [
             "Rothermel 1972, USDA FS Res. Pap. INT-115", "Albini 1976, USDA FS Gen. Tech. Rep. INT-30",
             "Anderson 1982, USDA FS Gen. Tech. Rep. INT-122", "Andrews 2018, USDA FS Gen. Tech. Rep. RMRS-GTR-371",
-            "Anderson 1983, USDA FS Res. Pap. INT-305 (length-to-breadth)", "Finney 2002, Can. J. For. Res. 32 (minimum travel time)",
+            "Anderson 1983, USDA FS Res. Pap. INT-305 (length-to-breadth)",
+            "Van Wagner 1977, Can. J. For. Res. 7 (crown initiation)", "Rothermel 1991, USDA FS Res. Pap. INT-438 (crown spread)",
+            "Scott & Reinhardt 2001, USDA FS RMRS-RP-29 (crown fraction burned)", "Thomas 1963 (crown flame length)", "Finney 2002, Can. J. For. Res. 32 (minimum travel time)",
             "Byram 1959 (fireline intensity, flame length)", "Simard 1968 (equilibrium moisture content)",
             "Briggs 1973/1975 (dispersion coefficients, plume rise); Turner 1970 (Gaussian plume)", "Horn 1981 (slope and aspect)",
         ],

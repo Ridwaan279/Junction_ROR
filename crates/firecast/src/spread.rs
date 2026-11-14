@@ -226,9 +226,13 @@ pub fn beds_for(hours: &[HourConditions], p: &Perturbation) -> Vec<Vec<Option<Fu
             let m = h
                 .moisture
                 .offset(p.dead_moisture_offset_pct, p.live_moisture_offset_pct);
+            // Index 10 holds the fuel-model-10 reference bed for crown spread (Rothermel 1991).
             LandCover::ALL
                 .iter()
                 .map(|c| c.fuel().and_then(|f| fuel_bed(f, &m)))
+                .chain(std::iter::once(
+                    crate::fuel::anderson(10).and_then(|f| fuel_bed(f, &m)),
+                ))
                 .collect()
         })
         .collect()
@@ -253,7 +257,12 @@ pub fn cell_spread(
     // 10 m → 20 ft (6.1 m) open wind ≈ /1.15, then the fuel's wind adjustment factor.
     let midflame = speed10 / 1.15 * fuel.wind_adjustment;
     let slope = landscape.slope[cell];
-    let s = spread(&bed, midflame, toward, slope.tan, slope.upslope);
+    let mut s = spread(&bed, midflame, toward, slope.tan, slope.upslope);
+    if let (Some(canopy), Some(fm10)) = (cover.canopy(), beds[hour].get(10).copied().flatten()) {
+        let open20 = speed10 / 1.15;
+        let r10 = spread(&fm10, open20 * 0.4, toward, 0.0, 0.0).head_ros_mps;
+        s = crate::rothermel::crown_adjust(s, &bed, &canopy, r10, open20);
+    }
     (s.head_ros_mps > 1e-6).then_some(s)
 }
 

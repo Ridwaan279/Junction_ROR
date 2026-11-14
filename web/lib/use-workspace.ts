@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { EventEnvelope, Evidence, Snapshot } from "./contracts";
+import type { EventEnvelope, Evidence, Forecast, Snapshot } from "./contracts";
 import { parseSnapshot, replayAt, type StreamState } from "./model";
 import { SnapshotChannel } from "./snapshot-channel";
 export type Connection =
@@ -27,8 +27,23 @@ export function useWorkspace() {
   const [busy, setBusy] = useState(false);
   const channel = useRef(new SnapshotChannel());
   const full = useRef<Snapshot | null>(null);
+  // Offline only: a forecast precomputed by the Rust model from synthetic inputs.
+  const localForecast = useRef<Forecast | null>(null);
   const commit = useCallback((snapshot: Snapshot) => {
-    const next = channel.current.replace(snapshot);
+    const fixture = localForecast.current;
+    const withForecast =
+      !apiBase &&
+      fixture &&
+      snapshot.incidents.some((i) => i.id === fixture.incident_id)
+        ? {
+            ...snapshot,
+            forecasts: [
+              ...snapshot.forecasts.filter((f) => f.id !== fixture.id),
+              { ...fixture, run_id: snapshot.scenario.run_id, epoch: snapshot.scenario.epoch },
+            ],
+          }
+        : snapshot;
+    const next = channel.current.replace(withForecast);
     setState(next);
   }, []);
   const resync = useCallback(async () => {
@@ -92,6 +107,14 @@ export function useWorkspace() {
             fetch("/replay-evidence.json", { signal: controller.signal }),
           ]);
           if (!initial.ok || !upcoming.ok) throw new Error("Fixture missing");
+          try {
+            const fixture = await fetch("/firecast-fixture.json", {
+              signal: controller.signal,
+            });
+            if (fixture.ok) localForecast.current = (await fixture.json()) as Forecast;
+          } catch {
+            localForecast.current = null;
+          }
           snapshot = parseSnapshot(await initial.json());
           const later = (await upcoming.json()) as Evidence[];
           full.current = parseSnapshot({
@@ -286,8 +309,40 @@ export function useWorkspace() {
       setBusy(false);
     }
   }, []);
+  const forecast = useCallback(async (incidentId: string) => {
+    const snapshot = channel.current.state?.snapshot;
+    if (!snapshot || !apiBase) return;
+    setBusy(true);
+    setError(null);
+    const request = channel.current.beginRequest();
+    try {
+      const response = await fetch(
+        apiBase +
+          "/api/incidents/" +
+          encodeURIComponent(incidentId) +
+          "/firecast?run_id=" +
+          encodeURIComponent(snapshot.scenario.run_id),
+        { method: "POST", signal: AbortSignal.timeout(150000) },
+      );
+      if (response.status === 409) return; // already running; SSE delivers the result
+      if (!response.ok) throw new Error("Forecast failed");
+      const next = parseSnapshot(await response.json());
+      if (
+        channel.current.isCurrent(request) &&
+        next.scenario.run_id === snapshot.scenario.run_id
+      ) {
+        const accepted = channel.current.acceptHttp(next, request);
+        if (accepted) setState(accepted);
+      }
+    } catch {
+      setError("command");
+    } finally {
+      setBusy(false);
+    }
+  }, []);
   return {
     snapshot: state?.snapshot ?? null,
+    forecast: apiBase ? forecast : undefined,
     connection,
     error,
     busy,

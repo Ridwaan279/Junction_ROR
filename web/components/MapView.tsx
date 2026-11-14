@@ -10,6 +10,15 @@ import type { Incident, Snapshot } from "@/lib/contracts";
 import type { Locale } from "@/lib/i18n";
 import { copy } from "@/lib/i18n";
 import { forecastFeatures } from "@/lib/model";
+import {
+  arrowPaths,
+  featuresOf,
+  firecastFor,
+  horizonColor,
+  horizonsOf,
+  isFirecast,
+  smokeAlpha,
+} from "@/lib/firecast";
 import Icon from "./Icon";
 const BOUNDS: [[number, number], [number, number]] = [
   [-9.6, 36.9],
@@ -25,6 +34,17 @@ const style: StyleSpecification = {
       attribution:
         '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
       maxzoom: 19,
+    },
+    terrain: {
+      type: "raster-dem",
+      tiles: [
+        "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+      ],
+      tileSize: 256,
+      encoding: "terrarium",
+      maxzoom: 13,
+      attribution:
+        'Terrain: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noreferrer">Mapzen / AWS Terrain Tiles</a>',
     },
   },
   layers: [
@@ -44,7 +64,47 @@ const style: StyleSpecification = {
         "raster-contrast": 0.08,
       },
     },
+    {
+      id: "hillshade",
+      type: "hillshade",
+      source: "terrain",
+      paint: {
+        "hillshade-exaggeration": 0.6,
+        "hillshade-shadow-color": "#0c1d1b",
+        "hillshade-highlight-color": "#eef4e4",
+        "hillshade-accent-color": "#2b4a43",
+        "hillshade-illumination-direction": 315,
+      },
+    },
   ],
+};
+const T = {
+  pt: {
+    now: "Agora",
+    smoke: "Fumo",
+    wind: "Vento",
+    spreadAt: "Propagação prevista",
+    probability: "probabilidade",
+    isochrones: "Frente provável (50 %)",
+    band: "Banda 10–90 %",
+    smokeLegend: "Fumo PM2.5 ≥ 35 / 150 / 500 µg/m³",
+    windLegend: "Vento a 10 m",
+    head: "Cabeça do incêndio (1 h)",
+    model: "Modelo físico (não operacional)",
+  },
+  en: {
+    now: "Now",
+    smoke: "Smoke",
+    wind: "Wind",
+    spreadAt: "Predicted spread",
+    probability: "probability",
+    isochrones: "Likely front (50 %)",
+    band: "10–90 % band",
+    smokeLegend: "PM2.5 smoke ≥ 35 / 150 / 500 µg/m³",
+    windLegend: "10 m wind",
+    head: "Head fire (1 h)",
+    model: "Physics model (not operational)",
+  },
 };
 export default function MapView({
   snapshot,
@@ -62,8 +122,18 @@ export default function MapView({
     overlay = useRef<MapboxOverlay | null>(null);
   const [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false),
-    [fps, setFps] = useState<number | null>(null);
-  const t = copy[locale];
+    [fps, setFps] = useState<number | null>(null),
+    [horizon, setHorizon] = useState<number | null>(null),
+    [showSmoke, setShowSmoke] = useState(true),
+    [showWind, setShowWind] = useState(true);
+  const t = copy[locale],
+    f = T[locale];
+  const firecast = firecastFor(snapshot, selectedId);
+  const horizons = horizonsOf(firecast);
+  const activeHorizon =
+    horizon !== null && horizons.includes(horizon)
+      ? horizon
+      : (horizons.find((h) => h >= 1) ?? horizons[0] ?? null);
   useEffect(() => {
     let cancelled = false,
       instance: LibreMap | null = null;
@@ -117,8 +187,10 @@ export default function MapView({
             start = now;
           }
         });
-        instance.on("error", () => {
-          if (!instance?.isStyleLoaded()) setFailed(true);
+        instance.on("error", (event) => {
+          // A blocked tile source (base map or terrain) must not hide the map.
+          const sourceError = Boolean((event as { sourceId?: string }).sourceId);
+          if (!sourceError && !instance?.isStyleLoaded()) setFailed(true);
         });
       } catch (error) {
         if (!cancelled) {
@@ -143,16 +215,150 @@ export default function MapView({
         await import("@deck.gl/layers");
       if (cancelled || !overlay.current) return;
       const incidents = snapshot.incidents.filter((i) => i.position);
+      const epoch = snapshot.scenario.epoch;
+      const fc = (features: GeoJSON.Feature[]): GeoJSON.FeatureCollection => ({
+        type: "FeatureCollection",
+        features,
+      });
+      const spread = featuresOf(firecast, "spread");
+      const band = spread.filter(
+        (x) => Number(x.properties.horizon_h) === activeHorizon,
+      );
+      const isochrones = spread
+        .filter(
+          (x) =>
+            Number(x.properties.probability) === 0.5 &&
+            Number(x.properties.horizon_h) <= (activeHorizon ?? 99),
+        )
+        .sort(
+          (a, b) => Number(b.properties.horizon_h) - Number(a.properties.horizon_h),
+        );
+      const smoke = featuresOf(firecast, "smoke")
+        .filter((x) => Number(x.properties.hour_offset) === activeHorizon)
+        .sort(
+          (a, b) =>
+            Number(a.properties.threshold_ug_m3) -
+            Number(b.properties.threshold_ug_m3),
+        );
+      const smokeAxis = featuresOf(firecast, "smoke_axis").filter(
+        (x) => Number(x.properties.hour_offset) === activeHorizon,
+      );
+      const arrows = (layer: string) =>
+        featuresOf(firecast, layer).flatMap((x) =>
+          arrowPaths(
+            (x.geometry as GeoJSON.LineString).coordinates as [number, number][],
+          ).map((path) => ({ path, properties: x.properties })),
+        );
+      const legacy = snapshot.forecasts.some((x) => !isFirecast(x));
       overlay.current.setProps({
+        getTooltip: ({ object }: { object?: unknown }) => {
+          const p = (object as { properties?: Record<string, unknown> })
+            ?.properties;
+          if (!p) return null;
+          if (p.layer === "spread")
+            return (
+              (Number(p.horizon_h) === 0 ? f.now : "+" + p.horizon_h + " h") +
+              " · " +
+              Math.round(Number(p.probability) * 100) +
+              " % " +
+              f.probability
+            );
+          if (p.layer === "smoke")
+            return "PM2.5 ≥ " + p.threshold_ug_m3 + " µg/m³";
+          if (p.layer === "wind")
+            return (
+              f.wind + ": " + p.speed_mps + " m/s · " + p.from_deg + "°" +
+              (p.gust_mps ? " · gust " + p.gust_mps + " m/s" : "")
+            );
+          if (p.layer === "head_vector")
+            return f.head + ": " + p.ros_m_min + " m/min → " + p.bearing_deg + "°";
+          return null;
+        },
         layers: [
+          ...(legacy
+            ? [
+                new GeoJsonLayer({
+                  id: "spread-" + epoch,
+                  data: forecastFeatures({
+                    ...snapshot,
+                    forecasts: snapshot.forecasts.filter((x) => !isFirecast(x)),
+                  }),
+                  filled: true,
+                  stroked: true,
+                  getFillColor: [236, 125, 58, 65],
+                  getLineColor: [255, 177, 98, 190],
+                  lineWidthMinPixels: 1,
+                }),
+              ]
+            : []),
           new GeoJsonLayer({
-            id: "spread-" + snapshot.scenario.epoch,
-            data: forecastFeatures(snapshot),
+            id: "fc-smoke-" + epoch + "-" + activeHorizon,
+            data: fc(showSmoke ? smoke : []),
             filled: true,
             stroked: true,
-            getFillColor: [236, 125, 58, 65],
-            getLineColor: [255, 177, 98, 190],
+            pickable: true,
+            getFillColor: (x: GeoJSON.Feature) => [
+              96,
+              90,
+              122,
+              smokeAlpha(Number(x.properties?.threshold_ug_m3)),
+            ],
+            getLineColor: [180, 172, 205, 110],
             lineWidthMinPixels: 1,
+          }),
+          new PathLayer({
+            id: "fc-smoke-axis-" + epoch,
+            data: showSmoke
+              ? smokeAxis.map(
+                  (x) => (x.geometry as GeoJSON.LineString).coordinates,
+                )
+              : [],
+            getPath: (d: number[][]) => d as [number, number][],
+            getColor: [205, 196, 235, 170],
+            widthMinPixels: 1.5,
+          }),
+          new GeoJsonLayer({
+            id: "fc-band-" + epoch + "-" + activeHorizon,
+            data: fc(band),
+            filled: true,
+            stroked: false,
+            pickable: true,
+            getFillColor: (x: GeoJSON.Feature) => {
+              const p = Number(x.properties?.probability);
+              const [r, g, b] = horizonColor(activeHorizon ?? 1);
+              return [r, g, b, p >= 0.9 ? 120 : p >= 0.5 ? 80 : 45];
+            },
+          }),
+          new GeoJsonLayer({
+            id: "fc-isochrones-" + epoch + "-" + activeHorizon,
+            data: fc(isochrones),
+            filled: false,
+            stroked: true,
+            getLineColor: (x: GeoJSON.Feature) => [
+              ...horizonColor(Number(x.properties?.horizon_h)),
+              235,
+            ] as [number, number, number, number],
+            lineWidthMinPixels: 2,
+          }),
+          new PathLayer({
+            id: "fc-wind-" + epoch,
+            data: showWind ? arrows("wind") : [],
+            getPath: (d: { path: [number, number][] }) => d.path,
+            getColor: [176, 224, 255, 120],
+            widthMinPixels: 1.1,
+            pickable: true,
+            capRounded: true,
+            jointRounded: true,
+          }),
+          new PathLayer({
+            id: "fc-head-" + epoch,
+            data: arrows("head_vector"),
+            getPath: (d: { path: [number, number][] }) => d.path,
+            getColor: [255, 72, 48, 245],
+            widthMinPixels: 3,
+            pickable: true,
+            capRounded: true,
+            jointRounded: true,
           }),
           new PathLayer({
             id: "drone-" + snapshot.scenario.epoch,
@@ -196,13 +402,23 @@ export default function MapView({
     return () => {
       cancelled = true;
     };
-  }, [snapshot, ready, selectedId, onSelect]);
+  }, [
+    snapshot,
+    ready,
+    selectedId,
+    onSelect,
+    firecast,
+    activeHorizon,
+    showSmoke,
+    showWind,
+    f,
+  ]);
   useEffect(() => {
     const selected = snapshot.incidents.find((i) => i.id === selectedId);
     if (ready && selected?.position)
       map.current?.flyTo({
         center: selected.position,
-        zoom: 9.5,
+        zoom: 12.3,
         duration: 800,
       });
   }, [selectedId, ready, snapshot.incidents]);
@@ -337,6 +553,42 @@ export default function MapView({
           <Icon name="target" size={18} />
         </button>
       </div>
+      {firecast && horizons.length > 0 && (
+        <div className="forecast-controls" role="group" aria-label={f.spreadAt}>
+          <span className="forecast-controls-title">{f.spreadAt}</span>
+          <div className="horizon-buttons">
+            {horizons.map((h) => (
+              <button
+                key={h}
+                className={h === activeHorizon ? "active" : ""}
+                aria-pressed={h === activeHorizon}
+                onClick={() => setHorizon(h)}
+              >
+                {h === 0 ? f.now : "+" + h + " h"}
+              </button>
+            ))}
+          </div>
+          <div className="layer-toggles">
+            <label>
+              <input
+                type="checkbox"
+                checked={showSmoke}
+                onChange={(e) => setShowSmoke(e.target.checked)}
+              />
+              {f.smoke}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={showWind}
+                onChange={(e) => setShowWind(e.target.checked)}
+              />
+              {f.wind}
+            </label>
+          </div>
+          <span className="forecast-controls-note">{f.model}</span>
+        </div>
+      )}
       {(failed || !ready) && (
         <div className="map-fallback-notice">
           {failed ? t.mapUnavailable : t.simplified}
@@ -351,11 +603,36 @@ export default function MapView({
           <i className="legend-ring" />
           {t.radius}
         </span>
-        {snapshot.forecasts.length > 0 && (
-          <span>
-            <i className="legend-spread" />
-            {t.spread}
-          </span>
+        {firecast ? (
+          <>
+            <span>
+              <i className="legend-isochrone" />
+              {f.isochrones}
+            </span>
+            <span>
+              <i className="legend-band" />
+              {f.band}
+            </span>
+            <span>
+              <i className="legend-smoke" />
+              {f.smokeLegend}
+            </span>
+            <span>
+              <i className="legend-wind" />
+              {f.windLegend}
+            </span>
+            <span>
+              <i className="legend-head" />
+              {f.head}
+            </span>
+          </>
+        ) : (
+          snapshot.forecasts.length > 0 && (
+            <span>
+              <i className="legend-spread" />
+              {t.spread}
+            </span>
+          )
         )}
         {snapshot.drone_plans.length > 0 && (
           <span>

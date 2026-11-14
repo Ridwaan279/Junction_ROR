@@ -210,6 +210,24 @@ impl LandCover {
             LandCover::NonBurnable => None,
         }
     }
+    /// Canopy fuel for crown-fire assessment. Typical plantation/stand values
+    /// (assumptions, not measured for the incident).
+    pub fn canopy(self) -> Option<crate::rothermel::Canopy> {
+        use crate::rothermel::Canopy;
+        let c = |base_height_m, bulk_density_kg_m3, fuel_load_kg_m2, foliar_moisture_pct| Canopy {
+            base_height_m,
+            bulk_density_kg_m3,
+            fuel_load_kg_m2,
+            foliar_moisture_pct,
+        };
+        match self {
+            LandCover::Eucalyptus => Some(c(3.0, 0.15, 1.0, 110.0)),
+            LandCover::MaritimePine => Some(c(3.0, 0.15, 1.1, 100.0)),
+            LandCover::MixedForest => Some(c(4.0, 0.12, 0.9, 110.0)),
+            LandCover::Montado | LandCover::Broadleaf => Some(c(6.0, 0.05, 0.6, 120.0)),
+            _ => None,
+        }
+    }
     pub fn label(self) -> &'static str {
         match self {
             LandCover::Eucalyptus => "eucalyptus",
