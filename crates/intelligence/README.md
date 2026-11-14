@@ -4,6 +4,17 @@ The Rust crate returns shared `emberwatch-domain` batches. Platform owns source
 cadences/caches, retry policy, incident fusion, persistence, and SSE. No provider
 key or source-run trigger belongs in the browser.
 
+Observation IDs identify immutable capture/revision records using the run, source,
+stable upstream identity, original capture time and content hash. A later capture
+or changed payload gets a new ID; retrying the same stored capture retains its ID
+and timestamps. Callers reprocessing a stored capture must keep its original
+capture time in `RunContext.clock`. `provenance.external_id` remains an actual
+visible ID, URL or station/municipality ID. Fogos composite fallback identity is
+separately labelled in `attributes.source_identity` and `source_identity_basis`;
+platform can group revisions without inventing a visible upstream ID. When no
+visible ID or event time exists, the fallback includes its excerpt to preserve
+ambiguous same-place reports rather than force them into one incident.
+
 - `ContextClient` calls documented Context REST (`/web/scrape`, `/web/search`)
   with deadlines, bounded bodies and error categories. It never targets a Fogos
   API. Billed POSTs have no implicit retry; an unknown timeout may have cost credits.

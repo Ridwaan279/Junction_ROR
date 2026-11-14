@@ -194,11 +194,32 @@ pub fn normalize_fogos_with_coverage(
                     if raw_start.is_none() { excerpt } else { "" }
                 )
             });
-        let id = crate::hash(format!("{}|fogos|{identity}", context.run_id).as_bytes());
+        let content_hash = crate::hash(
+            json!([&row, &response.url, &page.page_update_text])
+                .to_string()
+                .as_bytes(),
+        );
+        let id = crate::observation_id(
+            &context.run_id,
+            "fogos",
+            &identity,
+            result.captured_at,
+            &content_hash,
+        );
         if !seen.insert(id.clone()) {
             continue;
         }
         let mut attributes = json!({"via":"Context.dev","raw_start_text":raw_start,"page_update_text":page.page_update_text,"raw_type":raw_type,"source_attribution":"Source: Fogos.pt via Context.dev; underlying public reports: ANEPC","resource_counts":{}});
+        attributes["source_identity"] = json!(identity);
+        attributes["source_identity_basis"] = json!(if external_id.is_some() {
+            "visible_external_id"
+        } else if detail_url.is_some() {
+            "visible_detail_url"
+        } else if raw_start.is_some() {
+            "composite_locality_municipality_type_start"
+        } else {
+            "ambiguous_composite_with_excerpt"
+        });
         for key in ["personnel", "vehicles", "aircraft"] {
             // A count requires literal support; retaining null is safer than matching an unrelated page number.
             attributes["resource_counts"][key] = Value::Null;

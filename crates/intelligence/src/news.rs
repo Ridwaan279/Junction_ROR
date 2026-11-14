@@ -99,7 +99,15 @@ pub fn normalize_news(
             continue;
         }
         let text: String = body.chars().take(6000).collect();
-        result.evidence.push(Evidence{id:crate::hash(format!("{}|news|{source_url}",context.run_id).as_bytes()),run_id:context.run_id.clone(),mode:context.mode,
+        let content_hash = crate::hash(json!([&item.title, body]).to_string().as_bytes());
+        let id = crate::observation_id(
+            &context.run_id,
+            "portuguese-news",
+            &source_url,
+            result.captured_at,
+            &content_hash,
+        );
+        result.evidence.push(Evidence{id,run_id:context.run_id.clone(),mode:context.mode,
             provenance:Provenance{source_id:"portuguese-news".into(),source_url:source_url.clone(),origin_group:origin.into(),external_id:Some(source_url),event_at:None,published_at:None,captured_at:result.captured_at,available_at:result.captured_at,
                 availability_basis:"captured_article; publication/event availability not inferred from search ranking".into(),evidence_hash:crate::hash(body.as_bytes()),quality_flags:vec!["via_context_dev".into(),"article_not_an_incident_confirmation".into(),"lineage_requires_review".into(),"location_requires_separate_uncertain_geocode".into()]},
             position:None,uncertainty_m:None,location_name:None,municipality:None,kind:"web_report".into(),raw_status:None,title:item.title.chars().take(300).collect(),body:Some(text),attributes:json!({"source":"Portuguese public report via Context.dev","query_scope":"bounded search","geocoding_hints_require_review":true})});

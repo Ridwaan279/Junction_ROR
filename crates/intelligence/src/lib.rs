@@ -6,7 +6,7 @@ pub mod news;
 pub mod webhook;
 
 use emberwatch_domain::{
-    Coverage, DataMode, RunContext, SourceBatch, SourceError, SourceHealth, Usage,
+    Coverage, DataMode, RunContext, SourceBatch, SourceError, SourceHealth, Timestamp, Usage,
 };
 use sha2::{Digest, Sha256};
 
@@ -18,6 +18,29 @@ pub(crate) fn error(code: &str, message: &str) -> SourceError {
 }
 pub(crate) fn hash(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
+}
+/// Immutable capture/revision key, deliberately separate from the upstream entity identity.
+/// Reprocessing a stored capture must use its original capture time in RunContext.clock.
+pub(crate) fn observation_id(
+    run_id: &str,
+    source_id: &str,
+    source_identity: &str,
+    captured_at: Timestamp,
+    content_hash: &str,
+) -> String {
+    // A structured tuple prevents delimiter collisions in upstream IDs/locality text.
+    hash(
+        serde_json::json!([
+            "observation-v1",
+            run_id,
+            source_id,
+            source_identity,
+            captured_at,
+            content_hash
+        ])
+        .to_string()
+        .as_bytes(),
+    )
 }
 pub(crate) fn live_only(context: &RunContext) -> Result<(), SourceError> {
     if context.mode != DataMode::Live {

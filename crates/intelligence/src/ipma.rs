@@ -2,7 +2,7 @@ use emberwatch_domain::{
     Provenance, RunContext, Source, SourceBatch, SourceError, SourceFuture, SourceHealth,
     Timestamp, Weather,
 };
-use serde_json::Value;
+use serde_json::{Value, json};
 use std::{
     collections::HashMap,
     time::{Duration, Instant},
@@ -102,10 +102,10 @@ pub fn normalize_observations(
         else {
             continue;
         };
-        if let (Some(lon), Some(lat)) = (coords[0].as_f64(), coords[1].as_f64()) {
-            if crate::in_bbox([lon, lat], context.bbox) {
-                positions.insert(id, [lon, lat]);
-            }
+        if let (Some(lon), Some(lat)) = (coords[0].as_f64(), coords[1].as_f64())
+            && crate::in_bbox([lon, lat], context.bbox)
+        {
+            positions.insert(id, [lon, lat]);
         }
     }
     let times = observations.as_object().ok_or_else(|| {
@@ -155,16 +155,26 @@ pub fn normalize_observations(
                 flags.push("wind_converted_from_kmh".into());
             }
             let record_hash = crate::hash(record.to_string().as_bytes());
+            let content_hash = crate::hash(
+                json!([record, position, time, &flags])
+                    .to_string()
+                    .as_bytes(),
+            );
+            let source_identity = json!([station_id, valid_at]).to_string();
             result.weather.push(Weather {
-                id: crate::hash(
-                    format!("{}|ipma|{station_id}|{valid_at}", context.run_id).as_bytes(),
+                id: crate::observation_id(
+                    &context.run_id,
+                    "ipma-observations",
+                    &source_identity,
+                    result.captured_at,
+                    &content_hash,
                 ),
                 run_id: context.run_id.clone(),
                 provenance: Provenance {
                     source_id: "ipma-observations".into(),
                     source_url: OBSERVATIONS_URL.into(),
                     origin_group: "ipma".into(),
-                    external_id: Some(format!("{station_id}|{time}")),
+                    external_id: Some(station_id.clone()),
                     event_at: Some(valid_at),
                     published_at: None,
                     captured_at: result.captured_at,
@@ -266,8 +276,20 @@ pub fn normalize_fire_risk(
             .as_u64()
             .filter(|v| (1..=5).contains(v))
             .map(|v| v as u8);
+        let source_identity = json!([dico, day]).to_string();
+        let content_hash = crate::hash(
+            json!([record, &payload["dataRun"], &payload["fileDate"]])
+                .to_string()
+                .as_bytes(),
+        );
         result.weather.push(Weather {
-            id: crate::hash(format!("{}|ipma-risk|{dico}|{day}", context.run_id).as_bytes()),
+            id: crate::observation_id(
+                &context.run_id,
+                "ipma-fire-risk",
+                &source_identity,
+                result.captured_at,
+                &content_hash,
+            ),
             run_id: context.run_id.clone(),
             provenance: Provenance {
                 source_id: "ipma-fire-risk".into(),
