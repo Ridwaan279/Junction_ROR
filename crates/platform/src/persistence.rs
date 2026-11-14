@@ -47,4 +47,34 @@ impl PgStore {
         }
         tx.commit().await
     }
+
+    /// Durable verified receipt only. Normalization/ingestion is a separate step.
+    pub async fn persist_receipt(
+        &self,
+        run_id: &str,
+        source_id: &str,
+        id: &str,
+        body_hash: &str,
+        record: serde_json::Value,
+    ) -> Result<bool, sqlx::Error> {
+        let mut tx = self.pool.begin().await?;
+        let inserted = sqlx::query("INSERT INTO webhook_receipts(run_id,source_id,id,body_hash,record) VALUES($1,$2,$3,$4,$5) ON CONFLICT(source_id,id) DO NOTHING")
+            .bind(run_id).bind(source_id).bind(id).bind(body_hash).bind(record).execute(&mut *tx).await?.rows_affected() == 1;
+        if !inserted {
+            let (original_hash,): (String,) = sqlx::query_as(
+                "SELECT body_hash FROM webhook_receipts WHERE source_id=$1 AND id=$2",
+            )
+            .bind(source_id)
+            .bind(id)
+            .fetch_one(&mut *tx)
+            .await?;
+            if original_hash != body_hash {
+                return Err(sqlx::Error::Protocol(
+                    "receipt identity reused with different content".into(),
+                ));
+            }
+        }
+        tx.commit().await?;
+        Ok(inserted)
+    }
 }

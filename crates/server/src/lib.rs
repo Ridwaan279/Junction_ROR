@@ -23,6 +23,7 @@ use std::{
 use tokio::sync::{Mutex, broadcast};
 use tokio_stream::wrappers::BroadcastStream;
 use tower_http::cors::CorsLayer;
+mod webhook;
 
 #[derive(Clone)]
 struct AppState {
@@ -30,6 +31,7 @@ struct AppState {
     store: Option<PgStore>,
     events: broadcast::Sender<EventEnvelope>,
     sequence: Arc<AtomicU64>,
+    compute: emberwatch_response::ComputePool,
 }
 #[derive(Deserialize)]
 struct RunQuery {
@@ -56,6 +58,7 @@ pub fn router(engine: Engine, store: Option<PgStore>) -> Router {
         store,
         events,
         sequence: Arc::new(AtomicU64::new(1)),
+        compute: emberwatch_response::ComputePool::new(2).expect("bounded compute pool"),
     };
     let ticker = state.clone();
     tokio::spawn(async move {
@@ -83,10 +86,17 @@ pub fn router(engine: Engine, store: Option<PgStore>) -> Router {
             publish(&ticker, &engine, "scenario.tick");
         }
     });
-    let origin = std::env::var("WEB_ORIGIN")
-        .unwrap_or_else(|_| "http://localhost:3000".into())
-        .parse::<axum::http::HeaderValue>()
-        .expect("valid WEB_ORIGIN");
+    let origins = match std::env::var("WEB_ORIGIN") {
+        Ok(origin) => vec![
+            origin
+                .parse::<axum::http::HeaderValue>()
+                .expect("valid WEB_ORIGIN"),
+        ],
+        Err(_) => vec![
+            "http://localhost:3000".parse().unwrap(),
+            "http://127.0.0.1:3000".parse().unwrap(),
+        ],
+    };
     Router::new()
         .route("/healthz", get(health))
         .route("/api/scenarios", get(scenarios))
@@ -95,15 +105,20 @@ pub fn router(engine: Engine, store: Option<PgStore>) -> Router {
         .route("/api/incidents/{id}", get(incident))
         .route("/api/incidents/{id}/timeline", get(timeline))
         .route("/api/incidents/{id}/forecast", get(forecast))
+        .route("/api/incidents/{id}/dispatch", post(dispatch))
         .route("/api/sources", get(sources))
         .route("/api/stations", get(stations))
         .route("/api/drones", get(drones))
         .route("/api/briefings", get(briefings))
         .route("/api/events", get(sse_events))
         .route("/api/scenarios/{id}/{command}", post(command))
+        .route(
+            "/webhooks/context",
+            post(webhook::receive).layer(axum::extract::DefaultBodyLimit::max(1024 * 1024)),
+        )
         .layer(
             CorsLayer::new()
-                .allow_origin(origin)
+                .allow_origin(origins)
                 .allow_methods([Method::GET, Method::POST])
                 .allow_headers([axum::http::header::CONTENT_TYPE]),
         )
@@ -114,6 +129,73 @@ fn publish(state: &AppState, engine: &Engine, kind: &str) {
     let seq = state.sequence.fetch_add(1, Ordering::Relaxed);
     let envelope = engine.envelope(seq, kind, json!(engine.snapshot()));
     let _ = state.events.send(envelope);
+}
+
+async fn dispatch(
+    State(state): State<AppState>,
+    Query(query): Query<RunQuery>,
+    Path(id): Path<String>,
+) -> ApiResult<Json<Snapshot>> {
+    let engine = state.engine.lock().await;
+    scope(&engine, &query.run_id)?;
+    let snapshot = engine.snapshot();
+    let incident = find_incident(&snapshot, &id)?;
+    if snapshot.scenario.mode != DataMode::Synthetic {
+        return Err(ApiError(
+            StatusCode::BAD_REQUEST,
+            "demo response requires a synthetic run".into(),
+        ));
+    }
+    let context = RunContext {
+        run_id: snapshot.scenario.run_id.clone(),
+        scenario_id: Some(snapshot.scenario.id.clone()),
+        mode: snapshot.scenario.mode,
+        epoch: snapshot.scenario.epoch,
+        bbox: PORTUGAL_BBOX,
+        window_start: snapshot.scenario.start_at,
+        window_end: snapshot.scenario.end_at,
+        clock: Arc::new(FixedClock(snapshot.scenario.current_at)),
+    };
+    let at = snapshot.scenario.current_at;
+    let epoch = snapshot.scenario.epoch;
+    drop(engine);
+    let (forecast, plan, briefing) = state
+        .compute
+        .run(move || {
+            emberwatch_response::demo_bundle(
+                &context,
+                &incident,
+                &snapshot.evidence,
+                &snapshot.weather,
+            )
+        })
+        .await
+        .map_err(|e| ApiError(StatusCode::UNPROCESSABLE_ENTITY, e.to_string()))?;
+    let mut engine = state.engine.lock().await;
+    if engine.scenario.epoch != epoch || engine.scenario.current_at != at {
+        return Err(ApiError(
+            StatusCode::CONFLICT,
+            "scenario changed during computation; retry".into(),
+        ));
+    }
+    let mut candidate = engine.clone();
+    candidate.forecasts.retain(|f| f.incident_id != id);
+    candidate.forecasts.push(forecast);
+    candidate.drone_plans.retain(|f| f.incident_id != id);
+    candidate.drone_plans.push(plan);
+    candidate.briefings.retain(|f| f.incident_id != id);
+    candidate.briefings.push(briefing);
+    if let Some(store) = &state.store {
+        store.save(&candidate).await.map_err(|_| {
+            ApiError(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "persistence unavailable".into(),
+            )
+        })?;
+    }
+    *engine = candidate;
+    publish(&state, &engine, "drone.plan");
+    Ok(Json(engine.snapshot()))
 }
 async fn health(State(state): State<AppState>) -> Json<Value> {
     Json(
@@ -402,5 +484,61 @@ mod tests {
             assert_eq!(result["evidence"].as_array().unwrap().len(), expected_len);
             assert_eq!(result["scenario"]["epoch"], epoch);
         }
+    }
+
+    #[tokio::test]
+    async fn dispatch_is_simulated_and_seek_invalidates_all_derived_outputs() {
+        let app = router(Engine::synthetic().unwrap(), None);
+        let response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/incidents/incident-training-1/dispatch?run_id=synthetic-portugal")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), 200);
+        let bytes = to_bytes(response.into_body(), 1024 * 1024).await.unwrap();
+        let snapshot: Snapshot = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(snapshot.forecasts.len(), 1);
+        assert!(snapshot.forecasts[0].illustrative);
+        assert!(snapshot.drone_plans[0].simulated);
+        assert!(snapshot.briefings[0].simulated);
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/scenarios/portugal-synthetic/reset?run_id=synthetic-portugal")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let bytes = to_bytes(response.into_body(), 1024 * 1024).await.unwrap();
+        let snapshot: Snapshot = serde_json::from_slice(&bytes).unwrap();
+        assert!(
+            snapshot.forecasts.is_empty()
+                && snapshot.drone_plans.is_empty()
+                && snapshot.briefings.is_empty()
+        );
+    }
+
+    #[tokio::test]
+    async fn webhook_cannot_inject_live_data_into_synthetic_replay() {
+        let app = router(Engine::synthetic().unwrap(), None);
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/webhooks/context")
+                    .body(Body::from("{}"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), 503);
     }
 }

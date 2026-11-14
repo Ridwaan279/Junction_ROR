@@ -32,7 +32,11 @@ CREATE TABLE IF NOT EXISTS source_runs (
 );
 
 CREATE TABLE IF NOT EXISTS webhook_receipts (
-    id TEXT PRIMARY KEY,
+    run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    source_id TEXT NOT NULL,
+    id TEXT NOT NULL,
     body_hash TEXT NOT NULL,
-    received_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    record JSONB NOT NULL,
+    received_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY(source_id, id)
 );

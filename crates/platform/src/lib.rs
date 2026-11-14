@@ -12,6 +12,8 @@ pub struct Engine {
     evidence: BTreeMap<String, Evidence>,
     weather: BTreeMap<String, Weather>,
     sources: Vec<SourceStatus>,
+    #[serde(default)]
+    source_history: Vec<(Timestamp, SourceStatus)>,
     receipts: BTreeSet<String>,
     pub forecasts: Vec<Forecast>,
     pub drone_plans: Vec<DronePlan>,
@@ -36,6 +38,7 @@ impl Engine {
         Ok(Self {
             scenario: initial.scenario.clone(),
             sources: initial.sources.clone(),
+            source_history: vec![],
             evidence,
             weather: BTreeMap::new(),
             receipts: BTreeSet::new(),
@@ -60,7 +63,14 @@ impl Engine {
             let stable_key = format!(
                 "{}:{}",
                 item.provenance.source_id,
-                item.provenance.external_id.as_deref().unwrap_or(&item.id)
+                item.provenance
+                    .external_id
+                    .as_deref()
+                    .or_else(|| item
+                        .attributes
+                        .get("source_identity")
+                        .and_then(serde_json::Value::as_str))
+                    .unwrap_or(&item.id)
             );
             let seed = self
                 .initial
@@ -97,6 +107,28 @@ impl Engine {
             // Multiple copied reports never increase the evidence level. Independent
             // corroboration requires a reviewed link, not merely nearby geometry.
         }
+        let mut sources = self.initial.sources.clone();
+        let mut history: Vec<_> = self
+            .source_history
+            .iter()
+            .filter(|(captured, _)| *captured <= at)
+            .collect();
+        history.sort_by_key(|(captured, _)| *captured);
+        for (_, version) in history {
+            if let Some(source) = sources.iter_mut().find(|s| s.id == version.id) {
+                let last_success = source.last_success_at;
+                *source = version.clone();
+                // A delayed failure must not inherit a later successful capture.
+                source.last_success_at = if matches!(
+                    source.health,
+                    SourceHealth::Healthy | SourceHealth::EmptyVerified
+                ) {
+                    source.captured_at
+                } else {
+                    last_success
+                };
+            }
+        }
         Snapshot {
             scenario: self.scenario.clone(),
             incidents: incidents.into_values().collect(),
@@ -107,7 +139,7 @@ impl Engine {
                 .filter(|w| w.provenance.available_at <= at && w.valid_at <= at)
                 .cloned()
                 .collect(),
-            sources: self.sources.clone(),
+            sources,
             forecasts: self
                 .forecasts
                 .iter()
@@ -154,6 +186,13 @@ impl Engine {
                 return Err("evidence scope/lineage mismatch".into());
             }
             validate_position(item.position)?;
+            if self
+                .evidence
+                .get(&item.id)
+                .is_some_and(|prior| prior != item)
+            {
+                return Err("observation ID reused for different evidence; preserve a new immutable version".into());
+            }
             if item.provenance.source_url.is_empty()
                 || item.provenance.evidence_hash.is_empty()
                 || item.provenance.origin_group.is_empty()
@@ -166,6 +205,13 @@ impl Engine {
                 return Err("weather scope mismatch".into());
             }
             validate_position(item.position)?;
+            if self
+                .weather
+                .get(&item.id)
+                .is_some_and(|prior| prior != item)
+            {
+                return Err("observation ID reused for different weather".into());
+            }
         }
         let receipt = format!("{}:{}:{}", batch.run_id, batch.source_id, batch.captured_at);
         // A failed retry may update health, but never deletes prior evidence.
@@ -180,10 +226,11 @@ impl Engine {
             ) {
                 source.last_success_at = Some(batch.captured_at);
             }
+            self.source_history
+                .push((batch.captured_at, source.clone()));
         }
-        if self.receipts.contains(&receipt) {
-            return Ok(0);
-        }
+        // Deduplicate immutable observations, not an entire attempt: a failed or
+        // partial capture may recover more records while retaining its timestamp.
         let mut inserted = 0;
         for item in batch.evidence {
             if !self.evidence.contains_key(&item.id) {

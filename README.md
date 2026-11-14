@@ -15,7 +15,10 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. API defaults to http://127.0.0.1:8080. The baseline
+Open http://localhost:3000. To connect the UI to the Rust service, set
+`NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080` before `npm run dev` or
+`npm run build`; without it the UI uses an explicitly labelled local fixture.
+The baseline
 scenario is invented training data near Sever do Vouga, not a live incident or
 a reconstruction of the 2024 fires. No API key is needed for the offline demo.
 All dispatch, drone routes and spread are illustrative simulations.
@@ -42,6 +45,8 @@ development-only. Secrets are never exposed to the browser; `.env` is ignored.
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
+# With the synthetic server running in another process:
+node tests/smoke.mjs
 cd web
 npm test
 npm run lint
@@ -54,3 +59,9 @@ Recurring Fogos scraping remains disabled pending source checks. A source
 failure never means zero incidents. IPMA nulls and uncertain times remain
 unknown. External keys, weather coverage, historical assets and source reuse
 permission are not prerequisites for the labelled synthetic replay.
+
+The implementation is an initial integrated slice. Fogos returned partial page
+coverage in the bounded Context probe. IPMA timestamps without a confirmed time
+basis are skipped. Historical assets, Gemini/voice, full live scheduling, uploads
+and production deployment remain planned. See the intelligence/response/web
+READMEs for exact implemented behavior and limitations.

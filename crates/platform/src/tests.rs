@@ -108,3 +108,96 @@ async fn postgres_round_trip_preserves_archive_and_deduplicates_retries() {
         Utc.with_ymd_and_hms(2026, 11, 14, 12, 0, 0).unwrap()
     );
 }
+
+#[test]
+fn revised_observation_keeps_prior_capture_and_fuses_by_external_identity() {
+    let mut engine = Engine::synthetic().unwrap();
+    let seed = engine.snapshot();
+    let mut revision = seed.evidence[0].clone();
+    revision.id = "training-revision-3".into();
+    revision.provenance.evidence_hash = "changed-content-v2".into();
+    revision.provenance.captured_at += Duration::minutes(20);
+    revision.provenance.available_at += Duration::minutes(20);
+    revision.raw_status = Some("synthetic changed status".into());
+    let batch = SourceBatch {
+        run_id: seed.scenario.run_id.clone(),
+        source_id: revision.provenance.source_id.clone(),
+        captured_at: revision.provenance.captured_at,
+        health: SourceHealth::Healthy,
+        coverage: seed.sources[0].coverage.clone(),
+        evidence: vec![revision],
+        weather: vec![],
+        usage: Usage::default(),
+    };
+    assert_eq!(engine.ingest(batch.clone()).unwrap(), 1);
+    assert_eq!(engine.ingest(batch).unwrap(), 0);
+    assert_eq!(engine.snapshot().evidence.len(), 1);
+    assert_eq!(
+        engine.snapshot().sources[0].captured_at,
+        Some(seed.scenario.start_at)
+    );
+    engine
+        .seek(seed.scenario.start_at + Duration::minutes(20))
+        .unwrap();
+    assert_eq!(engine.snapshot().evidence.len(), 3);
+    assert_eq!(engine.snapshot().incidents.len(), 1);
+    assert_eq!(engine.snapshot().incidents[0].evidence_ids.len(), 3);
+    assert_eq!(
+        engine.snapshot().sources[0].captured_at,
+        Some(seed.scenario.start_at + Duration::minutes(20))
+    );
+}
+
+#[test]
+fn delayed_source_failure_cannot_reveal_a_future_success() {
+    let mut engine = Engine::synthetic().unwrap();
+    let seed = engine.snapshot();
+    let mut batch = SourceBatch {
+        run_id: seed.scenario.run_id.clone(),
+        source_id: "synthetic-public-page".into(),
+        captured_at: seed.scenario.start_at + Duration::minutes(20),
+        health: SourceHealth::Healthy,
+        coverage: seed.sources[0].coverage.clone(),
+        evidence: vec![],
+        weather: vec![],
+        usage: Usage::default(),
+    };
+    engine.ingest(batch.clone()).unwrap();
+    batch.captured_at = seed.scenario.start_at + Duration::minutes(10);
+    batch.health = SourceHealth::Failed;
+    engine.ingest(batch).unwrap();
+    engine
+        .seek(seed.scenario.start_at + Duration::minutes(10))
+        .unwrap();
+    assert_eq!(engine.snapshot().sources[0].health, SourceHealth::Failed);
+    assert_eq!(
+        engine.snapshot().sources[0].last_success_at,
+        Some(seed.scenario.start_at)
+    );
+}
+
+#[test]
+fn a_failed_capture_can_recover_records_on_same_timestamp_retry() {
+    let mut engine = Engine::synthetic().unwrap();
+    let seed = engine.snapshot();
+    let captured_at = seed.scenario.start_at + Duration::minutes(5);
+    let mut batch = SourceBatch {
+        run_id: seed.scenario.run_id.clone(),
+        source_id: "synthetic-public-page".into(),
+        captured_at,
+        health: SourceHealth::Failed,
+        coverage: seed.sources[0].coverage.clone(),
+        evidence: vec![],
+        weather: vec![],
+        usage: Usage::default(),
+    };
+    assert_eq!(engine.ingest(batch.clone()).unwrap(), 0);
+    let mut recovered = seed.evidence[0].clone();
+    recovered.id = "recovered-observation".into();
+    recovered.provenance.captured_at = captured_at;
+    recovered.provenance.available_at = captured_at;
+    batch.evidence.push(recovered);
+    batch.health = SourceHealth::Healthy;
+    assert_eq!(engine.ingest(batch.clone()).unwrap(), 1);
+    assert_eq!(engine.ingest(batch).unwrap(), 0);
+}

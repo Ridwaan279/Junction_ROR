@@ -489,3 +489,18 @@ the server explicitly runs in memory. FIRMS/Open-Meteo adapters, uploads,
 reviewed cross-source geographic fusion, full historical asset manifests,
 production authentication/deployment and operational calibration remain planned.
 See each crate/web README for current behavior and validation details.
+
+B now provides a Rust Context REST client, conservative Fogos extraction,
+IPMA weather/risk normalization, Portuguese report handling and signed webhook
+verification. Immutable observation versions preserve revised source captures.
+C provides tested illustrative spread, wind blending, reserve-aware A* routing,
+replanning, seeded state simulation and cited PT/EN text. D provides the bilingual
+Next.js/MapLibre/deck.gl workspace, source panels, local replay and API/SSE sync.
+The integrator mounts synthetic dispatch through a bounded blocking compute pool
+and returns forecast/route/briefing snapshots. Webhook HTTP is receipt-only and
+requires a live run, PostgreSQL and an independently validated monitor binding;
+the bundled synthetic run rejects live deliveries.
+
+Run `node tests/smoke.mjs` against the local Rust service for the HTTP/SSE response,
+seek/reset and playback check. DB round-trip verification is an explicit ignored
+test requiring TEST_DATABASE_URL; CI provisions PostGIS and runs that check.
