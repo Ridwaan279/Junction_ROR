@@ -1,0 +1,7 @@
+[
+  {
+    "id":"training-copy-2","run_id":"synthetic-portugal","mode":"synthetic",
+    "provenance":{"source_id":"synthetic-public-page","source_url":"https://example.org/emberwatch/synthetic/report-2","origin_group":"synthetic-origin-1","external_id":"training-1","event_at":null,"published_at":null,"captured_at":"2026-11-14T12:10:00Z","available_at":"2026-11-14T12:10:00Z","availability_basis":"synthetic_scenario_schedule","evidence_hash":"synthetic-copy-2-v1","quality_flags":["synthetic","copied_upstream"]},
+    "position":[-8.367,40.735],"uncertainty_m":1200.0,"location_name":"Sever do Vouga (training location)","municipality":"Sever do Vouga","kind":"public_report","raw_status":null,"title":"Synthetic update repeating the original report","body":"Same upstream origin; this does not add independent corroboration.","attributes":{"synthetic":true,"training_incident":"training-1"}
+  }
+]
