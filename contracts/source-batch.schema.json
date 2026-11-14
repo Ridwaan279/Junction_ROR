@@ -1,0 +1,361 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SourceBatch",
+  "type": "object",
+  "required": [
+    "captured_at",
+    "coverage",
+    "evidence",
+    "health",
+    "run_id",
+    "source_id",
+    "usage",
+    "weather"
+  ],
+  "properties": {
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "coverage": {
+      "$ref": "#/definitions/Coverage"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Evidence"
+      }
+    },
+    "health": {
+      "$ref": "#/definitions/SourceHealth"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "usage": {
+      "$ref": "#/definitions/Usage"
+    },
+    "weather": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Weather"
+      }
+    }
+  },
+  "definitions": {
+    "Coverage": {
+      "type": "object",
+      "required": [
+        "complete",
+        "explicit_empty",
+        "notes",
+        "scope"
+      ],
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "explicit_empty": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string"
+        }
+      }
+    },
+    "DataMode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "historical",
+        "synthetic"
+      ]
+    },
+    "Evidence": {
+      "type": "object",
+      "required": [
+        "attributes",
+        "id",
+        "kind",
+        "mode",
+        "provenance",
+        "run_id",
+        "title"
+      ],
+      "properties": {
+        "attributes": true,
+        "body": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "location_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mode": {
+          "$ref": "#/definitions/DataMode"
+        },
+        "municipality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "position": {
+          "description": "GeoJSON order: longitude, latitude. Never imply a geocode was page-visible.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "provenance": {
+          "$ref": "#/definitions/Provenance"
+        },
+        "raw_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "uncertainty_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "required": [
+        "availability_basis",
+        "available_at",
+        "captured_at",
+        "evidence_hash",
+        "origin_group",
+        "quality_flags",
+        "source_id",
+        "source_url"
+      ],
+      "properties": {
+        "availability_basis": {
+          "type": "string"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "evidence_hash": {
+          "type": "string"
+        },
+        "external_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "origin_group": {
+          "type": "string"
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "source_url": {
+          "type": "string"
+        }
+      }
+    },
+    "SourceHealth": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "empty_verified",
+        "partial",
+        "stale",
+        "blocked",
+        "failed",
+        "unconfigured",
+        "needs_validation"
+      ]
+    },
+    "Usage": {
+      "type": "object",
+      "properties": {
+        "cache_age_ms": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "credits": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "latency_ms": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "request_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Weather": {
+      "type": "object",
+      "required": [
+        "forecast",
+        "id",
+        "provenance",
+        "run_id",
+        "valid_at"
+      ],
+      "properties": {
+        "fire_risk": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint8",
+          "minimum": 0.0
+        },
+        "forecast": {
+          "type": "boolean"
+        },
+        "gust_mps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "id": {
+          "type": "string"
+        },
+        "position": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "provenance": {
+          "$ref": "#/definitions/Provenance"
+        },
+        "relative_humidity_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "station_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "valid_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "wind_from_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "wind_speed_mps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        }
+      }
+    }
+  }
+}

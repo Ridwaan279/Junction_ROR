@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: emberwatch
+      POSTGRES_PASSWORD: local-development-only
+      POSTGRES_DB: emberwatch
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: ["postgres:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emberwatch"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  postgres:

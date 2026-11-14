@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EventEnvelope",
+  "type": "object",
+  "required": [
+    "emitted_at",
+    "epoch",
+    "event_time",
+    "id",
+    "payload",
+    "run_id",
+    "type"
+  ],
+  "properties": {
+    "emitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "epoch": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "id": {
+      "type": "string"
+    },
+    "payload": true,
+    "run_id": {
+      "type": "string"
+    },
+    "scenario_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "type": "string"
+    }
+  }
+}

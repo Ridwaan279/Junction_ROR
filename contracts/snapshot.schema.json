@@ -1,0 +1,769 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Snapshot",
+  "type": "object",
+  "required": [
+    "briefings",
+    "drone_plans",
+    "evidence",
+    "forecasts",
+    "incidents",
+    "scenario",
+    "sources",
+    "weather"
+  ],
+  "properties": {
+    "briefings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Briefing"
+      }
+    },
+    "drone_plans": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DronePlan"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Evidence"
+      }
+    },
+    "forecasts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Forecast"
+      }
+    },
+    "incidents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Incident"
+      }
+    },
+    "scenario": {
+      "$ref": "#/definitions/Scenario"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/SourceStatus"
+      }
+    },
+    "weather": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Weather"
+      }
+    }
+  },
+  "definitions": {
+    "Briefing": {
+      "type": "object",
+      "required": [
+        "citations",
+        "epoch",
+        "generated_at",
+        "id",
+        "incident_id",
+        "run_id",
+        "simulated",
+        "text_en",
+        "text_pt"
+      ],
+      "properties": {
+        "audio_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string"
+        },
+        "incident_id": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "simulated": {
+          "type": "boolean"
+        },
+        "text_en": {
+          "type": "string"
+        },
+        "text_pt": {
+          "type": "string"
+        }
+      }
+    },
+    "Coverage": {
+      "type": "object",
+      "required": [
+        "complete",
+        "explicit_empty",
+        "notes",
+        "scope"
+      ],
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "explicit_empty": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string"
+        }
+      }
+    },
+    "DataMode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "historical",
+        "synthetic"
+      ]
+    },
+    "DronePlan": {
+      "type": "object",
+      "required": [
+        "distance_m",
+        "duration_seconds",
+        "epoch",
+        "generated_at",
+        "id",
+        "incident_id",
+        "reasons",
+        "reserve_pct",
+        "return_route",
+        "route",
+        "run_id",
+        "simulated"
+      ],
+      "properties": {
+        "distance_m": {
+          "type": "number",
+          "format": "double"
+        },
+        "duration_seconds": {
+          "type": "number",
+          "format": "double"
+        },
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string"
+        },
+        "incident_id": {
+          "type": "string"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reserve_pct": {
+          "type": "number",
+          "format": "double"
+        },
+        "return_route": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "maxItems": 2,
+            "minItems": 2
+          }
+        },
+        "route": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "maxItems": 2,
+            "minItems": 2
+          }
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "simulated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "required": [
+        "attributes",
+        "id",
+        "kind",
+        "mode",
+        "provenance",
+        "run_id",
+        "title"
+      ],
+      "properties": {
+        "attributes": true,
+        "body": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "location_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mode": {
+          "$ref": "#/definitions/DataMode"
+        },
+        "municipality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "position": {
+          "description": "GeoJSON order: longitude, latitude. Never imply a geocode was page-visible.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "provenance": {
+          "$ref": "#/definitions/Provenance"
+        },
+        "raw_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "uncertainty_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        }
+      }
+    },
+    "Forecast": {
+      "type": "object",
+      "required": [
+        "epoch",
+        "generated_at",
+        "geometry",
+        "horizon_seconds",
+        "id",
+        "illustrative",
+        "incident_id",
+        "input_evidence_ids",
+        "input_weather_ids",
+        "limitations",
+        "model_version",
+        "run_id",
+        "seed"
+      ],
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "geometry": true,
+        "horizon_seconds": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0.0
+        },
+        "id": {
+          "type": "string"
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "incident_id": {
+          "type": "string"
+        },
+        "input_evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "input_weather_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "model_version": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "seed": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      }
+    },
+    "Incident": {
+      "type": "object",
+      "required": [
+        "evidence_ids",
+        "evidence_level",
+        "id",
+        "mode",
+        "origin_groups",
+        "run_id",
+        "status",
+        "title",
+        "updated_at"
+      ],
+      "properties": {
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_level": {
+          "type": "string"
+        },
+        "first_event_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string"
+        },
+        "location_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mode": {
+          "$ref": "#/definitions/DataMode"
+        },
+        "origin_groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "position": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "uncertainty_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "required": [
+        "availability_basis",
+        "available_at",
+        "captured_at",
+        "evidence_hash",
+        "origin_group",
+        "quality_flags",
+        "source_id",
+        "source_url"
+      ],
+      "properties": {
+        "availability_basis": {
+          "type": "string"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "evidence_hash": {
+          "type": "string"
+        },
+        "external_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "origin_group": {
+          "type": "string"
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "source_url": {
+          "type": "string"
+        }
+      }
+    },
+    "Scenario": {
+      "type": "object",
+      "required": [
+        "current_at",
+        "description",
+        "end_at",
+        "epoch",
+        "id",
+        "mode",
+        "name",
+        "playing",
+        "run_id",
+        "seed",
+        "speed",
+        "start_at"
+      ],
+      "properties": {
+        "current_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "end_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "id": {
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/definitions/DataMode"
+        },
+        "name": {
+          "type": "string"
+        },
+        "playing": {
+          "type": "boolean"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "seed": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "speed": {
+          "type": "number",
+          "format": "double"
+        },
+        "start_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SourceHealth": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "empty_verified",
+        "partial",
+        "stale",
+        "blocked",
+        "failed",
+        "unconfigured",
+        "needs_validation"
+      ]
+    },
+    "SourceStatus": {
+      "type": "object",
+      "required": [
+        "attribution",
+        "coverage",
+        "enabled",
+        "health",
+        "id",
+        "name",
+        "notes",
+        "origin_group",
+        "source_url"
+      ],
+      "properties": {
+        "attribution": {
+          "type": "string"
+        },
+        "captured_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "coverage": {
+          "$ref": "#/definitions/Coverage"
+        },
+        "data_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "health": {
+          "$ref": "#/definitions/SourceHealth"
+        },
+        "id": {
+          "type": "string"
+        },
+        "last_success_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "origin_group": {
+          "type": "string"
+        },
+        "source_url": {
+          "type": "string"
+        },
+        "via": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Weather": {
+      "type": "object",
+      "required": [
+        "forecast",
+        "id",
+        "provenance",
+        "run_id",
+        "valid_at"
+      ],
+      "properties": {
+        "fire_risk": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint8",
+          "minimum": 0.0
+        },
+        "forecast": {
+          "type": "boolean"
+        },
+        "gust_mps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "id": {
+          "type": "string"
+        },
+        "position": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "provenance": {
+          "$ref": "#/definitions/Provenance"
+        },
+        "relative_humidity_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "station_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "valid_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "wind_from_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "wind_speed_mps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        }
+      }
+    }
+  }
+}
