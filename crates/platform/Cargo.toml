@@ -1,0 +1,15 @@
+[package]
+name = "emberwatch-platform"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+emberwatch-domain.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+sqlx.workspace = true

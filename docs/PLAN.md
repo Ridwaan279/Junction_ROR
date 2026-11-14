@@ -5,8 +5,8 @@ Context.dev, "The Web Is Your Real-Time Database".
 
 Decisions: **mainland Portugal**, **Context.dev scraping Fogos.pt public pages**,
 and a **Rust backend**. This replaces v2's geography, language, sources, replay,
-backend, and agent assignments. The repository currently contains planning
-only; paths and capabilities below are intended deliverables.
+backend, and agent assignments. The original sections below describe the intended
+build; section 17 records the initial implementation and remaining limitations.
 
 Read [AGENTS.md](../AGENTS.md) for collaboration rules and
 [DATA_SOURCES.md](DATA_SOURCES.md) for dated source evidence and open questions.
@@ -466,3 +466,41 @@ Public viewing, extraction feasibility, reuse rights and Context.dev cost are
 separate questions. The plan follows the requested Rust + public-page scraping
 route without claiming an unrestricted free feed, and retains an independent
 replay path that every agent can build against.
+
+## 17. Initial parallel implementation checkpoint
+
+The user requested implementation by B/C/D in parallel. The coordinator publishes
+shared Rust DTOs, Source/Clock contracts, generated JSON Schemas, OpenAPI and
+synthetic Portuguese fixtures. Agent branches are `agent-b`, `agent-c`, and
+`agent-d`, each in its own managed worktree; the integrator uses `codex/core`.
+
+The first platform slice implements run-scoped in-memory evidence ingestion,
+stable-source identity, conservative lineage handling, deterministic availability
+gating, play/pause/seek/reset, atomic snapshots, bounded SSE and optional SQLx
+PostgreSQL/PostGIS persistence. The source registry starts with Fogos ingestion
+disabled pending reuse checks. The synthetic fixture is invented training data,
+not a reconstruction of the September 2024 event. No live report or historical
+completeness is claimed.
+
+The SQL migration and local Compose recipe are present; database integration
+verification requires a running Docker daemon/PostgreSQL instance. The local
+Docker daemon was unavailable during the initial checks. Without DATABASE_URL,
+the server explicitly runs in memory. FIRMS/Open-Meteo adapters, uploads,
+reviewed cross-source geographic fusion, full historical asset manifests,
+production authentication/deployment and operational calibration remain planned.
+See each crate/web README for current behavior and validation details.
+
+B now provides a Rust Context REST client, conservative Fogos extraction,
+IPMA weather/risk normalization, Portuguese report handling and signed webhook
+verification. Immutable observation versions preserve revised source captures.
+C provides tested illustrative spread, wind blending, reserve-aware A* routing,
+replanning, seeded state simulation and cited PT/EN text. D provides the bilingual
+Next.js/MapLibre/deck.gl workspace, source panels, local replay and API/SSE sync.
+The integrator mounts synthetic dispatch through a bounded blocking compute pool
+and returns forecast/route/briefing snapshots. Webhook HTTP is receipt-only and
+requires a live run, PostgreSQL and an independently validated monitor binding;
+the bundled synthetic run rejects live deliveries.
+
+Run `node tests/smoke.mjs` against the local Rust service for the HTTP/SSE response,
+seek/reset and playback check. DB round-trip verification is an explicit ignored
+test requiring TEST_DATABASE_URL; CI provisions PostGIS and runs that check.

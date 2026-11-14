@@ -4,8 +4,9 @@
 
 Read this file, [docs/PLAN.md](docs/PLAN.md), and
 [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) before implementing a task.
-The repository currently contains planning documents, not a working application.
-Paths below describe the intended scaffold; do not report them as implemented.
+The repository now has an initial implementation of shared contracts and the
+synthetic replay slice. Read README.md and the implementation checkpoint in
+docs/PLAN.md to distinguish verified behavior from remaining planned work.
 
 ## Product decisions
 

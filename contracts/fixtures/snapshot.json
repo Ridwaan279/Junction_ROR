@@ -1,0 +1,37 @@
+{
+  "scenario": {
+    "id": "portugal-synthetic", "run_id": "synthetic-portugal", "name": "Portugal · synthetic training scenario",
+    "mode": "synthetic", "start_at": "2026-11-14T12:00:00Z", "end_at": "2026-11-14T13:00:00Z",
+    "current_at": "2026-11-14T12:00:00Z", "playing": false, "speed": 60.0, "seed": 760,
+    "epoch": 0, "description": "Invented training observations near Sever do Vouga. This is not a reconstruction of a real incident."
+  },
+  "incidents": [{
+    "id": "incident-training-1", "run_id": "synthetic-portugal", "mode": "synthetic",
+    "title": "Synthetic rural fire report", "location_name": "Sever do Vouga (training location)",
+    "position": [-8.367, 40.735], "uncertainty_m": 1200.0, "status": "reported",
+    "evidence_level": "reported", "evidence_ids": ["training-report-1"], "origin_groups": ["synthetic-origin-1"],
+    "first_event_at": null, "updated_at": "2026-11-14T12:00:00Z"
+  }],
+  "evidence": [{
+    "id": "training-report-1", "run_id": "synthetic-portugal", "mode": "synthetic",
+    "provenance": {
+      "source_id": "synthetic-public-page", "source_url": "https://example.org/emberwatch/synthetic/report-1",
+      "origin_group": "synthetic-origin-1", "external_id": "training-1", "event_at": null, "published_at": null,
+      "captured_at": "2026-11-14T12:00:00Z", "available_at": "2026-11-14T12:00:00Z",
+      "availability_basis": "synthetic_scenario_schedule", "evidence_hash": "synthetic-report-1-v1",
+      "quality_flags": ["synthetic", "approximate_location", "event_time_unknown"]
+    },
+    "position": [-8.367, 40.735], "uncertainty_m": 1200.0,
+    "location_name": "Sever do Vouga (training location)", "municipality": "Sever do Vouga",
+    "kind": "public_report", "raw_status": null, "title": "Synthetic rural fire report",
+    "body": "Invented Portuguese public-page extraction for offline development. No live incident is asserted.",
+    "attributes": {"synthetic": true, "extractor": "Context.dev fixture", "training_incident": "training-1"}
+  }],
+  "weather": [],
+  "sources": [
+    {"id":"synthetic-public-page","name":"Synthetic public-page fixture","source_url":"https://example.org/emberwatch/synthetic/report-1","via":"Context.dev (fixture only)","origin_group":"synthetic-origin-1","enabled":true,"health":"healthy","coverage":{"complete":true,"explicit_empty":false,"scope":"synthetic training case only","notes":["Not national coverage"]},"last_success_at":"2026-11-14T12:00:00Z","captured_at":"2026-11-14T12:00:00Z","data_at":null,"attribution":"EmberWatch synthetic training data","notes":["Invented observations; no captured source data"]},
+    {"id":"fogos","name":"Fogos.pt","source_url":"https://fogos.pt/pt","via":"Context.dev","origin_group":"anepc","enabled":false,"health":"needs_validation","coverage":{"complete":false,"explicit_empty":false,"scope":"mainland Portugal public page","notes":["Probe did not expose populated rows"]},"last_success_at":null,"captured_at":null,"data_at":null,"attribution":"Source: Fogos.pt · via Context.dev","notes":["Reuse permission unresolved; recurring ingestion disabled"]},
+    {"id":"ipma","name":"IPMA","source_url":"https://api.ipma.pt/","via":null,"origin_group":"ipma","enabled":false,"health":"unconfigured","coverage":{"complete":false,"explicit_empty":false,"scope":"Portugal stations","notes":["No live weather loaded"]},"last_success_at":null,"captured_at":null,"data_at":null,"attribution":"IPMA — Instituto Português do Mar e da Atmosfera","notes":["Missing weather remains unknown"]}
+  ],
+  "forecasts": [], "drone_plans": [], "briefings": []
+}
