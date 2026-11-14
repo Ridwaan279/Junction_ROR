@@ -19,6 +19,24 @@ mainland bounding box; it is not a general address geocoder. The workspace also
 uses this terrain basemap and links to the explorer. Incident/forecast overlays
 stay in the workspace's 2D view.
 
+Choose **Explore 3D buildings** to fly into Lisboa at building scale, or select
+Porto/Lisboa while in 3D. The **3D buildings** switch controls extrusion; flat
+footprints remain in 2D. Click a building for its source and height explanation.
+Place labels are optional to keep the city geometry clear; street names remain.
+City presets use 1× terrain exaggeration. Building heights are in metres and
+are not multiplied by the terrain exaggeration control.
+
+Building footprints come from OpenStreetMap through OpenFreeMap/OpenMapTiles.
+They follow real mapped outlines, with coverage, age and geometry accuracy varying
+by location. OpenMapTiles `render_height`/`render_min_height` are approximations
+that can come from mapped heights, estimated floor counts or provider defaults.
+This tile schema does not establish which was used for each building. The
+inspector therefore labels them provider approximations and keeps **verified
+height unknown**. If render height is absent or invalid, the explicit display
+fallback is 5 m. Roof and façade colours are illustrative. No photographic
+textures, surveyed sizes, current-condition verification, or complete coverage
+are claimed. See [building sources and the photorealistic path](../docs/BUILDINGS.md).
+
 The default map needs **no API key or account**. MapLibre renders
 [OpenFreeMap's Liberty vector style](https://openfreemap.org/quick_start/) with
 terrain colours and [Mapterhorn elevation tiles](https://mapterhorn.com/data-access/).

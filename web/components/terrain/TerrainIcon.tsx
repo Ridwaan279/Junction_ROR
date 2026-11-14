@@ -1,5 +1,6 @@
-type Name = "mountain" | "search" | "plus" | "minus" | "compass" | "share" | "chevron" | "rotate" | "expand" | "contour" | "back" | "pin" | "close" | "globe";
+type Name = "mountain" | "city" | "search" | "plus" | "minus" | "compass" | "share" | "chevron" | "rotate" | "expand" | "contour" | "back" | "pin" | "close" | "globe";
 const paths: Record<Name, React.ReactNode> = {
+  city: <><path d="M2 21h20M4 21V9h7v12m0-16h8v16M6 12h2m-2 4h2m6-8h2m-2 4h2m-2 4h2" /></>,
   mountain: <><path d="m2 20 7-14 4 7 3-5 6 12Z"/><path d="m6 12 3 2 2-3m3 3 2 1 2-2"/></>,
   search: <><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></>,
   plus: <path d="M12 5v14M5 12h14"/>,

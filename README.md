@@ -27,6 +27,8 @@ Open http://localhost:3000/terrain for the Portugal terrain explorer, with shade
 relief, contours and real 3D elevation, plus tilt, orbit and place presets. The
 default OpenFreeMap/Mapterhorn map needs no API key; internet access and WebGL are
 required. See [web/README.md](web/README.md) for providers, attribution and controls.
+The explorer also offers free 3D building views of Lisboa/Porto, using mapped OSM
+footprints and explicitly approximate heights, with a click-to-inspect source panel.
 
 If the installed Rust toolchain is named `stable` and reports 1.100.0, `cargo
 +stable ...` uses that installation without downloading a second named copy.

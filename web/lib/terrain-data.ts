@@ -43,7 +43,7 @@ export function parseCoordinates(query: string): [number, number] | null {
 }
 
 export function placeCamera(place: TerrainPlace, threeD: boolean): CameraOptions {
-  return { center: place.center, zoom: place.zoom, pitch: threeD ? 62 : 0, bearing: threeD ? place.bearing : 0 };
+  return { center: place.center, zoom: threeD && place.kind === "city" ? 16 : place.zoom, pitch: threeD ? 62 : 0, bearing: threeD ? place.bearing : 0 };
 }
 
 export function prepareTerrainStyle(original: StyleSpecification): StyleSpecification {

@@ -22,6 +22,11 @@ describe("terrain explorer navigation", () => {
     expect(placeCamera(PLACES[0], false)).toMatchObject({ pitch: 0, bearing: 0, center: PLACES[0].center });
     for (const place of PLACES) expect(parseCoordinates(place.center[1] + "," + place.center[0])).toEqual(place.center);
   });
+  it("takes city views close enough to see building geometry while keeping the flat overview", () => {
+    const city = PLACES.find((place) => place.id === "lisboa")!;
+    expect(placeCamera(city, true).zoom).toBeGreaterThanOrEqual(15);
+    expect(placeCamera(city, false).zoom).toBe(city.zoom);
+  });
 });
 
 describe("terrain basemap styling", () => {
