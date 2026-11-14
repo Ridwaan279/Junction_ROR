@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { EventEnvelope, Evidence, Snapshot } from "./contracts";
-import { applyEvent, parseSnapshot, replayAt, type StreamState } from "./model";
+import { parseSnapshot, replayAt, type StreamState } from "./model";
+import { SnapshotChannel } from "./snapshot-channel";
 export type Connection =
   "loading" | "local" | "connecting" | "connected" | "disconnected";
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -24,17 +25,15 @@ export function useWorkspace() {
   const [connection, setConnection] = useState<Connection>("loading");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const current = useRef<StreamState | null>(null),
-    full = useRef<Snapshot | null>(null);
-  const sequence = useRef(0);
+  const channel = useRef(new SnapshotChannel());
+  const full = useRef<Snapshot | null>(null);
   const commit = useCallback((snapshot: Snapshot) => {
-    const next = { snapshot, needsResync: false, seen: [] };
-    current.current = next;
+    const next = channel.current.replace(snapshot);
     setState(next);
   }, []);
   const resync = useCallback(async () => {
-    const request = ++sequence.current;
-    const run = current.current?.snapshot.scenario.run_id;
+    const request = channel.current.beginRequest();
+    const run = channel.current.state?.snapshot.scenario.run_id;
     if (!run || !apiBase) return;
     try {
       const response = await fetch(
@@ -43,22 +42,27 @@ export function useWorkspace() {
       );
       if (!response.ok) throw new Error("Snapshot request failed");
       const snapshot = parseSnapshot(await response.json());
-      if (request !== sequence.current || snapshot.scenario.run_id !== run)
-        return;
       if (
-        current.current &&
-        snapshot.scenario.epoch < current.current.snapshot.scenario.epoch
+        !channel.current.isCurrent(request) ||
+        snapshot.scenario.run_id !== run
       )
         return;
-      commit(snapshot);
+      if (
+        channel.current.state &&
+        snapshot.scenario.epoch < channel.current.state.snapshot.scenario.epoch
+      )
+        return;
+      const accepted = channel.current.acceptHttp(snapshot, request);
+      if (!accepted) return;
+      setState(accepted);
       setError(null);
     } catch {
-      if (request === sequence.current) {
+      if (channel.current.isCurrent(request)) {
         setConnection("disconnected");
         setError("connection");
       }
     }
-  }, [commit]);
+  }, []);
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
@@ -136,12 +140,12 @@ export function useWorkspace() {
           typeof event.id !== "string" ||
           typeof event.type !== "string" ||
           !Number.isInteger(event.epoch) ||
-          !current.current
+          !channel.current.state
         )
           throw new Error("Invalid event");
-        const next = applyEvent(current.current, event);
-        if (next === current.current) return;
-        current.current = next;
+        const next = channel.current.acceptStream(event);
+        if (!next) return;
+
         setState(next);
         if (next.needsResync) void resync();
         else {
@@ -160,7 +164,7 @@ export function useWorkspace() {
   useEffect(() => {
     if (apiBase) return;
     const timer = setInterval(() => {
-      const snapshot = current.current?.snapshot,
+      const snapshot = channel.current.state?.snapshot,
         source = full.current;
       if (!snapshot?.scenario.playing || !source) return;
       const nextTime = Math.min(
@@ -181,13 +185,13 @@ export function useWorkspace() {
   }, [commit]);
   const command = useCallback(
     async (action: "play" | "pause" | "seek" | "reset", at?: string) => {
-      const snapshot = current.current?.snapshot;
+      const snapshot = channel.current.state?.snapshot;
       if (!snapshot) return;
       setBusy(true);
       setError(null);
       try {
         if (apiBase) {
-          const request = ++sequence.current;
+          const request = channel.current.beginRequest();
           const response = await fetch(
             apiBase +
               "/api/scenarios/" +
@@ -212,13 +216,15 @@ export function useWorkspace() {
           if (!response.ok) throw new Error("Command failed");
           const next = parseSnapshot(await response.json());
           if (
-            request === sequence.current &&
+            channel.current.isCurrent(request) &&
             next.scenario.run_id === snapshot.scenario.run_id &&
             next.scenario.epoch >=
-              (current.current?.snapshot.scenario.epoch ??
+              (channel.current.state?.snapshot.scenario.epoch ??
                 snapshot.scenario.epoch)
-          )
-            commit(next);
+          ) {
+            const accepted = channel.current.acceptHttp(next, request);
+            if (accepted) setState(accepted);
+          }
         } else if (full.current) {
           const reset = action === "seek" || action === "reset";
           const next = replayAt(
@@ -243,43 +249,43 @@ export function useWorkspace() {
     },
     [commit],
   );
-  const dispatch = useCallback(
-    async (incidentId: string) => {
-      const snapshot = current.current?.snapshot;
-      if (!snapshot || !apiBase) return;
-      setBusy(true);
-      setError(null);
-      const request = ++sequence.current;
-      try {
-        const response = await fetch(
-          apiBase +
-            "/api/incidents/" +
-            encodeURIComponent(incidentId) +
-            "/dispatch?run_id=" +
-            encodeURIComponent(snapshot.scenario.run_id),
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: "{}",
-            signal: AbortSignal.timeout(15000),
-          },
-        );
-        if (!response.ok) throw new Error("Simulation failed");
-        const next = parseSnapshot(await response.json());
-        if (
-          request === sequence.current &&
-          next.scenario.run_id === snapshot.scenario.run_id &&
-          next.scenario.epoch >= (current.current?.snapshot.scenario.epoch ?? 0)
-        )
-          commit(next);
-      } catch {
-        setError("command");
-      } finally {
-        setBusy(false);
+  const dispatch = useCallback(async (incidentId: string) => {
+    const snapshot = channel.current.state?.snapshot;
+    if (!snapshot || !apiBase) return;
+    setBusy(true);
+    setError(null);
+    const request = channel.current.beginRequest();
+    try {
+      const response = await fetch(
+        apiBase +
+          "/api/incidents/" +
+          encodeURIComponent(incidentId) +
+          "/dispatch?run_id=" +
+          encodeURIComponent(snapshot.scenario.run_id),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+          signal: AbortSignal.timeout(15000),
+        },
+      );
+      if (!response.ok) throw new Error("Simulation failed");
+      const next = parseSnapshot(await response.json());
+      if (
+        channel.current.isCurrent(request) &&
+        next.scenario.run_id === snapshot.scenario.run_id &&
+        next.scenario.epoch >=
+          (channel.current.state?.snapshot.scenario.epoch ?? 0)
+      ) {
+        const accepted = channel.current.acceptHttp(next, request);
+        if (accepted) setState(accepted);
       }
-    },
-    [commit],
-  );
+    } catch {
+      setError("command");
+    } finally {
+      setBusy(false);
+    }
+  }, []);
   return {
     snapshot: state?.snapshot ?? null,
     connection,
