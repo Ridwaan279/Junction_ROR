@@ -1,0 +1,4 @@
+# Optional contract validation only; no Python application service.
+PyYAML==6.0.3
+jsonschema==4.25.1
+openapi-spec-validator==0.7.2

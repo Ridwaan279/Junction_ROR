@@ -23,6 +23,8 @@ use std::{
 use tokio::sync::{Mutex, broadcast};
 use tokio_stream::wrappers::BroadcastStream;
 use tower_http::cors::CorsLayer;
+pub mod platform_api;
+pub mod platform_ui;
 mod webhook;
 
 #[derive(Clone)]

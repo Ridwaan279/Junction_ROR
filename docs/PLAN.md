@@ -504,3 +504,24 @@ the bundled synthetic run rejects live deliveries.
 Run `node tests/smoke.mjs` against the local Rust service for the HTTP/SSE response,
 seek/reset and playback check. DB round-trip verification is an explicit ignored
 test requiring TEST_DATABASE_URL; CI provisions PostGIS and runs that check.
+
+## 18. Agent A merge checkpoint
+
+`origin/agent-A` is merged into `codex/core`. Its independently developed DTOs
+are retained in `domain::platform`; the existing browser DTOs remain compatible
+with B/C/D. One Axum process mounts the native platform at `/platform`, and a
+`/platform/ui` adapter supplies canonical snapshots, scenario controls, SSE and
+incident-scoped C simulation outputs to the existing browser.
+
+Agent A supplies file/PostGIS persistence, bounded replay event history,
+FIRMS/Open-Meteo adapters, shared cadence gates, operator authorization and bounded
+CSV/JSONL/point-GeoJSON uploads. Live adapters remain disabled for merge testing.
+The SQL migrations use separate `platform_*` tables, avoiding TEXT/UUID collisions
+with the original compatibility API. Dataset/replay state survives a file-store
+restart; adapter response outputs are cached in memory and recomputed after restart.
+
+Merge regression tests cover stable incident IDs through revisions, returning to
+a prior status, scoped recovery URLs, per-incident response retention, unit
+conversion and backward seek invalidation. Original and incoming Rust tests,
+contract validation, both HTTP smoke flows and browser checks are the merge gate.
+Local PostGIS verification remains blocked by the unavailable Docker daemon.

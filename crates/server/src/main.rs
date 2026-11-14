@@ -17,17 +17,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         store.save(&engine).await?;
     }
-    let bind = std::env::var("BIND_ADDRESS").unwrap_or_else(|_| "127.0.0.1:8080".into());
+    let bind = std::env::var("BIND_ADDRESS")
+        .or_else(|_| std::env::var("BIND_ADDR"))
+        .unwrap_or_else(|_| "127.0.0.1:8080".into());
+    let (platform, access) = emberwatch_server::platform_api::initialize(&bind).await?;
+    let platform_storage = platform.storage_kind();
+    let app = emberwatch_server::router(engine, store).nest(
+        "/platform",
+        emberwatch_server::platform_api::integrated_router(platform, access),
+    );
     let listener = tokio::net::TcpListener::bind(&bind).await?;
     println!(
-        "EmberWatch synthetic demo: http://{bind} (storage: {})",
-        if store.is_some() {
-            "postgres"
-        } else {
-            "memory"
-        }
+        "EmberWatch: http://{bind}; Agent A /platform (storage: {platform_storage}); browser adapter /platform/ui"
     );
-    axum::serve(listener, emberwatch_server::router(engine, store))
+    axum::serve(listener, app)
         .with_graceful_shutdown(async {
             let _ = tokio::signal::ctrl_c().await;
         })

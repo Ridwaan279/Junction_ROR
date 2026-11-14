@@ -1,4 +1,6 @@
 //! Shared wire contracts. All timestamps serialize as RFC3339 UTC, positions as lon/lat.
+/// Agent A's native persistence/API contract. Browser DTOs remain at this crate's root.
+pub mod platform;
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

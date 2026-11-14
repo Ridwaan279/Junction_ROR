@@ -1,0 +1,67 @@
+{
+  "spec": {
+    "name": "Sever do Vouga — synthetic demonstration",
+    "mode": "synthetic",
+    "bbox": [-9.6, 36.9, -6.1, 42.2],
+    "starts_at": "2026-01-01T12:00:00Z",
+    "ends_at": "2026-01-01T13:00:00Z",
+    "speed": 60,
+    "seed": 2026
+  },
+  "evidence": [
+    {
+      "source_id": "synthetic-report", "external_id": "demo-fire-1",
+      "origin_group": "synthetic-anepc", "kind": "official",
+      "url": "https://example.invalid/synthetic/report-1",
+      "title": "Synthetic rural fire report — not a real event",
+      "place_name": "Sever do Vouga", "municipality": "Sever do Vouga",
+      "point": {"longitude": -8.366, "latitude": 40.735}, "radius_m": 1000,
+      "observed_at": "2026-01-01T12:00:00Z", "published_at": "2026-01-01T12:00:00Z",
+      "available_at": "2026-01-01T12:00:00Z", "availability_basis": "synthetic",
+      "captured_at": "2026-01-01T12:00:00Z", "status": "active", "raw_status": "Em curso (sintético)",
+      "is_official": false, "attrs": {"synthetic": true}
+    },
+    {
+      "source_id": "synthetic-mirror", "external_id": "demo-news-1",
+      "origin_group": "synthetic-anepc", "kind": "report",
+      "url": "https://example.invalid/synthetic/mirror-1",
+      "title": "Synthetic mirror of the same upstream report",
+      "place_name": "Sever do Vouga", "municipality": "Sever do Vouga",
+      "point": {"longitude": -8.365, "latitude": 40.736}, "radius_m": 1000,
+      "observed_at": "2026-01-01T12:00:00Z", "published_at": "2026-01-01T12:10:00Z",
+      "available_at": "2026-01-01T12:10:00Z", "availability_basis": "synthetic",
+      "captured_at": "2026-01-01T12:10:00Z", "status": "active",
+      "attrs": {"synthetic": true}
+    },
+    {
+      "source_id": "synthetic-satellite", "external_id": "demo-pixel-1",
+      "origin_group": "synthetic-satellite", "kind": "satellite",
+      "url": "https://example.invalid/synthetic/pixel-1",
+      "title": "Synthetic independent thermal observation",
+      "place_name": "Sever do Vouga", "municipality": "Sever do Vouga",
+      "point": {"longitude": -8.364, "latitude": 40.735}, "radius_m": 500,
+      "observed_at": "2026-01-01T12:15:00Z", "published_at": "2026-01-01T12:20:00Z",
+      "available_at": "2026-01-01T12:20:00Z", "availability_basis": "synthetic",
+      "captured_at": "2026-01-01T12:20:00Z", "status": "unknown",
+      "attrs": {"synthetic": true, "frp_mw": 10}
+    }
+  ],
+  "weather": [
+    {
+      "source_id": "synthetic-weather", "station_id": "demo-station",
+      "point": {"longitude": -8.36, "latitude": 40.73},
+      "valid_at": "2026-01-01T12:00:00Z", "available_at": "2026-01-01T12:00:00Z",
+      "captured_at": "2026-01-01T12:00:00Z", "is_forecast": false,
+      "temperature_c": 28, "humidity_pct": 30, "wind_kmh": 30,
+      "wind_from_deg": 270, "gust_kmh": null
+    },
+    {
+      "source_id": "synthetic-weather", "station_id": "demo-station",
+      "point": {"longitude": -8.36, "latitude": 40.73},
+      "valid_at": "2026-01-01T12:25:00Z", "available_at": "2026-01-01T12:25:00Z",
+      "captured_at": "2026-01-01T12:25:00Z", "is_forecast": false,
+      "temperature_c": 29, "humidity_pct": 28, "wind_kmh": 35,
+      "wind_from_deg": 270, "gust_kmh": 55
+    }
+  ]
+}

@@ -1,0 +1,846 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Contracts",
+  "type": "object",
+  "required": [
+    "batch",
+    "briefing",
+    "dataset",
+    "drone_plan",
+    "event",
+    "evidence",
+    "forecast",
+    "incident",
+    "scenario",
+    "scenario_spec",
+    "source",
+    "weather"
+  ],
+  "properties": {
+    "batch": {
+      "$ref": "#/definitions/SourceBatch"
+    },
+    "briefing": {
+      "$ref": "#/definitions/Briefing"
+    },
+    "dataset": {
+      "$ref": "#/definitions/ScenarioDataset"
+    },
+    "drone_plan": {
+      "$ref": "#/definitions/DronePlan"
+    },
+    "event": {
+      "$ref": "#/definitions/EventEnvelope"
+    },
+    "evidence": {
+      "$ref": "#/definitions/Evidence"
+    },
+    "forecast": {
+      "$ref": "#/definitions/Forecast"
+    },
+    "incident": {
+      "$ref": "#/definitions/Incident"
+    },
+    "scenario": {
+      "$ref": "#/definitions/Scenario"
+    },
+    "scenario_spec": {
+      "$ref": "#/definitions/ScenarioSpec"
+    },
+    "source": {
+      "$ref": "#/definitions/SourceDescriptor"
+    },
+    "weather": {
+      "$ref": "#/definitions/WeatherSample"
+    }
+  },
+  "definitions": {
+    "AvailabilityBasis": {
+      "type": "string",
+      "enum": [
+        "published",
+        "captured",
+        "synthetic"
+      ]
+    },
+    "Briefing": {
+      "type": "object",
+      "required": [
+        "epoch",
+        "incident_id",
+        "run_id",
+        "simulated",
+        "source_urls",
+        "text_en",
+        "text_pt"
+      ],
+      "properties": {
+        "audio_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "incident_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "simulated": {
+          "type": "boolean"
+        },
+        "source_urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "text_en": {
+          "type": "string"
+        },
+        "text_pt": {
+          "type": "string"
+        }
+      }
+    },
+    "Coverage": {
+      "type": "object",
+      "required": [
+        "complete",
+        "explicit_empty"
+      ],
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "explicit_empty": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "DronePlan": {
+      "type": "object",
+      "required": [
+        "battery_required_pct",
+        "drone_id",
+        "epoch",
+        "eta_s",
+        "incident_id",
+        "path_geojson",
+        "reason",
+        "run_id",
+        "simulated"
+      ],
+      "properties": {
+        "battery_required_pct": {
+          "type": "number",
+          "format": "double"
+        },
+        "drone_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "eta_s": {
+          "type": "number",
+          "format": "double"
+        },
+        "incident_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "path_geojson": true,
+        "reason": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "simulated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "EventEnvelope": {
+      "type": "object",
+      "required": [
+        "emitted_at",
+        "epoch",
+        "event_time",
+        "id",
+        "payload",
+        "run_id",
+        "type"
+      ],
+      "properties": {
+        "emitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "event_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "payload": true,
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "scenario_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "required": [
+        "availability_basis",
+        "available_at",
+        "captured_at",
+        "external_id",
+        "kind",
+        "origin_group",
+        "place_name",
+        "radius_m",
+        "source_id",
+        "title",
+        "url"
+      ],
+      "properties": {
+        "attrs": {
+          "default": {},
+          "type": "object",
+          "additionalProperties": true
+        },
+        "availability_basis": {
+          "$ref": "#/definitions/AvailabilityBasis"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "external_id": {
+          "type": "string"
+        },
+        "id": {
+          "default": "00000000-0000-0000-0000-000000000000",
+          "type": "string",
+          "format": "uuid"
+        },
+        "is_official": {
+          "default": false,
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/definitions/EvidenceKind"
+        },
+        "municipality": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "origin_group": {
+          "type": "string"
+        },
+        "place_name": {
+          "type": "string"
+        },
+        "point": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Point"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "radius_m": {
+          "type": "number",
+          "format": "double"
+        },
+        "raw_status": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "status": {
+          "default": "unknown",
+          "allOf": [
+            {
+              "$ref": "#/definitions/OperationalStatus"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "EvidenceKind": {
+      "type": "string",
+      "enum": [
+        "report",
+        "official",
+        "satellite",
+        "context"
+      ]
+    },
+    "EvidenceLevel": {
+      "type": "string",
+      "enum": [
+        "reported",
+        "corroborated",
+        "satellite_supported"
+      ]
+    },
+    "Forecast": {
+      "description": "Agent C implements producers of these contracts; platform owns persistence.",
+      "type": "object",
+      "required": [
+        "epoch",
+        "generated_at",
+        "geojson",
+        "illustrative",
+        "incident_id",
+        "input_evidence_ids",
+        "model_version",
+        "narrative",
+        "run_id",
+        "seed"
+      ],
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "geojson": true,
+        "illustrative": {
+          "type": "boolean"
+        },
+        "incident_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "input_evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "model_version": {
+          "type": "string"
+        },
+        "narrative": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "seed": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      }
+    },
+    "Incident": {
+      "type": "object",
+      "required": [
+        "evidence_ids",
+        "evidence_level",
+        "first_seen",
+        "id",
+        "last_seen",
+        "official_source",
+        "origin_groups",
+        "place_name",
+        "point",
+        "radius_m",
+        "run_id",
+        "status"
+      ],
+      "properties": {
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "evidence_level": {
+          "$ref": "#/definitions/EvidenceLevel"
+        },
+        "first_seen": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "last_seen": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "municipality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "official_source": {
+          "type": "boolean"
+        },
+        "origin_groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "place_name": {
+          "type": "string"
+        },
+        "point": {
+          "$ref": "#/definitions/Point"
+        },
+        "radius_m": {
+          "type": "number",
+          "format": "double"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "$ref": "#/definitions/OperationalStatus"
+        }
+      }
+    },
+    "OperationalStatus": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "active",
+        "contained",
+        "resolved"
+      ]
+    },
+    "Point": {
+      "type": "object",
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "RunMode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "historical",
+        "synthetic"
+      ]
+    },
+    "Scenario": {
+      "type": "object",
+      "required": [
+        "cursor",
+        "epoch",
+        "evidence",
+        "id",
+        "incidents",
+        "playing",
+        "spec",
+        "weather"
+      ],
+      "properties": {
+        "cursor": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "epoch": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "evidence": {
+          "description": "Append-only evidence revisions; API views expose only available revisions.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Evidence"
+          }
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "incidents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Incident"
+          }
+        },
+        "playing": {
+          "type": "boolean"
+        },
+        "spec": {
+          "$ref": "#/definitions/ScenarioSpec"
+        },
+        "weather": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WeatherSample"
+          }
+        }
+      }
+    },
+    "ScenarioDataset": {
+      "type": "object",
+      "required": [
+        "spec"
+      ],
+      "properties": {
+        "evidence": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Evidence"
+          }
+        },
+        "spec": {
+          "$ref": "#/definitions/ScenarioSpec"
+        },
+        "weather": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WeatherSample"
+          }
+        }
+      }
+    },
+    "ScenarioSpec": {
+      "type": "object",
+      "required": [
+        "bbox",
+        "ends_at",
+        "mode",
+        "name",
+        "seed",
+        "speed",
+        "starts_at"
+      ],
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxItems": 4,
+          "minItems": 4
+        },
+        "ends_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mode": {
+          "$ref": "#/definitions/RunMode"
+        },
+        "name": {
+          "type": "string"
+        },
+        "seed": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "speed": {
+          "type": "number",
+          "format": "double"
+        },
+        "starts_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SourceBatch": {
+      "type": "object",
+      "required": [
+        "captured_at",
+        "coverage",
+        "source_id"
+      ],
+      "properties": {
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "coverage": {
+          "$ref": "#/definitions/Coverage"
+        },
+        "evidence": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Evidence"
+          }
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "weather": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WeatherSample"
+          }
+        }
+      }
+    },
+    "SourceDescriptor": {
+      "type": "object",
+      "required": [
+        "cadence_s",
+        "enabled",
+        "fetch",
+        "health",
+        "id",
+        "name",
+        "origin_group",
+        "replayable",
+        "validated"
+      ],
+      "properties": {
+        "cadence_s": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Coverage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "fetch": {
+          "type": "string"
+        },
+        "health": {
+          "$ref": "#/definitions/SourceHealth"
+        },
+        "id": {
+          "type": "string"
+        },
+        "last_attempt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "last_error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_success": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string"
+        },
+        "origin_group": {
+          "type": "string"
+        },
+        "replayable": {
+          "type": "boolean"
+        },
+        "validated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "SourceHealth": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "empty_verified",
+        "partial",
+        "stale",
+        "blocked",
+        "failed",
+        "unconfigured",
+        "needs_validation"
+      ]
+    },
+    "WeatherSample": {
+      "type": "object",
+      "required": [
+        "available_at",
+        "captured_at",
+        "is_forecast",
+        "point",
+        "source_id",
+        "station_id",
+        "valid_at"
+      ],
+      "properties": {
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "gust_kmh": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "humidity_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "is_forecast": {
+          "type": "boolean"
+        },
+        "point": {
+          "$ref": "#/definitions/Point"
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "station_id": {
+          "type": "string"
+        },
+        "temperature_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "valid_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "wind_from_deg": {
+          "description": "Meteorological direction FROM which wind blows, clockwise from north.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "wind_kmh": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        }
+      }
+    }
+  }
+}

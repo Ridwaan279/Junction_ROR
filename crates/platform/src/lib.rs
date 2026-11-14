@@ -1,8 +1,15 @@
 //! Run-scoped ingestion, identity, persistence and deterministic scenario replay.
+pub mod engine;
+pub mod fusion;
+pub mod sources;
+pub mod store;
+pub mod uploads;
 use chrono::{Duration, Utc};
 pub use emberwatch_domain::*;
+pub use engine::{Platform, PlatformError};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+pub use store::Store;
 pub mod persistence;
 
 #[derive(Clone, Serialize, Deserialize)]
