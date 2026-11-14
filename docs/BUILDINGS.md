@@ -28,7 +28,7 @@ identity or surveyed measurements.
 | `render_min_height` | Approximate height of the bottom of a building part. Rendering constrains it between ground and the rendered top. |
 | Missing/invalid render height | A labelled 5 m display fallback. The source height stays null. This fallback is never stored as a measured dimension. |
 | Verified height | Unknown. No survey, LiDAR or per-building authoritative measurements are integrated. |
-| Roofs / façades | Simplified extruded polygons with provider colour or a neutral material. No photographic textures or detailed roof meshes. |
+| Roofs / façades | Simplified extruded polygons with provider colour or an optional generated Portuguese material preview. Preview is off by default; roof tile scale and aliasing are unfinished. No address-matched photographs or detailed roof meshes. |
 | Ground elevation | Mapterhorn terrain. City presets choose 1× terrain exaggeration; changing ground exaggeration does not scale building height values. Alignment remains limited by the source DEM and mapped polygon resolution. |
 
 OpenMapTiles' [building implementation](https://github.com/openmaptiles/openmaptiles/tree/master/layers/building)
@@ -37,6 +37,22 @@ are the primary implementation references. OpenFreeMap/OpenMapTiles/OSM attribut
 stays visible. OpenStreetMap data is subject to its
 [ODbL terms and attribution requirements](https://www.openstreetmap.org/copyright).
 There is no bulk geometry download, external building database or new paid service.
+
+## Texture and close-view WIP checkpoint
+
+Zoom now reaches 22, tilt reaches 85°, and Close view / the building inspector's
+closer-view action move the camera to building scale. Source geometry retains
+its existing resolution. The generated Portuguese atlas includes ivory stucco,
+blue-and-white azulejos, granite and terracotta. The native-pattern preview is
+optional and off by default because roof tiles can appear too large at close
+range. Generated materials are labelled illustrative in English and Portuguese.
+See the [asset provenance and complete prompt](../web/public/textures/portugal/README.md).
+
+Remaining: connect the metre-based polygon/UV builder to a custom WebGL renderer,
+add mipmaps/anisotropic filtering, verify terrain placement and picking, then
+repeat close-up desktop/mobile checks. This checkpoint is not the finished
+realistic building renderer. No claim is made that a generated façade matches a
+particular address, or that OSM height attributes establish surveyed dimensions.
 
 ## Why Context.dev is not the geometry source
 

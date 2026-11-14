@@ -10,6 +10,7 @@ export const buildingHeight: ExpressionSpecification = ["case", [">", ["to-numbe
 export const buildingBase: ExpressionSpecification = ["min", buildingHeight, ["max", 0, ["to-number", ["get", "render_min_height"], 0]]];
 
 export type BuildingInfo = {
+  center: [number, number];
   name: string | null;
   renderHeightM: number;
   providerHeightM: number | null;
@@ -26,6 +27,7 @@ export function buildingInfo(properties: Record<string, unknown>, longitude: num
   const renderHeightM = providerHeightM ?? BUILDING_FALLBACK_HEIGHT_M;
   const suppliedBase = number(properties.render_min_height);
   return {
+    center: [longitude, latitude],
     name: typeof properties.name === "string" && properties.name.trim() ? properties.name : null,
     renderHeightM, providerHeightM, baseHeightM: Math.min(renderHeightM, Math.max(0, suppliedBase ?? 0)),
     measuredHeightM: null, heightBasis: providerHeightM === null ? "display-default" : "provider-derived",

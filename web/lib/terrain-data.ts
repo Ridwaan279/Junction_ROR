@@ -4,6 +4,9 @@ export const PORTUGAL_BOUNDS: [[number, number], [number, number]] = [[-9.65, 36
 export const TERRAIN_ATTRIBUTION = 'Terrain © <a href="https://mapterhorn.com/attribution/" target="_blank" rel="noreferrer">Mapterhorn & data providers</a>';
 export const BASE_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 export const DEM_URL = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp";
+export const MAX_TERRAIN_ZOOM = 22;
+export const MAX_TERRAIN_PITCH = 85;
+export const CLOSE_BUILDING_ZOOM = 18.8;
 
 export type TerrainPlace = {
   id: string;
@@ -43,7 +46,7 @@ export function parseCoordinates(query: string): [number, number] | null {
 }
 
 export function placeCamera(place: TerrainPlace, threeD: boolean): CameraOptions {
-  return { center: place.center, zoom: threeD && place.kind === "city" ? 16 : place.zoom, pitch: threeD ? 62 : 0, bearing: threeD ? place.bearing : 0 };
+  return { center: place.center, zoom: threeD && place.kind === "city" ? 17.2 : place.zoom, pitch: threeD ? place.kind === "city" ? 67 : 62 : 0, bearing: threeD ? place.bearing : 0 };
 }
 
 export function prepareTerrainStyle(original: StyleSpecification): StyleSpecification {

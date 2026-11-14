@@ -1,4 +1,5 @@
 "use client";
+// @refresh reset
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -8,6 +9,8 @@ import TerrainIcon from "./TerrainIcon";
 import { portugueseDescriptions, terrainCopy } from "./terrain-copy";
 import { addBuildingLayers, setBuildingsVisible } from "@/lib/buildings";
 import { BUILDING_LAYER, FOOTPRINT_LAYER, buildingInfo, type BuildingInfo } from "@/lib/building-data";
+import { loadBuildingMaterials, setBuildingMaterials } from "@/lib/building-materials";
+import { CLOSE_BUILDING_ZOOM, MAX_TERRAIN_PITCH, MAX_TERRAIN_ZOOM } from "@/lib/terrain-data";
 import s from "./terrain.module.css";
 
 export default function TerrainExplorer() {
@@ -25,6 +28,10 @@ export default function TerrainExplorer() {
   const [relief, setRelief] = useState(true);
   const [contours, setContours] = useState(true);
   const [buildings, setBuildings] = useState(true);
+  // The native-pattern preview has known close-up scaling issues; opt in until
+  // the metre-based mesh renderer is integrated and visually checked.
+  const [textures, setTextures] = useState(false);
+  const [textureStatus, setTextureStatus] = useState<"loading" | "ready" | "failed">("loading");
   const [landmarks, setLandmarks] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingInfo | null>(null);
   const [buildingPoint, setBuildingPoint] = useState<{ x: number; y: number } | null>(null);
@@ -74,8 +81,8 @@ export default function TerrainExplorer() {
         const hasSharedCamera = window.location.hash.includes("terrain=");
         instance = new libre.Map({
           container: host.current, style, center: [-8.13, 39.55], zoom: 6.4,
-          maxBounds: [[-20, 30], [5, 50]], minZoom: 5.2, maxZoom: 17,
-          maxPitch: 78, canvasContextAttributes: { antialias: true },
+          maxBounds: [[-20, 30], [5, 50]], minZoom: 5.2, maxZoom: MAX_TERRAIN_ZOOM,
+          maxPitch: MAX_TERRAIN_PITCH, canvasContextAttributes: { antialias: true },
           attributionControl: { compact: true }, hash: "terrain",
         });
         map.current = instance;
@@ -86,6 +93,11 @@ export default function TerrainExplorer() {
             await addTerrainLayers(instance);
             if (cancelled) return;
             addBuildingLayers(instance);
+            void loadBuildingMaterials(instance, controller.signal).then(() => {
+              if (!cancelled) setTextureStatus("ready");
+            }).catch(() => {
+              if (!cancelled && !controller.signal.aborted) setTextureStatus("failed");
+            });
             instance.addSource("explorer-focus", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
             instance.addLayer({ id: "explorer-focus-halo", type: "circle", source: "explorer-focus", paint: { "circle-radius": 18, "circle-color": "#2b6c55", "circle-opacity": 0.12 } });
             instance.addLayer({ id: "explorer-focus-dot", type: "circle", source: "explorer-focus", paint: { "circle-radius": 5, "circle-color": "#2b6c55", "circle-stroke-color": "#fff", "circle-stroke-width": 2 } });
@@ -173,8 +185,10 @@ export default function TerrainExplorer() {
     if (!instance || !ready) return;
     instance.setTerrain(threeD ? { source: "portugal-terrain", exaggeration } : null);
     setTerrainVisibility(instance, relief, contours && relief);
-    setBuildingsVisible(instance, threeD && buildings);
-  }, [ready, threeD, exaggeration, relief, contours, buildings]);
+    const textured = textures && textureStatus === "ready";
+    setBuildingMaterials(instance, textured);
+    setBuildingsVisible(instance, threeD && buildings, textured);
+  }, [ready, threeD, exaggeration, relief, contours, buildings, textures, textureStatus]);
 
   useEffect(() => {
     const instance = map.current;
@@ -246,6 +260,19 @@ export default function TerrainExplorer() {
     setContours(false);
     fly(selected?.kind === "city" ? selected : PLACES.find((place) => place.id === "lisboa")!, true);
   }
+  function closeView(center?: [number, number]) {
+    if (!ready || !map.current) return;
+    if (!center && map.current.getZoom() < 14) { enterCity(); return; }
+    setThreeD(true);
+    setBuildings(true);
+    setExaggeration(1);
+    setContours(false);
+    setOrbit(false);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    map.current.flyTo({ center: center ?? map.current.getCenter(), zoom: Math.min(MAX_TERRAIN_ZOOM, Math.max(CLOSE_BUILDING_ZOOM, map.current.getZoom() + 0.8)), pitch: 72,
+      duration: reduce ? 0 : 1100, essential: false, padding: { left: window.innerWidth > 800 ? 120 : 0, right: 0, top: 0, bottom: 0 } });
+    setPanelOpen(false);
+  }
 
   return (
     <main className={s.explorer} lang={locale} data-panel-open={panelOpen} data-building-selected={Boolean(selectedBuilding)}>
@@ -295,6 +322,8 @@ export default function TerrainExplorer() {
           <p>{t.footprintDetail}</p>
           <dl><div><dt>{t.renderHeight}</dt><dd>≈ {selectedBuilding.renderHeightM.toLocaleString(locale === "pt" ? "pt-PT" : "en-GB")} m</dd></div><div><dt>{t.heightBasis}</dt><dd>{selectedBuilding.heightBasis === "provider-derived" ? t.derivedHeight : t.defaultHeight}</dd></div><div><dt>{t.measuredHeight}</dt><dd>{t.unknown}</dd></div></dl>
           <p className={s.buildingCaveat}>{t.heightCaveat}</p>
+          <p className={s.materialCaveat}>{t.generatedMaterials}</p>
+          <button className={s.closeBuildingView} onClick={() => closeView(selectedBuilding.center)}><TerrainIcon name="search" size={15} />{t.closerBuilding}</button>
           <a href={selectedBuilding.sourceUrl} target="_blank" rel="noreferrer">{t.viewFootprint}<TerrainIcon name="chevron" size={13} /></a>
         </section>}
         {selected && !query && <section className={s.selection}>
@@ -323,22 +352,27 @@ export default function TerrainExplorer() {
         <div className={s.switchRow}><label htmlFor="terrain-relief">{t.relief}</label><input id="terrain-relief" type="checkbox" role="switch" checked={relief} onChange={(e) => setRelief(e.target.checked)} disabled={!ready} /></div>
         <div className={s.switchRow}><label htmlFor="terrain-contours">{t.contours}</label><input id="terrain-contours" type="checkbox" role="switch" checked={contours} onChange={(e) => setContours(e.target.checked)} disabled={!ready || !relief} /></div>
         <div className={s.switchRow}><label htmlFor="terrain-buildings">{t.buildings}</label><input id="terrain-buildings" type="checkbox" role="switch" checked={buildings && threeD} onChange={(e) => { setBuildings(e.target.checked); clearBuilding(); }} disabled={!ready || !threeD} /></div>
+        <div className={s.switchRow}><label htmlFor="terrain-textures">{t.textures}</label><input id="terrain-textures" type="checkbox" role="switch" checked={textures} onChange={(e) => setTextures(e.target.checked)} disabled={!ready || textureStatus !== "ready"} /></div>
         <div className={s.switchRow}><label htmlFor="terrain-landmarks">{t.landmarks}</label><input id="terrain-landmarks" type="checkbox" role="switch" checked={landmarks} onChange={(e) => setLandmarks(e.target.checked)} disabled={!ready} /></div>
         {threeD && <div className={s.threeDSettings}>
           <label htmlFor="terrain-exaggeration"><span>{t.exaggeration}</span><output>{exaggeration.toFixed(1)}×</output></label>
           <input id="terrain-exaggeration" type="range" min="1" max="2.5" step="0.1" value={exaggeration} onChange={(e) => { clearBuilding(); setExaggeration(Number(e.target.value)); }} />
           <label htmlFor="terrain-tilt"><span>{t.tilt}</span><output>{Math.round(camera.pitch)}°</output></label>
-          <input id="terrain-tilt" type="range" min="25" max="75" step="1" value={Math.round(camera.pitch)} onChange={(e) => map.current?.jumpTo({ pitch: Number(e.target.value) })} />
+          <input id="terrain-tilt" type="range" min="25" max={MAX_TERRAIN_PITCH} step="1" value={Math.round(camera.pitch)} onChange={(e) => map.current?.jumpTo({ pitch: Number(e.target.value) })} />
+          <button className={s.closeBuildingView} onClick={() => closeView()}><TerrainIcon name="search" size={15} />{t.closeView}</button>
           <button className={s.orbit} aria-pressed={orbit} onClick={() => setOrbit(!orbit)}><TerrainIcon name="rotate" size={15} />{orbit ? t.pause : t.orbit}</button>
         </div>}
         <p className={s.gestureHint}>{threeD ? t.hint3D : t.hint2D}</p>
         {threeD && buildings && <p className={s.buildingHint}>{camera.zoom < 14 ? t.zoomBuildings : t.inspectBuildings}</p>}
+        {textureStatus === "loading" && <p className={s.buildingHint}>{t.textureLoading}</p>}
+        {textureStatus === "failed" && <p className={s.buildingHint}>{t.textureFailure}</p>}
       </section>
 
       <div className={s.statusBar}><span className={s.statusDot + (ready ? " " + s.loaded : "")} />{failure ? t.unavailable : ready ? threeD ? t.map3D : t.map : t.loading}<span className={s.statusDivider} /><span>{camera.latitude.toFixed(4)}° N, {Math.abs(camera.longitude).toFixed(4)}° W</span>{threeD && elevation !== null && <><span className={s.statusDivider} /><span>≈ {elevation.toLocaleString(locale === "pt" ? "pt-PT" : "en-GB")} m {t.elevation}</span></>}</div>
+      {threeD && buildings && textures && textureStatus === "ready" && <div className={s.materialLabel}>{t.generatedTextureLabel}</div>}
       {threeD && <div className={s.perspectiveLabel}><span>PORTUGAL</span><strong>{t.closer}</strong></div>}
       {terrainWarning && !failure && <div className={s.terrainWarning} role="status">{t.warning}</div>}
-      {(!ready || failure) && <div className={s.mapNotice} role="status"><TerrainIcon name="mountain" size={28} /><strong>{failure ? t.retryTitle : t.loadingTitle}</strong><p>{failure ? t.errors[failure] : t.loadingDetail}</p>{failure && <button onClick={() => { setFailure(null); setReady(false); setTerrainWarning(false); setThreeD(false); setOrbit(false); setAttempt(attempt + 1); }}>{t.reload}</button>}</div>}
+      {(!ready || failure) && <div className={s.mapNotice} role="status"><TerrainIcon name="mountain" size={28} /><strong>{failure ? t.retryTitle : t.loadingTitle}</strong><p>{failure ? t.errors[failure] : t.loadingDetail}</p>{failure && <button onClick={() => { setFailure(null); setReady(false); setTerrainWarning(false); setThreeD(false); setOrbit(false); setTextureStatus("loading"); setAttempt(attempt + 1); }}>{t.reload}</button>}</div>}
       {toast && <div className={s.toast} role="status">{t[toast]}</div>}
     </main>
   );

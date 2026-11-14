@@ -26,6 +26,16 @@ Place labels are optional to keep the city geometry clear; street names remain.
 City presets use 1× terrain exaggeration. Building heights are in metres and
 are not multiplied by the terrain exaggeration control.
 
+Texture WIP checkpoint: the camera now allows zoom 22 and tilt 85°. **Close view**
+and **View this building closer** move towards building scale. Deeper zoom does
+not add source geometry detail. **Portuguese textures (preview)** opts into a
+generated stucco/azulejo/granite/terracotta atlas; it is off by default because
+native extrusion patterns still have oversized roof tiles and aliasing at close
+range. A metre-based mesh builder is included but its WebGL renderer, mipmapping,
+terrain alignment and selection integration remain unfinished. Close-up desktop
+and mobile checks must follow that integration. The image generation method,
+asset details and full prompt are in the [material provenance](public/textures/portugal/README.md).
+
 Building footprints come from OpenStreetMap through OpenFreeMap/OpenMapTiles.
 They follow real mapped outlines, with coverage, age and geometry accuracy varying
 by location. OpenMapTiles `render_height`/`render_min_height` are approximations
@@ -33,8 +43,8 @@ that can come from mapped heights, estimated floor counts or provider defaults.
 This tile schema does not establish which was used for each building. The
 inspector therefore labels them provider approximations and keeps **verified
 height unknown**. If render height is absent or invalid, the explicit display
-fallback is 5 m. Roof and façade colours are illustrative. No photographic
-textures, surveyed sizes, current-condition verification, or complete coverage
+fallback is 5 m. Roof and façade materials are illustrative. No address-matched
+photographic textures, surveyed sizes, current-condition verification, or complete coverage
 are claimed. See [building sources and the photorealistic path](../docs/BUILDINGS.md).
 
 The default map needs **no API key or account**. MapLibre renders

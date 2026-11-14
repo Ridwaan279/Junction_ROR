@@ -1,5 +1,6 @@
 import type { Map as LibreMap } from "maplibre-gl";
 import { BUILDING_LAYER, BUILDING_SOURCE_URL, FOOTPRINT_LAYER, buildingBase, buildingHeight } from "./building-data";
+import { BUILDING_ROOF_LAYER } from "./building-material-data";
 
 export function addBuildingLayers(map: LibreMap) {
   if (map.getLayer(BUILDING_LAYER)) return;
@@ -21,10 +22,16 @@ export function addBuildingLayers(map: LibreMap) {
       "fill-extrusion-opacity": 1, "fill-extrusion-vertical-gradient": true,
     },
   }, beforeLabels);
+  map.addLayer({ id: BUILDING_ROOF_LAYER, type: "fill-extrusion", source, "source-layer": "building", minzoom: 14,
+    filter: ["!=", ["get", "hide_3d"], true], layout: { visibility: "none" },
+    paint: { "fill-extrusion-height": ["+", buildingHeight, 0.05], "fill-extrusion-base": buildingHeight,
+      "fill-extrusion-color": "#b8754e", "fill-extrusion-opacity": 1, "fill-extrusion-vertical-gradient": false },
+  }, beforeLabels);
   map.setLight({ anchor: "viewport", color: "#fff4df", intensity: 0.45, position: [1.4, 200, 35] });
 }
 
-export function setBuildingsVisible(map: LibreMap, visible: boolean) {
+export function setBuildingsVisible(map: LibreMap, visible: boolean, textured = false) {
   if (map.getLayer(BUILDING_LAYER)) map.setLayoutProperty(BUILDING_LAYER, "visibility", visible ? "visible" : "none");
+  if (map.getLayer(BUILDING_ROOF_LAYER)) map.setLayoutProperty(BUILDING_ROOF_LAYER, "visibility", visible && textured ? "visible" : "none");
   if (map.getLayer(FOOTPRINT_LAYER)) map.setPaintProperty(FOOTPRINT_LAYER, "fill-opacity", visible ? 0.25 : 0.7);
 }
