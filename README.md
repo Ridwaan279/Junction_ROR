@@ -23,6 +23,11 @@ scenario is invented training data near Sever do Vouga, not a live incident or
 a reconstruction of the 2024 fires. No API key is needed for the offline demo.
 All dispatch, drone routes and spread are illustrative simulations.
 
+Open http://localhost:3000/terrain for the Portugal terrain explorer, with shaded
+relief, contours and real 3D elevation, plus tilt, orbit and place presets. The
+default OpenFreeMap/Mapterhorn map needs no API key; internet access and WebGL are
+required. See [web/README.md](web/README.md) for providers, attribution and controls.
+
 If the installed Rust toolchain is named `stable` and reports 1.100.0, `cargo
 +stable ...` uses that installation without downloading a second named copy.
 

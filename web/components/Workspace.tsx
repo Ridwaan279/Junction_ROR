@@ -92,6 +92,10 @@ export default function Workspace() {
           ))}
         </nav>
         <div className="topbar-end">
+          <Link href="/terrain" className="terrain-workspace-link">
+            <Icon name="layers" size={16} />
+            {locale === "pt" ? "Terreno 3D" : "3D terrain"}
+          </Link>
           <div
             className={"connection " + (!connected ? "connection-warning" : "")}
           >

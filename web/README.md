@@ -10,11 +10,40 @@ Set `NEXT_PUBLIC_API_BASE_URL` to the Rust service (for example http://localhost
 Without it the bundled synthetic fixture powers a local replay. API errors preserve
 last received data marked disconnected; they never imply zero incidents.
 
-`NEXT_PUBLIC_MAP_STYLE_URL` optionally configures a licensed MapLibre style. The
-fallback uses standard OpenStreetMap raster tiles with visible attribution for
-local demonstration. Respect https://operations.osmfoundation.org/policies/tiles/;
-no bulk/offline downloads and no production high-traffic deployment on that
-public service. A labelled geographic fallback remains usable without WebGL.
+Open `/terrain` for a full-screen mainland Portugal terrain explorer. It includes
+2D/3D switching, shaded relief, generated elevation contours, tilt, vertical
+exaggeration, orbit, north reset, zoom, and shareable camera links.
+Portuguese/English controls are available from the header. Search covers
+eight curated places (accent-insensitive) or `latitude, longitude` within the
+mainland bounding box; it is not a general address geocoder. The workspace also
+uses this terrain basemap and links to the explorer. Incident/forecast overlays
+stay in the workspace's 2D view.
+
+The default map needs **no API key or account**. MapLibre renders
+[OpenFreeMap's Liberty vector style](https://openfreemap.org/quick_start/) with
+terrain colours and [Mapterhorn elevation tiles](https://mapterhorn.com/data-access/).
+Both public services currently offer free access. Keep the visible OpenFreeMap,
+OpenMapTiles, OpenStreetMap and
+[Mapterhorn/data-provider attribution](https://mapterhorn.com/attribution/).
+Public endpoints have no project-specific availability guarantee; assess usage,
+licences and hosting capacity before production deployment. Do not bulk-download
+tiles. Terrain is elevation-derived geometry, not photorealistic buildings or a
+survey. The elevation readout is approximate and the exaggeration control changes
+the display only. Camera presets are approximate.
+
+Map rendering requires internet access and WebGL. The incident workspace retains
+its labelled geographic fallback without WebGL; the dedicated explorer shows a
+retry message when it cannot initialize. No map imagery or DEM is bundled for
+offline use. Next.js emits MapLibre's worker asset through an explicit worker URL.
+`maplibre-contour` generates contours in a separate worker and shares its DEM cache
+with terrain/hillshade sources.
+
+`NEXT_PUBLIC_MAP_STYLE_URL` optionally configures a licensed MapLibre style; its
+source attribution is preserved. Google imagery/photorealistic 3D is not integrated.
+That would need a Google Maps Platform project, an appropriate enabled API and a
+restricted browser key, with production billing configured under
+[Google's current setup rules](https://developers.google.com/maps/documentation/javascript/get-api-key).
+No Gemini key is needed to render this geographically grounded map.
 
 The browser displays supplied forecast/drone outputs; it does not compute them.
 
