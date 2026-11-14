@@ -35,3 +35,9 @@ requires the Rust service. The mission button is enabled only for synthetic runs
 Map FPS is sampled from actual render events while the map camera moves; it stays
 "not measured" when WebGL is unavailable. The fallback outline is approximate and
 does not provide terrain, licensed airspace, or navigation geometry.
+
+For the integrated app, run `npm run test:e2e:online` while the web app is already
+running on http://127.0.0.1:3000 with API http://127.0.0.1:8080. This opt-in check
+resets the synthetic scenario, generates a simulated mission, reloads to
+resynchronize the event stream, then resets and verifies all mission outputs clear.
+Override URLs with `EMBERWATCH_ONLINE_URL` and `EMBERWATCH_API_TEST_URL`.
