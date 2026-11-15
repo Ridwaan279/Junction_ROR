@@ -62,6 +62,7 @@ impl FirecastOptions {
 }
 
 type Key = (String, u64);
+type ContextBudgets = HashMap<String, (Instant, ContextDev)>;
 
 #[derive(Clone)]
 pub(crate) struct FirecastState {
@@ -71,6 +72,7 @@ pub(crate) struct FirecastState {
     cache: Arc<Mutex<HashMap<Key, Arc<FirecastResult>>>>,
     inflight: Arc<Mutex<HashSet<Key>>>,
     failures: Arc<Mutex<HashMap<Key, Instant>>>,
+    context_budgets: Arc<Mutex<ContextBudgets>>,
 }
 
 impl FirecastState {
@@ -84,6 +86,7 @@ impl FirecastState {
             cache: Default::default(),
             inflight: Default::default(),
             failures: Default::default(),
+            context_budgets: Default::default(),
         }
     }
     pub async fn cached(&self, incident: &str, epoch: u64) -> Option<Arc<FirecastResult>> {
@@ -92,6 +95,25 @@ impl FirecastState {
             .await
             .get(&(incident.to_owned(), epoch))
             .cloned()
+    }
+    async fn incident_context(&self, scope: String) -> Option<ContextDev> {
+        let client = self.context.as_ref()?;
+        let mut budgets = self.context_budgets.lock().await;
+        budgets.retain(|_, (at, c)| {
+            at.elapsed() < Duration::from_secs(3600) || c.budget_status().outcome_unknown
+        });
+        if !budgets.contains_key(&scope) {
+            budgets.insert(
+                scope.clone(),
+                (
+                    Instant::now(),
+                    client
+                        .with_shared_budget(self.options.max_context_credits)
+                        .ok()?,
+                ),
+            );
+        }
+        Some(budgets.get(&scope)?.1.clone())
     }
 }
 
@@ -200,9 +222,16 @@ async fn forecast(
         max_context_credits: fc.options.max_context_credits,
         network: fc.options.network,
     };
+    let incident_context = fc
+        .incident_context(format!("{}:{}", context.run_id, incident.id))
+        .await;
     let env = match tokio::time::timeout(
         Duration::from_secs(90),
-        acquire(fc.sources.as_ref(), fc.context.as_ref(), request.clone()),
+        acquire(
+            fc.sources.as_ref(),
+            incident_context.as_ref(),
+            request.clone(),
+        ),
     )
     .await
     {

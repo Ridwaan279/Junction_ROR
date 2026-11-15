@@ -1,5 +1,18 @@
 # Context.dev accuracy plan (Agent 2)
 
+### Delivery revision — 15 November 2026
+
+The user explicitly removed the human benchmark from this delivery and asked
+for implementation to finish quickly. Section 5 and the human-label acceptance
+gate below are deferred, not passing. No independently measured recall/fabrication
+rate or human accuracy certification is claimed. Deterministic quote, number,
+time, provenance, ambiguity and failure checks remain.
+
+Agent 2 now supplies the shared Context client, Rust capture-plan/batch/archive
+tools, an offline demo builder, half-hour early frames, sourced hypothetical
+stations, fleet sizing, regional routes, exposure priorities, simulated reports
+and the live/status route. See `data/agent2/HANDOFF.md` for validation and limits.
+
 ### Foundation checkpoint — 15 November 2026
 
 Implemented: shared transport used by firecast, bounded/redacted `probe_context`,
@@ -9,11 +22,11 @@ archive importer. The supplied ZIP contains the original 25 scrape responses;
 23 successful Markdown outputs now have exact-byte hashes in `pages.json`.
 The two failures remain failures. Full articles stay outside Git.
 
-Not complete: independent human `expected.json` labels and the threshold
-evaluator/benchmark acceptance. The golden inventory/hash/quote tests do not
+Not claimed: independent human `expected.json` labels or benchmark acceptance.
+The user subsequently removed this benchmark from scope. The hash/quote tests do not
 prove field recall or zero fabrication. Some normalizer integration still needs
-the full labelled cases; stations, fleet, routing, exposure generation and finer
-replay frames follow in the requested order. The optional second-model extraction
+the full labelled cases. Stations, fleet, routing, exposure generation and finer
+frames are now delivered separately. The optional second-model extraction
 and Gemini advisor are removed from scope by the user's instruction.
 
 The Windows host blocks some Cargo build scripts, the SQLx macro and selected
