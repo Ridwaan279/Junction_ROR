@@ -18,7 +18,7 @@ export function addBuildingLayers(map: LibreMap) {
     filter: ["!=", ["get", "hide_3d"], true], layout: { visibility: "none" },
     paint: { "fill-extrusion-height": buildingHeight, "fill-extrusion-base": buildingBase,
       "fill-extrusion-color": ["to-color", ["get", "colour"], "#e3d8c7"],
-      "fill-extrusion-opacity": 1, "fill-extrusion-vertical-gradient": true,
+      "fill-extrusion-opacity": 1, "fill-extrusion-opacity-transition": { duration: 0, delay: 0 }, "fill-extrusion-vertical-gradient": true,
     },
   }, beforeLabels);
   map.setLight({ anchor: "viewport", color: "#fff4df", intensity: 0.45, position: [1.4, 200, 35] });

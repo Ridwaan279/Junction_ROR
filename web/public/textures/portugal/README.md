@@ -19,8 +19,11 @@ footprints and approximate height attributes still come from OSM/OpenMapTiles.
 `building-mesh.ts`. Façades repeat every 6 m (two illustrative storeys), while
 terracotta and granite repeat every 2 m. Mipmaps and optional anisotropic
 filtering reduce shimmer; texture coordinates retain their size as the camera
-zooms. Textures are on by default and can be switched off. Pitched roofs and
-surveyed façade geometry are not included.
+zooms. Textures are on by default and can be switched off. Surveyed roof and
+façade geometry are not included. The [variation atlases](VARIANTS.md)
+extend this original set with seven façade styles, six roof finishes,
+illustrative roof profiles, and road/park materials. The per-building profiles
+are decorative choices, not observed roof forms.
 
 ## Final generation prompt
 

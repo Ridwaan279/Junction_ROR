@@ -10,6 +10,7 @@ import { portugueseDescriptions, terrainCopy } from "./terrain-copy";
 import { addBuildingLayers, setBuildingsVisible } from "@/lib/buildings";
 import { BUILDING_LAYER, FOOTPRINT_LAYER, buildingInfo, type BuildingInfo } from "@/lib/building-data";
 import { BuildingMaterialLayer } from "@/lib/building-materials";
+import { GroundMaterials } from "@/lib/ground-materials";
 import { CLOSE_BUILDING_ZOOM, MAX_TERRAIN_PITCH, MAX_TERRAIN_ZOOM } from "@/lib/terrain-data";
 import s from "./terrain.module.css";
 
@@ -19,6 +20,7 @@ export default function TerrainExplorer() {
   const host = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
   const materialLayer = useRef<BuildingMaterialLayer | null>(null);
+  const groundMaterials = useRef<GroundMaterials | null>(null);
   const [ready, setReady] = useState(false);
   const [failure, setFailure] = useState<keyof typeof terrainCopy.en.errors | null>(null);
   const [terrainWarning, setTerrainWarning] = useState(false);
@@ -30,6 +32,9 @@ export default function TerrainExplorer() {
   const [contours, setContours] = useState(true);
   const [buildings, setBuildings] = useState(true);
   const [textures, setTextures] = useState(true);
+  const [roadTextures, setRoadTextures] = useState(true);
+  const [parkTextures, setParkTextures] = useState(true);
+  const [groundStatus, setGroundStatus] = useState<"loading" | "ready" | "failed">("loading");
   const [textureStatus, setTextureStatus] = useState<"loading" | "ready" | "failed">("loading");
   const [landmarks, setLandmarks] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingInfo | null>(null);
@@ -100,6 +105,9 @@ export default function TerrainExplorer() {
             }).catch(() => {
               if (!cancelled && !controller.signal.aborted) setTextureStatus("failed");
             });
+            const surfaces = new GroundMaterials(instance);
+            groundMaterials.current = surfaces;
+            void surfaces.load(controller.signal).then(() => { if (!cancelled) setGroundStatus("ready"); }).catch(() => { if (!cancelled && !controller.signal.aborted) setGroundStatus("failed"); });
             instance.addSource("explorer-focus", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
             instance.addLayer({ id: "explorer-focus-halo", type: "circle", source: "explorer-focus", paint: { "circle-radius": 18, "circle-color": "#2b6c55", "circle-opacity": 0.12 } });
             instance.addLayer({ id: "explorer-focus-dot", type: "circle", source: "explorer-focus", paint: { "circle-radius": 5, "circle-color": "#2b6c55", "circle-stroke-color": "#fff", "circle-stroke-width": 2 } });
@@ -138,7 +146,7 @@ export default function TerrainExplorer() {
           if (!instance || cancelled) return;
           clearBuilding();
           const texturedBuilding = materialLayer.current?.pick(event.point.x, event.point.y);
-          const feature = (instance.getLayer(BUILDING_LAYER) ? instance.queryRenderedFeatures(event.point, { layers: [BUILDING_LAYER] })[0] : undefined)
+          const feature = (instance.getLayer(BUILDING_LAYER) && instance.getPaintProperty(BUILDING_LAYER, "fill-extrusion-opacity") !== 0 ? instance.queryRenderedFeatures(event.point, { layers: [BUILDING_LAYER] })[0] : undefined)
             ?? (instance.getLayer(FOOTPRINT_LAYER) ? instance.queryRenderedFeatures(event.point, { layers: [FOOTPRINT_LAYER] })[0] : undefined);
           if (texturedBuilding || feature) {
             const info = texturedBuilding ?? buildingInfo(feature!.properties, event.lngLat.lng, event.lngLat.lat);
@@ -166,7 +174,7 @@ export default function TerrainExplorer() {
           if ("sourceId" in event && String(event.sourceId).startsWith("portugal-")) {
             console.warn("Terrain tile unavailable", event.error?.message);
             setTerrainWarning(true);
-          }
+          } else console.warn("Map rendering warning", event.error?.message);
         });
       } catch {
         if (!cancelled) setFailure("startup");
@@ -180,6 +188,7 @@ export default function TerrainExplorer() {
       window.removeEventListener("resize", resizeCamera);
       instance?.remove();
       materialLayer.current = null;
+      groundMaterials.current = null;
       map.current = null;
     };
   }, [attempt, clearBuilding]);
@@ -193,6 +202,10 @@ export default function TerrainExplorer() {
     if (materialLayer.current) materialLayer.current.setDisplay(threeD && buildings, textured);
     else setBuildingsVisible(instance, threeD && buildings);
   }, [ready, threeD, exaggeration, relief, contours, buildings, textures, textureStatus]);
+
+  useEffect(() => {
+    if (ready && groundStatus === "ready") groundMaterials.current?.setDisplay(roadTextures, parkTextures);
+  }, [ready, roadTextures, parkTextures, groundStatus]);
 
   useEffect(() => {
     const instance = map.current;
@@ -263,6 +276,10 @@ export default function TerrainExplorer() {
     setExaggeration(1);
     setContours(false);
     fly(selected?.kind === "city" ? selected : PLACES.find((place) => place.id === "lisboa")!, true);
+  }
+  function toggleTextures() {
+    const next = !(textures && roadTextures && parkTextures);
+    clearBuilding(); setTextures(next); setRoadTextures(next); setParkTextures(next);
   }
   function closeView(center?: [number, number]) {
     if (!ready || !map.current) return;
@@ -338,6 +355,7 @@ export default function TerrainExplorer() {
       </div>
 
       <div className={s.viewControls}>
+        <button className={s.textureQuick} aria-label={textures && roadTextures && parkTextures ? t.texturesOff : t.texturesOn} aria-pressed={textures && roadTextures && parkTextures} onClick={toggleTextures} disabled={!ready}><TerrainIcon name="contour" size={16} /><span>{t.textureQuick}</span></button>
         <div className={s.modeSwitch} aria-label={t.perspective}>
           <button aria-pressed={!threeD} onClick={() => changeMode(false)} disabled={!ready}>{t.map2D}</button>
           <button aria-pressed={threeD} onClick={() => changeMode(true)} disabled={!ready}><TerrainIcon name="mountain" size={16} />{t.map3D}</button>
@@ -356,7 +374,12 @@ export default function TerrainExplorer() {
         <div className={s.switchRow}><label htmlFor="terrain-relief">{t.relief}</label><input id="terrain-relief" type="checkbox" role="switch" checked={relief} onChange={(e) => setRelief(e.target.checked)} disabled={!ready} /></div>
         <div className={s.switchRow}><label htmlFor="terrain-contours">{t.contours}</label><input id="terrain-contours" type="checkbox" role="switch" checked={contours} onChange={(e) => setContours(e.target.checked)} disabled={!ready || !relief} /></div>
         <div className={s.switchRow}><label htmlFor="terrain-buildings">{t.buildings}</label><input id="terrain-buildings" type="checkbox" role="switch" checked={buildings && threeD} onChange={(e) => { setBuildings(e.target.checked); clearBuilding(); }} disabled={!ready || !threeD} /></div>
-        <div className={s.switchRow}><label htmlFor="terrain-textures">{t.textures}</label><input id="terrain-textures" type="checkbox" role="switch" checked={textures} onChange={(e) => { clearBuilding(); setTextures(e.target.checked); }} disabled={!ready || textureStatus !== "ready"} /></div>
+        <div className={s.textureControls}>
+          <strong>{t.textureHeading}</strong>
+          <div className={s.switchRow}><label htmlFor="terrain-textures">{t.textures}</label><input id="terrain-textures" type="checkbox" role="switch" checked={textures} onChange={(e) => { clearBuilding(); setTextures(e.target.checked); }} disabled={!ready || textureStatus !== "ready"} /></div>
+          <div className={s.switchRow}><label htmlFor="terrain-road-textures">{t.roadTextures}</label><input id="terrain-road-textures" type="checkbox" role="switch" checked={roadTextures} onChange={(e) => setRoadTextures(e.target.checked)} disabled={!ready || groundStatus !== "ready"} /></div>
+          <div className={s.switchRow}><label htmlFor="terrain-park-textures">{t.parkTextures}</label><input id="terrain-park-textures" type="checkbox" role="switch" checked={parkTextures} onChange={(e) => setParkTextures(e.target.checked)} disabled={!ready || groundStatus !== "ready"} /></div>
+        </div>
         <div className={s.switchRow}><label htmlFor="terrain-landmarks">{t.landmarks}</label><input id="terrain-landmarks" type="checkbox" role="switch" checked={landmarks} onChange={(e) => setLandmarks(e.target.checked)} disabled={!ready} /></div>
         {threeD && <div className={s.threeDSettings}>
           <label htmlFor="terrain-exaggeration"><span>{t.exaggeration}</span><output>{exaggeration.toFixed(1)}×</output></label>
@@ -370,13 +393,15 @@ export default function TerrainExplorer() {
         {threeD && buildings && <p className={s.buildingHint}>{camera.zoom < 14 ? t.zoomBuildings : t.inspectBuildings}</p>}
         {textureStatus === "loading" && <p className={s.buildingHint}>{t.textureLoading}</p>}
         {textureStatus === "failed" && <p className={s.buildingHint}>{t.textureFailure}</p>}
+        {groundStatus === "loading" && <p className={s.buildingHint}>{t.surfaceLoading}</p>}
+        {groundStatus === "failed" && <p className={s.buildingHint}>{t.surfaceFailure}</p>}
       </section>
 
       <div className={s.statusBar}><span className={s.statusDot + (ready ? " " + s.loaded : "")} />{failure ? t.unavailable : ready ? threeD ? t.map3D : t.map : t.loading}<span className={s.statusDivider} /><span>{camera.latitude.toFixed(4)}° N, {Math.abs(camera.longitude).toFixed(4)}° W</span>{threeD && elevation !== null && <><span className={s.statusDivider} /><span>≈ {elevation.toLocaleString(locale === "pt" ? "pt-PT" : "en-GB")} m {t.elevation}</span></>}</div>
-      {threeD && buildings && textures && textureStatus === "ready" && camera.zoom >= 16.5 && <div className={s.materialLabel}>{t.generatedTextureLabel}</div>}
+      {camera.zoom >= 16 && ((threeD && buildings && textures && textureStatus === "ready") || (groundStatus === "ready" && (roadTextures || parkTextures))) && <div className={s.materialLabel}>{t.generatedTextureLabel}</div>}
       {threeD && <div className={s.perspectiveLabel}><span>PORTUGAL</span><strong>{t.closer}</strong></div>}
       {terrainWarning && !failure && <div className={s.terrainWarning} role="status">{t.warning}</div>}
-      {(!ready || failure) && <div className={s.mapNotice} role="status"><TerrainIcon name="mountain" size={28} /><strong>{failure ? t.retryTitle : t.loadingTitle}</strong><p>{failure ? t.errors[failure] : t.loadingDetail}</p>{failure && <button onClick={() => { setFailure(null); setReady(false); setTerrainWarning(false); setThreeD(false); setOrbit(false); setTextureStatus("loading"); setAttempt(attempt + 1); }}>{t.reload}</button>}</div>}
+      {(!ready || failure) && <div className={s.mapNotice} role="status"><TerrainIcon name="mountain" size={28} /><strong>{failure ? t.retryTitle : t.loadingTitle}</strong><p>{failure ? t.errors[failure] : t.loadingDetail}</p>{failure && <button onClick={() => { setFailure(null); setReady(false); setTerrainWarning(false); setThreeD(false); setOrbit(false); setTextureStatus("loading"); setGroundStatus("loading"); setAttempt(attempt + 1); }}>{t.reload}</button>}</div>}
       {toast && <div className={s.toast} role="status">{t[toast]}</div>}
     </main>
   );

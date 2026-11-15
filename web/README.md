@@ -29,14 +29,23 @@ are not multiplied by the terrain exaggeration control.
 The camera allows zoom 22 and tilt 85°. **Close view**
 and **View this building closer** move towards building scale. Deeper zoom does
 not add source geometry detail. **Portuguese textures** enables a
-generated stucco/azulejo/granite/terracotta atlas, on by default. A custom WebGL2
-layer repeats façades every 6 m and roof/stone surfaces every 2 m, independently
+generated Portuguese materials, on by default: seven façade styles and six roof
+finishes, with stable tint, roof orientation and pattern offsets per building.
+Suitable quadrilaterals get illustrative gabled/hipped profiles; irregular and
+courtyard roofs stay flat. The ridge retains the approximate source top height.
+A custom WebGL2 layer repeats façades every 6 m and roof/stone surfaces every 2 m, independently
 of zoom, with mipmaps and anisotropic filtering when supported. It renders up to
 3,000 nearby mapped polygons within 1.4 km from zoom 16.5. More distant areas
 retain flat footprints; lower zoom, disabled textures or a texture failure use
 plain native extrusions. Foundations sample terrain, roofs stay level, and
-click selection tests the drawn wall/roof triangles. The image generation method,
-asset details and full prompt are in the [material provenance](public/textures/portugal/README.md).
+click selection tests the drawn wall/roof triangles. **Textures** beside the 2D/3D
+buttons toggles all materials. The Materials section has independent **Buildings
+& roofs**, **Roads & paving**, and **Parks & grass** switches. Ground overlays
+work in 2D and 3D from zoom 16, using asphalt, calçada, and green/dry grass;
+their bounds/filters and road widths come from the existing mapped layers.
+The image generation method,
+asset details and original prompt are in the [material provenance](public/textures/portugal/README.md);
+the [new atlases and full prompt set](public/textures/portugal/VARIANTS.md) document the variations.
 
 Building footprints come from OpenStreetMap through OpenFreeMap/OpenMapTiles.
 They follow real mapped outlines, with coverage, age and geometry accuracy varying

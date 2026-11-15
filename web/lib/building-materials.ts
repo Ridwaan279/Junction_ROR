@@ -1,8 +1,9 @@
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as LibreMap, MapSourceDataEvent } from "maplibre-gl";
 import type { Polygon } from "geojson";
 import { BUILDING_LAYER, FOOTPRINT_LAYER, buildingInfo, type BuildingInfo } from "./building-data";
-import { MATERIAL_ATLAS_URL, MATERIAL_IMAGE_SIZE, MATERIAL_REGIONS, MATERIALS, type BuildingMaterial } from "./building-material-data";
-import { appendBuildingMesh, emptyMesh, mercator, metreScale, polygonCenter, type MeshBuffers, type Point2 } from "./building-mesh";
+import { MATERIALS, buildingAppearance, type BuildingMaterial, type BuildingAppearance } from "./building-material-data";
+import { appendBuildingMesh, emptyMesh, mercator, metreScale, polygonCenter, MESH_STRIDE, type MeshBuffers, type Point2 } from "./building-mesh";
+import { loadMaterialImages } from "./material-images";
 import { pickMesh, type PickMesh } from "./building-picking";
 import { setBuildingsVisible } from "./buildings";
 
@@ -14,19 +15,22 @@ const vertexShader = `#version 300 es
 layout(location=0) in vec3 a_position;
 layout(location=1) in vec2 a_uv;
 layout(location=2) in vec3 a_normal;
+layout(location=3) in vec3 a_tint;
 uniform mat4 u_matrix;
 out vec2 v_uv;
 out vec3 v_normal;
-void main() { gl_Position = u_matrix * vec4(a_position, 1.0); v_uv = a_uv; v_normal = a_normal; }`;
+out vec3 v_tint;
+void main() { gl_Position = u_matrix * vec4(a_position, 1.0); v_uv = a_uv; v_normal = a_normal; v_tint = a_tint; }`;
 const fragmentShader = `#version 300 es
 precision highp float;
 uniform sampler2D u_material;
 in vec2 v_uv;
 in vec3 v_normal;
+in vec3 v_tint;
 out vec4 color;
 void main() {
   float light = 0.57 + 0.43 * max(dot(normalize(v_normal), normalize(vec3(-0.35,-0.45,0.85))), 0.0);
-  color = vec4(texture(u_material, v_uv).rgb * light, 1.0);
+  color = vec4(texture(u_material, v_uv).rgb * light * v_tint, 1.0);
 }`;
 
 function compile(gl: WebGL2RenderingContext, type: number, source: string) {
@@ -56,6 +60,7 @@ export class BuildingMaterialLayer implements CustomLayerInterface {
   private active = false;
   private revision = 0;
   private refreshTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastFrameCheck = 0;
   private signature = "";
   private dirty = true;
   private origin: Point2 = [0, 0];
@@ -73,24 +78,13 @@ export class BuildingMaterialLayer implements CustomLayerInterface {
     this.source = layer.source;
     map.on("idle", this.refresh); map.on("moveend", this.refresh); map.on("zoom", this.syncVisibility);
     map.on("sourcedata", this.sourceChanged);
+    map.on("render", this.refreshAfterFrame);
   }
 
   async load(signal: AbortSignal) {
-    const response = await fetch(MATERIAL_ATLAS_URL, { signal });
-    if (!response.ok) throw new Error("Building textures could not load");
-    const atlas = await createImageBitmap(await response.blob());
-    try {
-      if (atlas.width !== 1254 || atlas.height !== 1254) throw new Error("Invalid building material atlas");
-      for (const material of MATERIALS) {
-        const [x, y, width, height] = MATERIAL_REGIONS[material];
-        const bitmap = await createImageBitmap(atlas, x, y, width, height, { resizeWidth: MATERIAL_IMAGE_SIZE, resizeHeight: MATERIAL_IMAGE_SIZE, resizeQuality: "high", imageOrientation: "flipY" });
-        if (signal.aborted || this.removed) { bitmap.close(); throw new DOMException("Aborted", "AbortError"); }
-        this.bitmaps[material] = bitmap;
-      }
-      this.loaded = true; this.refresh();
-    } catch (error) {
-      this.releaseBitmaps(); throw error;
-    } finally { atlas.close(); }
+    this.bitmaps = await loadMaterialImages(MATERIALS, signal);
+    if (signal.aborted || this.removed) { this.releaseBitmaps(); throw new DOMException("Aborted", "AbortError"); }
+    this.loaded = true; this.refresh();
   }
 
   setDisplay(visible: boolean, textured: boolean) {
@@ -113,21 +107,39 @@ export class BuildingMaterialLayer implements CustomLayerInterface {
   private syncVisibility = () => {
     if (this.removed) return;
     this.active = this.visible && this.textured && this.loaded && !this.failed && this.map.getZoom() >= DETAIL_ZOOM && this.picks.length > 0;
-    const nativeVisible = this.visible && !this.active;
-    if (this.map.getLayoutProperty(BUILDING_LAYER, "visibility") !== (nativeVisible ? "visible" : "none")) setBuildingsVisible(this.map, nativeVisible);
+    // A visible 3D source consumer must remain registered while terrain is on.
+    // Hiding this layer discards the non-draped tile coverage querySourceFeatures
+    // needs. Zero opacity skips its draw/depth pass while retaining that coverage.
+    if (this.map.getLayoutProperty(BUILDING_LAYER, "visibility") !== (this.visible ? "visible" : "none")) setBuildingsVisible(this.map, this.visible);
+    const nativeOpacity = this.active ? 0 : 1;
+    if (this.map.getPaintProperty(BUILDING_LAYER, "fill-extrusion-opacity") !== nativeOpacity) this.map.setPaintProperty(BUILDING_LAYER, "fill-extrusion-opacity", nativeOpacity);
     const footprintOpacity = this.visible ? 0.25 : 0.7;
     if (this.map.getPaintProperty(FOOTPRINT_LAYER, "fill-opacity") !== footprintOpacity) this.map.setPaintProperty(FOOTPRINT_LAYER, "fill-opacity", footprintOpacity);
+  };
+
+  private refreshAfterFrame = () => {
+    // Terrain coverage/refinement becomes queryable after sourcedata. Recheck on
+    // actual rendered frames; this does not create a continuous repaint loop.
+    if (!this.loaded || !this.visible || !this.textured || this.failed || this.map.getZoom() < DETAIL_ZOOM || this.map.isMoving()) return;
+    const now = performance.now();
+    if (now - this.lastFrameCheck < 400) return;
+    this.lastFrameCheck = now;
+    if (!this.picks.length) this.signature = "";
+    this.refresh();
   };
 
   private refresh = () => {
     if (this.removed) return;
     if (!this.loaded || !this.visible || !this.textured || this.failed || this.map.getZoom() < DETAIL_ZOOM) { this.syncVisibility(); return; }
     const center = this.map.getCenter(), origin = mercator([center.lng, center.lat]), scale = metreScale(center.lat);
-    const signature = `${Math.round(origin[0] / scale / 20)}/${Math.round(origin[1] / scale / 20)}/${Math.floor(this.map.getZoom())}/${this.revision}/${this.map.getTerrain()?.exaggeration}`;
+    // DEMs can become drawable after their source event, so revision alone is
+    // insufficient. Sample the nearby terrain to catch late elevation updates.
+    const groundStamp = [-1, 0, 1].flatMap((dx) => [-1, 0, 1].map((dy) => Math.round((this.map.queryTerrainElevation([center.lng + dx * 0.012, center.lat + dy * 0.009]) ?? 0) * 5))).join(",");
+    const signature = `${Math.round(origin[0] / scale / 20)}/${Math.round(origin[1] / scale / 20)}/${Math.floor(this.map.getZoom())}/${this.revision}/${this.map.getTerrain()?.exaggeration}/${groundStamp}`;
     if (signature === this.signature) return;
     this.signature = signature;
     const seen = new Set<string>();
-    const candidates: { polygon: Polygon; info: BuildingInfo; distance: number; facade: BuildingMaterial }[] = [];
+    const candidates: { polygon: Polygon; info: BuildingInfo; distance: number; appearance: BuildingAppearance }[] = [];
     const features = this.map.querySourceFeatures(this.source, { sourceLayer: "building" });
     for (const feature of features) {
       if (feature.properties?.hide_3d === true) continue;
@@ -141,18 +153,17 @@ export class BuildingMaterialLayer implements CustomLayerInterface {
         const key = JSON.stringify(coordinates);
         if (seen.has(key)) continue;
         seen.add(key);
-        const hash = Math.abs(Math.round(point[0] * 100000) * 31 + Math.round(point[1] * 100000)) % 10;
-        candidates.push({ polygon, info: buildingInfo(feature.properties ?? {}, ...point), distance, facade: hash < 7 ? "stucco" : hash < 9 ? "azulejo" : "granite" });
+        candidates.push({ polygon, info: buildingInfo(feature.properties ?? {}, ...point), distance, appearance: buildingAppearance(point) });
       }
     }
     candidates.sort((a, b) => a.distance - b.distance);
     const mesh = emptyMesh(), picks: PickMesh[] = [];
-    for (const { polygon, info, facade } of candidates.slice(0, MAX_BUILDINGS)) {
+    for (const { polygon, info, appearance } of candidates.slice(0, MAX_BUILDINGS)) {
       const ranges = Object.fromEntries(MATERIALS.map((material) => [material, [mesh[material].length, 0]])) as PickMesh["ranges"];
       const groundAt = (point: Point2) => this.map.queryTerrainElevation(point) ?? 0;
       // Level roof over the highest sampled ground; foundations follow the DEM.
       const ground = polygon.coordinates[0].reduce((height, point) => Math.max(height, groundAt([point[0], point[1]])), groundAt(info.center));
-      appendBuildingMesh(mesh, polygon, origin, scale, ground, info.baseHeightM, info.renderHeightM, facade, groundAt);
+      appendBuildingMesh(mesh, polygon, origin, scale, ground, info.baseHeightM, info.renderHeightM, appearance.facade, groundAt, appearance);
       for (const material of MATERIALS) ranges[material][1] = mesh[material].length;
       if (MATERIALS.some((material) => ranges[material][1] > ranges[material][0])) picks.push({ info, ranges });
     }
@@ -178,8 +189,8 @@ export class BuildingMaterialLayer implements CustomLayerInterface {
       if (!buffer || !vao || !texture) throw new Error("Building GPU resources unavailable");
       this.materials[material] = { buffer, vao, texture, count: 0 };
       gl.bindVertexArray(vao); gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      for (const [index, size, offset] of [[0, 3, 0], [1, 2, 12], [2, 3, 20]]) {
-        gl.enableVertexAttribArray(index); gl.vertexAttribPointer(index, size, gl.FLOAT, false, 32, offset);
+      for (const [index, size, offset] of [[0, 3, 0], [1, 2, 12], [2, 3, 20], [3, 3, 32]]) {
+        gl.enableVertexAttribArray(index); gl.vertexAttribPointer(index, size, gl.FLOAT, false, MESH_STRIDE * 4, offset);
       }
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.bitmaps[material]!);
@@ -205,7 +216,7 @@ export class BuildingMaterialLayer implements CustomLayerInterface {
         gl.bindVertexArray(gpu.vao);
         if (this.dirty) {
           gl.bindBuffer(gl.ARRAY_BUFFER, gpu.buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.mesh[material]), gl.STATIC_DRAW);
-          gpu.count = this.mesh[material].length / 8;
+          gpu.count = this.mesh[material].length / MESH_STRIDE;
         }
         gl.bindTexture(gl.TEXTURE_2D, gpu.texture); gl.drawArrays(gl.TRIANGLES, 0, gpu.count);
       }
@@ -237,6 +248,7 @@ export class BuildingMaterialLayer implements CustomLayerInterface {
     this.removed = true; this.active = false; this.releaseBitmaps();
     if (this.refreshTimer !== null) clearTimeout(this.refreshTimer);
     map.off("idle", this.refresh); map.off("moveend", this.refresh); map.off("zoom", this.syncVisibility); map.off("sourcedata", this.sourceChanged);
+    map.off("render", this.refreshAfterFrame);
     for (const gpu of Object.values(this.materials)) { gl.deleteBuffer(gpu.buffer); gl.deleteVertexArray(gpu.vao); gl.deleteTexture(gpu.texture); }
     if (this.program) gl.deleteProgram(this.program);
   }

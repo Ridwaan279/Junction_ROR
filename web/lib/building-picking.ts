@@ -1,6 +1,6 @@
 import type { BuildingInfo } from "./building-data";
 import { MATERIALS, type BuildingMaterial } from "./building-material-data";
-import type { MeshBuffers } from "./building-mesh";
+import { MESH_STRIDE, type MeshBuffers } from "./building-mesh";
 
 export type PickMesh = { info: BuildingInfo; ranges: Record<BuildingMaterial, [number, number]> };
 
@@ -16,8 +16,8 @@ export function pickMesh(mesh: MeshBuffers, picks: PickMesh[], matrix: Float32Ar
   let nearest = Infinity, result: BuildingInfo | null = null;
   for (const { info, ranges } of picks) for (const material of MATERIALS) {
     const [start, end] = ranges[material], data = mesh[material];
-    for (let i = start; i < end; i += 24) {
-      const a = project(data, i), b = project(data, i + 8), c = project(data, i + 16);
+    for (let i = start; i < end; i += MESH_STRIDE * 3) {
+      const a = project(data, i), b = project(data, i + MESH_STRIDE), c = project(data, i + MESH_STRIDE * 2);
       if (a[3] <= 0 || b[3] <= 0 || c[3] <= 0) continue;
       const d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
       if (Math.abs(d) < 0.01) continue;

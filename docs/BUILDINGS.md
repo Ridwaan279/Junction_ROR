@@ -28,7 +28,7 @@ identity or surveyed measurements.
 | `render_min_height` | Approximate height of the bottom of a building part. Rendering constrains it between ground and the rendered top. |
 | Missing/invalid render height | A labelled 5 m display fallback. The source height stays null. This fallback is never stored as a measured dimension. |
 | Verified height | Unknown. No survey, LiDAR or per-building authoritative measurements are integrated. |
-| Roofs / façades | Simplified polygons with generated Portuguese materials, enabled by default. Wall repeats are 6 m; terracotta/granite repeats are 2 m. These are synthetic assignments, not address-matched photographs. Roofs remain flat, not surveyed pitched meshes. |
+| Roofs / façades | Seven façade styles, six roof finishes, stable tints and tile directions. Suitable quadrilaterals have illustrative gabled/hipped profiles; other roofs stay flat. Wall repeats are 6 m; roof/stone repeats are 2 m. Materials and profiles are synthetic choices, not address-matched photographs or surveyed roof geometry. |
 | Ground elevation | Mapterhorn terrain. City presets choose 1× terrain exaggeration; changing ground exaggeration does not scale building height values. Alignment remains limited by the source DEM and mapped polygon resolution. |
 
 OpenMapTiles' [building implementation](https://github.com/openmaptiles/openmaptiles/tree/master/layers/building)
@@ -49,15 +49,26 @@ zoom-dependent sprite sizes. Mipmaps and optional anisotropic filtering reduce
 distance shimmer. Generated materials are labelled illustrative in English and Portuguese.
 See the [asset provenance and complete prompt](../web/public/textures/portugal/README.md).
 
+The [variation atlases and prompt set](../web/public/textures/portugal/VARIANTS.md)
+add ochre, green-tile, rose and white/blue façades, several clay finishes, slate
+and gravel. Material/tint, roof direction and pattern offsets are stable for a
+polygon's location. Suitable approximately rectangular footprints without holes
+get synthetic gabled/hipped profiles with the ridge at the source rendering top
+height and lower eaves. Irregular/courtyard roofs stay flat to preserve holes.
+
 Detail is bounded to the nearest 3,000 polygons within 1.4 km from zoom 16.5;
 outside that area footprints remain flat. Lower zoom, disabled textures and
 texture failures use native plain extrusions. Source tiles load through the
 existing map source, without a bulk geometry request. Duplicate geometry is
 deduplicated, grouped multipolygons are split and courtyard holes retained.
-Roof elevation uses the highest sampled footprint elevation plus rendering
+Maximum roof elevation uses the highest sampled footprint elevation plus rendering
 height. Foundations follow terrain samples with a small ground inset; terrain
 exaggeration changes the ground placement, not the supplied building height.
 DEM resolution, tile clipping and missing geometry still limit alignment.
+Nearby elevation samples are rechecked after rendered frames/idle so late DEM
+coverage replaces provisional ground placement. The native 3D source consumer
+stays registered at zero opacity during detailed rendering, retaining its tile
+coverage without drawing an overlapping flat roof.
 
 The renderer owns its GPU buffers/textures, builds mipmaps once, updates geometry
 after camera/source changes, and releases resources on removal. GPU uploads occur
@@ -65,6 +76,22 @@ inside MapLibre's custom render pass to preserve its GL state. Selection uses
 the same projected triangles and depth order as the drawn buildings rather than
 non-unique tile IDs. No claim is made that a generated façade matches a
 particular address, or that OSM height attributes establish surveyed dimensions.
+
+## Road and park surfaces
+
+The always-visible **Textures** button beside 2D/3D toggles all generated
+materials; the Materials section independently toggles buildings/roofs,
+roads/paving and parks/grass. Ground textures work in both modes from zoom 16.
+They overlay mapped road surfaces with asphalt or calçada and mapped park/grass
+polygons with green/dry grass. Grass repeats are 8/12 m to expose natural clumps;
+other ground materials repeat around 2 m near the reference Portugal latitude.
+The [MapLibre pattern layers](https://maplibre.org/maplibre-style-spec/layers/)
+follow native terrain draping. Overlay filters, road widths, paths, railway
+separation and labels come from the base style. No new road/park geometry is
+invented; road widths are cartographic, not surveyed surface widths. Materials
+do not establish actual pavement, maintenance, irrigation or seasonal condition.
+Toggling ground materials off reveals the untouched native surfaces. Surface
+loading is independent of building loading and failure leaves the base usable.
 
 ## Why Context.dev is not the geometry source
 
@@ -106,3 +133,5 @@ Mesh tests additionally cover courtyard area, stable metre-based UVs across
 camera origins, finite geometry, approximate height/base placement, sloping
 foundations and nearest-triangle picking. The custom-layer integration follows
 [MapLibre's public interface](https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/).
+Variation tests cover stable diverse assignments, pitched roofs bounded by
+footprints/top heights, courtyard preservation and ground-layer style validation.
