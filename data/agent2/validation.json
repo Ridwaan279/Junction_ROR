@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-11-15T04:52:26.243Z",
+  "environment": "Existing Linux Rust 1.100.0 Docker build image",
+  "commands": {
+    "fmt": "cargo fmt --all -- --check",
+    "clippy": "cargo clippy --locked --workspace --all-targets -- -D warnings",
+    "test": "cargo test --locked --workspace"
+  },
+  "exit_codes": {
+    "fmt": 0,
+    "clippy": 0,
+    "test": 0,
+    "demo": 0
+  },
+  "tests_passed": 151,
+  "tests_ignored": 2,
+  "spread_validation_rows": 12,
+  "spread_validation_unchanged": true,
+  "human_benchmark": "omitted_by_user_request",
+  "secrets_or_full_article_text_committed": false
+}

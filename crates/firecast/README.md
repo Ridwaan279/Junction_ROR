@@ -63,9 +63,11 @@ The replay forecasts from the ignition point to the first observed perimeter, th
 restarts from every observed perimeter and forecasts the next one. Each forecast is
 scored with the Sørensen–Dice coefficient on total and on newly burned area, plus the
 share of observed growth inside the 10 % probability band and the growth direction.
-Every 3 hours it also records smoke, conditions, and a drone fleet sized from the
-active front and growth rate. The fleet is routed from bases 3 km outside the fire in
-the cleanest air, avoiding likely fire within the hour and slowing down in smoke.
+Frames are half-hourly for the first three hours, then three-hourly. The fleet
+uses the tested perimeter/head/exposure duty-cycle formula. The intermediate
+replay retains legacy local-route graphics; the new split generated demo uses
+fixed hypothetical stations, sourced OSM coordinates, regional terrain and hard
+smoke/fire blocks. See `data/demo/arganil-early/README_AGENT2.md` for its Rust build.
 
 ```sh
 cargo run --release -p emberwatch-firecast --example build_dataset

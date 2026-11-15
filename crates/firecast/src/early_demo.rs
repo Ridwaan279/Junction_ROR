@@ -416,7 +416,41 @@ fn planned_fleet(
         .iter()
         .all(|(dx, dy)| !hazard(local.to_lon_lat(x + dx, y + dy)).blocked())
     };
-    let mut tasks = Vec::new();
+    let mut exposure_targets: Vec<[f64; 2]> = Vec::new();
+    let mut clusters: Vec<[f64; 2]> = Vec::new();
+    for site in exposures {
+        if site["automation_eligible"] != true
+            || !site["p_fire_6h"].as_f64().is_some_and(|p| p >= 0.2)
+        {
+            continue;
+        }
+        let Ok(position) = serde_json::from_value::<[f64; 2]>(site["position"].clone()) else {
+            continue;
+        };
+        if clusters.iter().any(|p| haversine_m(*p, position) < 1000.) {
+            continue;
+        }
+        clusters.push(position);
+        let (x, y) = local.to_local(position);
+        let point = if safe(position) {
+            Some(position)
+        } else {
+            [1000., 2000., 3000.].into_iter().find_map(|r| {
+                [
+                    bearing + std::f64::consts::PI,
+                    bearing + std::f64::consts::FRAC_PI_2,
+                    bearing - std::f64::consts::FRAC_PI_2,
+                ]
+                .into_iter()
+                .map(|a| local.to_lon_lat(x + r * a.sin(), y + r * a.cos()))
+                .find(|p| safe(*p))
+            })
+        };
+        if let Some(point) = point {
+            exposure_targets.push(point);
+        }
+    }
+    let mut tasks = exposure_targets.clone();
     for sector in 0..8 {
         let angle = sector as f64 * std::f64::consts::FRAC_PI_4;
         let mut radius = 0.0_f64;
@@ -504,18 +538,16 @@ fn planned_fleet(
         return Ok(plan);
     }
     let transit = templates.iter().map(|t| t.2.transit_s).fold(0., f64::max);
-    let clusters = exposures
+    let cluster_count = exposure_targets
         .iter()
-        .filter(|e| {
-            e["automation_eligible"] == true && e["p_fire_6h"].as_f64().is_some_and(|p| p >= 0.2)
-        })
+        .filter(|p| templates.iter().any(|t| t.1 == **p))
         .count();
     let sizing = fleet::size(
         grid["front_1h_m"]
             .as_f64()
             .ok_or_else(|| failure("front length"))?,
         grid["head_sectors"].as_u64().unwrap_or(1) as usize,
-        clusters,
+        cluster_count,
         transit,
         cfg,
     )?;
@@ -527,7 +559,24 @@ fn planned_fleet(
         .collect::<Vec<_>>();
     let airborne = sizing.airborne_perimeter + sizing.airborne_head + sizing.airborne_exposure;
     for i in 0..plan.count {
-        let (si, task, r) = &templates[i % templates.len()];
+        let role = if i >= airborne {
+            "reserve"
+        } else if i < sizing.airborne_head {
+            "head"
+        } else if i < sizing.airborne_head + sizing.airborne_exposure {
+            "exposure"
+        } else {
+            "perimeter"
+        };
+        let candidates = templates
+            .iter()
+            .filter(|t| (role == "exposure") == exposure_targets.contains(&t.1))
+            .collect::<Vec<_>>();
+        let (si, task, r) = if candidates.is_empty() {
+            &templates[i % templates.len()]
+        } else {
+            candidates[i % candidates.len()]
+        };
         // All templates may prefer one base. Assign overflow to another sourced
         // hypothetical station with an explicit recomputed schematic transfer.
         let chosen = if available[*si] > 0 {
@@ -539,15 +588,6 @@ fn planned_fleet(
             break;
         };
         available[chosen] -= 1;
-        let role = if i >= airborne {
-            "reserve"
-        } else if i < sizing.airborne_head {
-            "head"
-        } else if i < sizing.airborne_head + sizing.airborne_exposure {
-            "exposure"
-        } else {
-            "perimeter"
-        };
         let route = if role == "reserve" {
             None
         } else if chosen == *si {
@@ -647,19 +687,63 @@ pub struct Export {
 
 /// An observation samples an already-planned simulated flight at this cursor;
 /// it never reports a future task as a completed sensor observation.
+fn edge_distance(p: [f64; 2], geometry: &Value) -> Option<f64> {
+    fn visit(p: [f64; 2], v: &Value, best: &mut f64) {
+        let Some(values) = v.as_array() else {
+            return;
+        };
+        if values.first().is_some_and(|v| v[0].is_number()) {
+            let local = LocalFrame { origin_lon_lat: p };
+            for pair in values.windows(2) {
+                let (Ok(a), Ok(b)) = (
+                    serde_json::from_value::<[f64; 2]>(pair[0].clone()),
+                    serde_json::from_value::<[f64; 2]>(pair[1].clone()),
+                ) else {
+                    continue;
+                };
+                let (ax, ay) = local.to_local(a);
+                let (bx, by) = local.to_local(b);
+                let (dx, dy) = (bx - ax, by - ay);
+                let length2 = dx * dx + dy * dy;
+                let f = if length2 > 0. {
+                    (-(ax * dx + ay * dy) / length2).clamp(0., 1.)
+                } else {
+                    0.
+                };
+                *best = best.min((ax + f * dx).hypot(ay + f * dy));
+            }
+        } else {
+            for child in values {
+                visit(p, child, best);
+            }
+        }
+    }
+    let mut best = f64::INFINITY;
+    visit(p, &geometry["coordinates"], &mut best);
+    best.is_finite().then_some(best)
+}
 fn observation(
     frame: &Value,
     planned: DateTime<Utc>,
     drone: &Drone,
     at: DateTime<Utc>,
+    sites: &[Value],
 ) -> Option<String> {
     let route = drone.route.as_ref()?;
     let elapsed = (at - planned).num_seconds() as f64;
     let leg = route.legs.iter().find(|l| l.kind == "flight")?;
-    let path = &route.waypoints[leg.from..=leg.to];
-    if elapsed < path.first()?.t_s || elapsed > path.last()?.t_s {
+    let path = &route.waypoints;
+    if elapsed < 0. || path.len() < 2 {
         return None;
     }
+    let phase = if elapsed >= route.duration_s {
+        "returned / regressado"
+    } else if elapsed >= path[leg.from].t_s && elapsed <= path[leg.to].t_s {
+        "flight / voo"
+    } else {
+        "schematic ground transfer / transporte terrestre esquemático"
+    };
+    let elapsed = elapsed.clamp(path.first()?.t_s, path.last()?.t_s);
     let pair = path
         .windows(2)
         .find(|pair| pair[0].t_s <= elapsed && elapsed <= pair[1].t_s)?;
@@ -672,27 +756,48 @@ fn observation(
         pair[0].position[0] + f * (pair[1].position[0] - pair[0].position[0]),
         pair[0].position[1] + f * (pair[1].position[1] - pair[0].position[1]),
     ];
-    let source: PlumeSource =
-        serde_json::from_value(frame["planning"]["plume"]["source"].clone()).ok()?;
-    let met: PlumeMet = serde_json::from_value(frame["planning"]["plume"]["met"].clone()).ok()?;
     let origin: [f64; 2] =
         serde_json::from_value(frame["planning"]["origin_lon_lat"].clone()).ok()?;
     let (x, y) = LocalFrame {
         origin_lon_lat: origin,
     }
     .to_local(p);
-    let smoke = concentration(&source, &met, &summarise(&source, &met), x, y);
+    let smoke = match (
+        serde_json::from_value::<PlumeSource>(frame["planning"]["plume"]["source"].clone()),
+        serde_json::from_value::<PlumeMet>(frame["planning"]["plume"]["met"].clone()),
+    ) {
+        (Ok(source), Ok(met)) => concentration(&source, &met, &summarise(&source, &met), x, y),
+        _ if frame["weather"].is_object() => 0.,
+        _ => return None,
+    };
     let wind = frame["weather"]["wind_mps"].as_f64()?;
     let probability = probability(&frame["planning"], "burn_6h", p);
+    let edge = edge_distance(p, &frame["predicted"]["p50"])
+        .map_or("unknown".into(), |m| format!("{:.1} km", m / 1000.));
+    let nearby = sites
+        .iter()
+        .filter(|s| s["automation_eligible"] == true)
+        .filter_map(|s| {
+            serde_json::from_value::<[f64; 2]>(s["position"].clone())
+                .ok()
+                .filter(|q| haversine_m(p, *q) <= 2000.)
+                .and(s["name"].as_str())
+        })
+        .take(3)
+        .collect::<Vec<_>>()
+        .join(", ");
     Some(format!(
-        "{} · {} · simulated position {:.5}, {:.5}; model surface PM2.5 {:.1} µg/m³; retrospective wind {:.1} m/s; six-hour burn probability {}. No real sensor measurement.",
+        "{} · {} · {} · simulated position {:.5}, {:.5}; distance to model fire edge {}; model surface PM2.5 {:.1} µg/m³; retrospective wind {:.1} m/s; six-hour burn probability {}; mapped verified exposure sites within 2 km: [{}]. No real sensor measurement.",
         drone.id,
         drone.role,
+        phase,
         p[0],
         p[1],
+        edge,
         smoke,
         wind,
-        probability.map_or("unknown".into(), |p| format!("{:.0}%", 100. * p))
+        probability.map_or("unknown".into(), |p| format!("{:.0}%", 100. * p)),
+        nearby
     ))
 }
 pub fn build(
@@ -752,7 +857,7 @@ pub fn build(
             .unwrap_or(Value::Null);
         let mut automation = Vec::new();
         for (planned, drone) in missions.values() {
-            if let Some(detail) = observation(fr, *planned, drone, at) {
+            if let Some(detail) = observation(fr, *planned, drone, at, &sites) {
                 automation.push(json!({"step":"first_report","at":at,"basis":"simulated",
                     "detail":detail,"detail_en":detail,"detail_pt":format!("Observação simulada: {}. Fumo/vento/probabilidade são valores do modelo; sem medição real.",drone.id),
                     "url":null,"sources":[],"latency_s":(at-detection).num_seconds()}));
