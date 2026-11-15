@@ -1,6 +1,9 @@
 # EmberWatch two-agent work plan
 
 Status: plan only. Nothing here is implemented until a gate below says so.
+Updated 15 November 2026: the user removed Gemini from the project. No Google
+model integration, advisor chatbot, Gemini credentials or model access is required.
+Rust produces deterministic fleet/risk explanations; Context.dev supplies web evidence.
 Read with [AGENTS.md](../AGENTS.md), [PLAN.md](PLAN.md), [DATA_SOURCES.md](DATA_SOURCES.md)
 and, for Agent 2, [CONTEXT_DEV_ACCURACY.md](CONTEXT_DEV_ACCURACY.md).
 
@@ -10,9 +13,8 @@ The goal for the demo: an operator opens one screen, sees Portugal in 3D, a fire
 is reported, and **without anyone clicking** the system has already verified the
 report against cited sources, forecast spread and smoke, sized a drone fleet,
 launched simulated drones from fixed stations along smoke-avoiding routes, and is
-producing drone situation reports. The operator can ask a Gemini advisor
-"what is the risk of this reaching Piódão in the next 6 hours?" and get an
-answer whose numbers come from our models, with citations.
+producing simulated observation facts. The operator can inspect the model's
+risk for Piódão over the next 6 hours, with the calculation inputs and citations.
 
 Priority order (from the request; do not reorder):
 
@@ -24,7 +26,7 @@ Priority order (from the request; do not reorder):
 | 4 | Drone stations, deterministic fleet sizing, daily/frame re-sizing | Agent 2 (model), Agent 1 (map) |
 | 5 | Station→fire 3D routes, A* on a cost map that avoids smoke and predicted fire | Agent 2 (planner), Agent 1 (render) |
 | 6 | People-at-risk / nearby events from Context.dev, feeding deployment priority | Agent 2 |
-| 7 | Gemini: fleet-count cross-check, drone situation reports, risk chatbot | Agent 2 (server), Agent 1 (UI) |
+| 7 | Deterministic fleet/risk explanations and simulated observation facts | Agent 2 (server), Agent 1 (UI) |
 | 8 | Accuracy and correctness checks across all of the above | Both, in their own scope |
 | 9 | ROS2 bridge | Later phase. Only the message contract is written now (section 9) |
 
@@ -37,11 +39,11 @@ labelled so everywhere.
 Two agents work in parallel. Merging stays easy because **no file has two
 writers**. Every change outside your scope goes through a request to the owner.
 
-| | Agent 1: Experience + integration | Agent 2: Intelligence + planning + Gemini |
+| | Agent 1: Experience + integration | Agent 2: Intelligence + planning |
 |---|---|---|
 | Session | This session | The user's other agent |
 | Branch | integration branch (this session's branch) | its own branch, cut from the Gate 0 commit |
-| Writes | `web/**` except `web/public/generated/**`; `docs/UI.md`; `docs/WORKPLAN.md` | `crates/intelligence/**`, `crates/firecast/**`, new `crates/advisor/**`, `crates/server/**`, root `Cargo.toml`/`Cargo.lock`, `data/**`, `web/public/generated/**`, `docs/CONTEXT_DEV_ACCURACY.md`, `docs/DATA_SOURCES.md` |
+| Writes | `web/**` except `web/public/generated/**`; `docs/UI.md`; `docs/WORKPLAN.md` | `crates/intelligence/**`, `crates/firecast/**`, `crates/server/**`, root `Cargo.toml`/`Cargo.lock`, `data/**`, `web/public/generated/**`, `docs/CONTEXT_DEV_ACCURACY.md`, `docs/DATA_SOURCES.md` |
 | Never writes | any Rust, `Cargo.*`, `data/**`, `web/public/generated/**` | `web/**` outside `web/public/generated/**`, `web/package*.json` |
 | Git integration | Performs all merges into the integration branch | Hands off a commit; never merges into the integration branch |
 
@@ -67,7 +69,7 @@ Rules that keep merges trivial:
    ```
 
    Every path must be inside your "Writes" column.
-4. Agent 2 adds server routes in its own modules (`crates/server/src/advisor_api.rs`,
+4. Agent 2 adds server routes in its own modules (`crates/server/src/live_api.rs`,
    `crates/server/src/fleet_api.rs`) and mounts them in `crates/server/src/lib.rs`;
    Agent 1 does not touch the server, so no conflict.
 5. Rebase onto the integration branch after every gate. Do not rewrite another
@@ -79,11 +81,11 @@ Rules that keep merges trivial:
 
 | Gate | Done when | Who |
 |---|---|---|
-| 0 | Done: plan, contracts and firecast work pushed to `claude/fervent-clarke-m9qsko` (`9a061da`) | Agent 1 |
+| 0 | Done: plan, contracts and firecast work pushed (`9a061da`, now on `main`) | Agent 1 |
 | 1 | 3D branch merged into the integration branch, all checks green, Agent 2 rebased | Agent 1 |
 | 2 | UI shell redesign on fixtures; Agent 2 delivers stations + deterministic fleet + 3D routes for the Arganil replay into `web/public/generated/` | both |
 | 3 | Context.dev accuracy harness and golden set passing thresholds; exposures (people at risk) in the replay output | Agent 2 |
-| 4 | Gemini advisor endpoints (fleet check, sitreps, chat) with cached replay outputs; UI panels wired | both |
+| 4 | Deterministic fleet/risk breakdowns and simulated observation facts wired to UI panels; no external model dependency | both |
 | 5 | End-to-end demo pass, accuracy checklist (section 8) green, screenshots | both |
 
 ## 4. Agent 1 tasks: UI/UX first, then the 3D merge
@@ -143,7 +145,7 @@ Starting proposal: one operations screen replaces the current workspace/historic
 │ incidents           │                                                                   │ Risk summary        │
 │ automation timeline │                                                                   │ Fleet (count + why) │
 │  (detected → …)     │                                                                   │ Drone reports       │
-│                     │  bottom: replay timeline scrubber + layer legend                  │ Ask the advisor     │
+│                     │  bottom: replay timeline scrubber + layer legend                  │ Risk breakdown      │
 └─────────────────────┴───────────────────────────────────────────────────────────────────┴─────────────────────┘
 ```
 
@@ -163,7 +165,7 @@ Requirements:
 - **Right panel cards**: risk summary (area, head bearing/speed, fire type,
   towns within the 6-h envelope), fleet card (count with the breakdown terms
   from section 6.2, change since previous frame and the reason), drone reports
-  (latest first, "simulated observation" badge), advisor chat.
+  (latest first, "simulated observation" badge), deterministic risk breakdown.
 - **Provenance always visible**: every number that comes from a source shows its
   source and capture time on hover; derived values say "model" and link to the
   method. Scrape failure is shown as a failure state, never as "0 incidents".
@@ -185,8 +187,8 @@ Requirements:
   dashed segment for `ground_transfer` legs, solid for flight legs.
 - Drone animation: interpolate along `route.waypoints` by `t_s`.
 - Smoke-avoidance explanation on hover: "detour +2.1 km to avoid smoke ≥ 150 µg/m³".
-- Chat UI: streaming not required; show answer, the tool facts used (section
-  7.4 `facts`), citations and the model name returned by the server.
+- Risk details show the underlying calculation inputs, units, model horizon,
+  citations and uncertainty. No chatbot or generative advisor UI is planned.
 
 ## 5. Agent 2 tasks (backend)
 
@@ -222,7 +224,8 @@ flagged when they disagree.
 by Agent 1 before Agent 2 started (requested by the user). From now on Agent 2 owns
 `data/demo/**` and should (1) port the capture scripts to the Rust
 `probe_context` example, (2) produce 15–30 min frames for the first 3 hours,
-(3) fill `fleet`, `sitreps` and `fleet_check`, and write the result to
+(3) fill `fleet` and exposure/routing outputs, leave retired advisor fields
+`sitreps: []` and `fleet_check: null`, and write the result to
 `web/public/generated/arganil-early/` in the same format. Agent 1 keeps
 `web/public/fixtures/**`.
 
@@ -240,8 +243,8 @@ by Agent 1 before Agent 2 started (requested by the user). From now on Agent 2 o
 
 The fleet count is computed in Rust, from a formula we can defend and test; it
 is recomputed every replay frame and whenever a new daily perimeter or new
-evidence arrives. Gemini cross-checks and explains it (5.5); it never silently
-changes it.
+evidence arrives. Unit tests cross-check arithmetic; the UI explains it from the
+returned formula inputs and breakdown (5.5).
 
 ```
 airborne_perimeter = ceil( P_front / (v · T_revisit / 2) )
@@ -291,33 +294,21 @@ rather than a negative fleet; reproduces hand-computed cases.
 - Accuracy rules from CONTEXT_DEV_ACCURACY.md apply: quote verification,
   lineage, never invent attendance.
 
-### 5.5 Gemini advisor (`crates/advisor`)
+### 5.5 Deterministic explanations and simulated observation facts
 
-Server-side only: `GEMINI_API_KEY`, `GEMINI_MODEL` (required, no default model
-ID in the repo: the team picks one from Google's current model list). REST
-`generateContent` with structured JSON output (`responseSchema`), function
-calling and, for the fleet check, the code-execution tool. Network: the
-environment must allow `generativelanguage.googleapis.com`.
-
-1. **Fleet cross-check**: send the fleet inputs and the formula; Gemini computes
-   the count with code execution and explains it in PT/EN. Rust compares: equal →
-   "verified by advisor"; different → show the deterministic number and flag the
-   disagreement. Gemini may add a recommendation (for example "add one drone for
-   the campsite"), shown as a suggestion the operator can accept.
-2. **Drone situation reports**: at each task point, sample the facts the drone
-   would see in the simulation (distance to observed or predicted edge, smoke
-   concentration, wind, nearby exposure sites, flank or head). Gemini turns only
-   those facts into a structured report. Every report is labelled "simulated
-   observation" and keeps the facts beside the text.
-3. **Risk chatbot**: function calling over our data, so numbers are not
-   generated by the model: `find_place(name)`, `burn_probability(lon, lat,
-   hours)`, `smoke(lon, lat, hour)`, `exposures()`, `fleet()`, `sources()`.
-   Post-check: every number in the answer must appear in a tool result
-   (rounded), otherwise the answer is rejected and retried once, then returned
-   with `grounded: false`.
-4. **Replay determinism**: for the Arganil replay, cache advisor outputs into
-   `web/public/generated/` with `model`, `generated_at` and inputs hash, so the
-   demo runs without a key and a seek never shows a report from the future.
+1. **Fleet explanation**: return the Rust formula inputs and term-by-term
+   breakdown in PT/EN. Verify arithmetic with independent hand-computed unit
+   cases; do not claim verification by an external advisor.
+2. **Simulated observations**: sample distance to fire edge, smoke, wind,
+   exposure sites and task role from the simulation at the replay cursor. Keep
+   measured/source facts separate from model outputs and label simulation facts.
+3. **Risk details**: show computed burn probability, smoke, exposure priority,
+   forecast horizon and sources directly. No generative chat, code-execution
+   service, replacement model provider or advisor crate is required.
+4. **Replay determinism**: generate derived outputs offline from fixed inputs;
+   seeking must never reveal future evidence or observation facts. Existing
+   advisor fixture fields stay empty. Agree any new report contract with Agent 1
+   before populating structured report fields; never insert a fake model ID.
 
 Endpoints (Agent 2 owns `crates/server`):
 
@@ -325,24 +316,22 @@ Endpoints (Agent 2 owns `crates/server`):
 |---|---|
 | `GET /api/stations` | 7.2 `stations` |
 | `POST /api/incidents/{id}/fleet?run_id=&at=` | 7.2 `FleetPlan` |
-| `POST /api/incidents/{id}/advisor/fleet-check` | 7.3 `FleetCheck` |
-| `POST /api/incidents/{id}/advisor/sitrep` | 7.3 `Sitrep` |
-| `POST /api/incidents/{id}/advisor/chat` | 7.4 `ChatAnswer` |
 | `GET /api/incidents/{id}/exposures` | 7.2 `ExposureSite[]` |
+| `GET /api/live/status` | Shape of `web/public/fixtures/v2/live-status.json`; per-source capture success and positive-empty status |
 
-## 6. How Gemini and the physics fit together
+## 6. How source evidence and physics fit together
 
 - Physics (Rothermel/ensemble, Gaussian plume, A*) produces every number.
 - Context.dev produces evidence, each item with URL, quote and capture time.
-- Gemini explains, cross-checks arithmetic, writes reports from given facts and
-  answers questions by calling our functions. It does not forecast fire.
-- The UI always shows which of the three a value came from.
+- Rust computes deterministic explanations and simulated observations from those
+  facts. Human review and regression tests verify extraction and arithmetic.
+- The UI labels source observations, model outputs and configured assumptions.
 
 ## 7. Shared contracts (frozen at Gate 0)
 
 All times are RFC 3339 UTC. Coordinates are `[lon, lat]` or `[lon, lat, alt_m]`.
 Unknown values are `null`. Every object that is derived carries `basis`
-(`"observed" | "model" | "configured" | "advisor"`), and every object built from
+(`"observed" | "model" | "configured"`), and every object built from
 sources carries `sources: Source[]`.
 
 ```ts
@@ -354,7 +343,7 @@ type Source = { url: string; title: string | null; captured_at: string; event_ti
 
 `generated/<dataset>/index.json`: `{ dataset, mode: "historical", frames: [{ at, file }], stations_file, sources: Source[] }`.
 Each frame file keeps the existing frame fields and adds `fleet: FleetPlan`,
-`exposures: ExposureSite[]`, `sitreps: Sitrep[]`, `fleet_check: FleetCheck | null`,
+`exposures: ExposureSite[]`, `sitreps: []`, `fleet_check: null`,
 `automation: AutomationEvent[]`.
 
 ```ts
@@ -399,23 +388,16 @@ Revision 2.1 (after Gate 0, before any consumer shipped): `ExposureSite`,
 `AutomationEvent` gains `basis: "observed" | "simulated"` and `url`. Frames list
 `evidence_ids`; the evidence itself lives once in `index.json`.
 
-### 7.3 Advisor outputs
+### 7.3 Retired advisor output fields
 
-```ts
-type FleetCheck = { at: string; deterministic_count: number; advisor_count: number | null; agrees: boolean;
-  explanation_pt: string; explanation_en: string; suggestion: string | null; model: string; generated_at: string };
-type Sitrep = { drone_id: string; at: string; simulated: true; facts: Record<string, number | string | null>;
-  summary_pt: string; summary_en: string; recommended_action: string | null; model: string; generated_at: string };
-```
+Existing replay fixtures retain `fleet_check: null` and `sitreps: []` for reader
+compatibility. No advisor outputs or model identifiers are generated. Fleet
+explanations use the existing `FleetPlan.breakdown`; new structured observation
+reports need an agreed contract before implementation.
 
-### 7.4 Chat
+### 7.4 Removed chat contract
 
-Request `{ question: string; locale: "pt" | "en"; run_id: string; at: string }`.
-
-```ts
-type ChatAnswer = { answer: string; grounded: boolean; facts: { tool: string; args: unknown; result: unknown }[];
-  sources: Source[]; model: string; generated_at: string };
-```
+The advisor chat request/response and advisor routes are removed from scope.
 
 ## 8. Accuracy and verification checklist
 
@@ -427,8 +409,8 @@ Each agent runs the checks for what it changed and reports any it could not run.
   better than the current values recorded in `crates/firecast/README.md`.
 - Fleet formula unit tests and hand-computed cases (5.2); route invariants (5.3).
 - Context.dev golden-set thresholds (CONTEXT_DEV_ACCURACY.md section 6).
-- Advisor: chat answers pass the number-grounding check; sitrep text mentions
-  no fact absent from `facts`; fleet-check disagreement path tested with a stub.
+- Deterministic explanations match the Rust formula; observation facts come only
+  from the simulation/source state at the cursor; retired advisor fields stay empty.
 - Replay: seeking to any time shows no evidence, sitrep or exposure with a time
   after the cursor.
 - UI: screenshots for the states in 4.2; PT and EN; Lisbon time display tests.
@@ -447,27 +429,29 @@ commands, so the bridge can be added without changing the UI.
 
 ## 10. Kickoff prompt for Agent 2
 
-Agent 2 works on **its own branch** cut from `origin/claude/fervent-clarke-m9qsko`
-(its cloud session's assigned branch is fine). It never pushes to
-`claude/fervent-clarke-m9qsko`; Agent 1 merges Agent 2's branch at each gate.
+Integration branch is now **`main`** (user decision, 15 Nov 2026); the earlier
+`claude/fervent-clarke-m9qsko` is retired. Agent 2 keeps its own branch
+(`codex/agent-2-intelligence`), rebases it on `origin/main` after each gate and
+never pushes to `main`; Agent 1 merges Agent 2's branch into `main` at each gate.
 Paste this into the other agent:
 
-> You are Agent 2 (intelligence, planning and Gemini) on EmberWatch. Fetch
-> `origin/claude/fervent-clarke-m9qsko` and create your own branch from it; work
-> and push only there. Read AGENTS.md, docs/WORKPLAN.md (sections 2, 5, 7, 8),
+> You are Agent 2 (intelligence and planning) on EmberWatch. Fetch `origin/main`
+> and rebase your branch `codex/agent-2-intelligence` on it (or create it from
+> `origin/main`); work and push only there, never to `main`. Read AGENTS.md, docs/WORKPLAN.md (sections 2, 5, 7, 8),
 > docs/CONTEXT_DEV_ACCURACY.md and docs/DEMO_DATA.md. You write only the paths in
 > the "Agent 2" column of WORKPLAN section 2; never edit `web/**` except
-> `web/public/generated/**`. Work in this order: (1) CONTEXT_DEV_ACCURACY.md
+> `web/public/generated/**`. Also read docs/UI.md (live-status contract and what the UI expects). Work in this order: (1) CONTEXT_DEV_ACCURACY.md
 > tasks 0–5, using the real Arganil captures in `data/demo/arganil-early/` as the
 > first golden pages; (2) WORKPLAN 5.0b (port the capture scripts to Rust, finer
 > early frames); (3) 5.1 stations, 5.2 fleet sizing, 5.3 smoke-aware 3D routes;
-> (4) 5.4 people at risk and nearby events; (5) 5.5 Gemini advisor. The live
+> (4) 5.4 people at risk and nearby events; (5) 5.5 deterministic explanations
+> and simulated observation facts. The live
 > view needs an honest "no active fires" signal (WORKPLAN 4.2): expose, per
 > source, whether the last capture succeeded and whether it positively showed no
 > active incidents. Use only real data that was public at the time; never invent
 > model IDs, quotas, counts, events or timestamps. Context.dev's key is injected
-> by the environment proxy (`CONTEXT_DEV_API_KEY` may be a placeholder); Gemini
-> needs `GEMINI_API_KEY`, `GEMINI_MODEL` and network access to
-> `generativelanguage.googleapis.com`. At each gate, push your branch and hand off:
+> by the environment proxy (`CONTEXT_DEV_API_KEY` may be a placeholder). No Gemini
+> integration, key, model selection or Google model access is required. Implement
+> `GET /api/live/status` against the agreed fixture. At each gate, push your branch and hand off:
 > commit, `git diff --name-only <base>..HEAD` scope check, `cargo fmt/clippy/test`
 > results, open issues and env var names.

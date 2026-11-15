@@ -31,3 +31,20 @@ describe("Arganil early-stage replay", () => {
     expect(names).toContain("Piódão");
   });
 });
+
+import { pinsAt } from "../lib/replay";
+describe("nearby-event pins", () => {
+  it("show the Piódão summer festival only after it was reported (14 Aug 18:03 Lisbon)", () => {
+    const before = pinsAt(index, Date.parse("2025-08-14T17:00:00Z"));
+    const after = pinsAt(index, Date.parse("2025-08-14T17:10:00Z"));
+    expect(before.some((p) => p.kind === "event")).toBe(false);
+    const fest = after.find((p) => p.kind === "event");
+    expect(fest?.place).toBe("Piódão");
+    expect(fest?.items[0].url).toContain("observador.pt");
+  });
+  it("include shelters and road closures from verified reports", () => {
+    const pins = pinsAt(index, Date.parse(index.window.to));
+    expect(pins.some((p) => p.kind === "shelter" && p.place === "Vide")).toBe(true);
+    expect(pins.some((p) => p.kind === "road")).toBe(true);
+  });
+});

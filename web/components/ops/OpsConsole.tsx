@@ -5,62 +5,83 @@ import { loadMapLibre } from "@/lib/terrain";
 import { loadOpsStyle, setThreeD } from "@/lib/ops-map";
 import {
   addReplayLayers, compassPoint, FIRE, frameAt, lisbon, REPLAY_BASE, setReplayVisible, showReplayFrame, showVillages, villagesAt,
-  showDrones, type ReplayFrame, type ReplayIndex, type ValidationRow,
+  showFleet, pinsAt, pinElement, PIN_COLORS, type ReplayFrame, type ReplayIndex, type ValidationRow,
 } from "@/lib/replay";
+import { distanceKm, droneTasks, FLEET, outerRing, planFleet, stagingPoint, type FleetPlan } from "@/lib/fleet";
 import s from "./ops.module.css";
+import SiteNav, { useLocale } from "./SiteNav";
 
 type Locale = "pt" | "en";
 type Mode = "live" | "replay";
 type LiveStatus = {
-  mode: "live"; origin: "service" | "snapshot"; checked_at: string;
+  mode: "live"; checked_at: string;
   state: "no_active_fires" | "active_fires" | "check_failed" | "partial";
-  statement: string | null; statement_en: string | null;
   active: { id: string; place: string; position: [number, number] | null; status: string; url: string }[];
-  sources: { name: string; url: string; via: string; captured_at: string; status: string }[];
+  sources: { name: string; url: string }[];
 };
+type Accuracy = { method: string; observed_source: { name: string; url: string }[]; rows: ValidationRow[] };
 
 const PORTUGAL = { center: [-8.05, 39.62] as [number, number], zoom: 6.35, pitch: 46, bearing: -8 };
-/** Keep the subject in the free part of the screen, beside (desktop) or below (phone) the panels. */
-const framePadding = () => typeof window !== "undefined" && window.innerWidth <= 760
-  ? { top: 300, bottom: 190, left: 10, right: 10 }
-  : { top: 60, bottom: 110, left: 400, right: 40 };
-const REPLAY_SECONDS = 75; // the 42-hour window plays in about 75 s
+const REPLAY_SECONDS = 75;
+const phone = () => typeof window !== "undefined" && window.innerWidth <= 760;
+/** Keep the subject in the free part of the screen, beside (desktop) or below (phone) the card. */
+const framePadding = (mode: Mode = "replay") => mode === "live"
+  ? (phone() ? { top: 120, bottom: 20, left: 0, right: 0 } : { top: 40, bottom: 20, left: 0, right: 0 })
+  : (phone() ? { top: 300, bottom: 80, left: 10, right: 10 } : { top: 60, bottom: 90, left: 380, right: 40 });
 
 const T = {
   pt: {
-    live: "Ao vivo", replay: "Arganil 2025", replayLong: "Reprodução histórica · dados reais", threeD: "3D", twoD: "2D",
-    noFires: "Sem incêndios ativos neste momento", activeFires: (n: number) => `${n} incêndio${n === 1 ? "" : "s"} ativo${n === 1 ? "" : "s"}`,
-    checkFailed: "Não foi possível confirmar a situação", partial: "Verificação incompleta",
-    checked: "Verificado", via: "via", snapshot: "Serviço ao vivo desligado: a mostrar a última verificação",
-    loadingLive: "A verificar fontes…", watch: "Ver o incêndio de Arganil 2025",
-    area: "Área modelada", spread: "Avanço da frente", wind: "Vento", temp: "Temp.", rh: "HR",
-    evacuated: "aldeias evacuadas", accuracy: "Precisão do modelo", method: "Cada previsão parte do perímetro observado por satélite (GWIS; a primeira parte do ponto de ignição) e é comparada com o perímetro observado seguinte. Sobreposição (Dice) entre a área prevista (p50) e a observada; 1 é perfeito.", accuracyTitle: "Previsão vs. realidade", observedHa: "Observado", predictedHa: "Previsto (p50)", overlap: "Sobreposição", growthNote: (g: string) => `Sobreposição só no crescimento novo (mais exigente): mediana ${g}. O modelo não inclui o combate, por isso sobrestima nos dias de supressão forte; a primeira previsão parte do ponto de ignição e subestimou.`, legendDrones: "Drones simulados e rotas", drones: "drones", sources: "fontes", facts: "factos", from: "de", gusts: "Rajadas", status: "Estado", started: "Início",
-    timeline: "Linha temporal", play: "Reproduzir", pause: "Pausa", automation: "Resposta automática",
-    observed: "observado", simulated: "simulado", legendBurned: "Área ardida modelada (10/50/90 %)",
-    legendForecast: "Previsão 6 h / 12 h", legendSmoke: "Fumo PM2.5", legendVillage: "Aldeia evacuada / ameaçada",
-    mapFailed: "O mapa não carregou. Verifique a ligação.", close: "Fechar", model: "modelo",
-    sourcesTitle: "Fontes", sourcesNote: "Cada item só aparece a partir da hora em que foi público.",
-    steps: { reported: "Alerta", dispatched: "Despacho", first_alert_dispatch: "1.º alerta", active: "Em curso", corroborated_by_news: "Confirmado pela imprensa", forecast: "Previsão calculada", drones_launched: "Drones lançados" },
+    live: "Ao vivo", replay: "Arganil 2025",
+    noFires: "Sem incêndios ativos", activeFires: (n: number) => `${n} incêndio${n === 1 ? "" : "s"} ativo${n === 1 ? "" : "s"}`,
+    checkFailed: "Não foi possível verificar", partial: "Verificação incompleta", checking: "A verificar…",
+    checkedAt: "Portugal continental · verificado às", area: "Área", spread: "Avanço", wind: "Vento", evacuated: "Evacuadas",
+    waiting: "A aguardar o primeiro alerta.", alert: "Alerta", drones: "drones", simulated: "simulado",
+    sources: "Fontes", accuracy: "Precisão", dronesStat: "Drones", inAir: "no ar", launched: "drones lançados", legendPin: "Ocorrência",
+    pinKinds: { event: "Evento", shelter: "Abrigo", road: "Estrada cortada" }, source: "fonte",
+    fleetTitle: "Quantos drones", fleetNote: "Cálculo simples com dados já públicos no momento. Drones e despacho são simulados; constantes de demonstração.",
+    fleetRows: (p: FleetPlan) => [
+      [`Frente ativa ${dec(p.front_km, 1)} km ÷ ${dec(p.segment_km, 1)} km por drone (passagem a cada ${FLEET.revisit_min} min)`, p.perimeter],
+      [`Vento ${Math.round(p.wind_kmh)} km/h: 1 batedor na cabeça + 1 por cada ${FLEET.head_wind_step_kmh} km/h`, p.head],
+      [`${p.sites} locais e ocorrências a menos de ${FLEET.site_radius_km} km ÷ ${FLEET.sites_per_drone} por drone`, p.overwatch],
+      ["No ar", p.airborne],
+      [`Rotação: ${FLEET.endurance_min} min de voo, ${FLEET.recharge_min} min de recarga, ${Math.round(p.transit_min)} min de trânsito (÷ ${dec(p.duty, 2)}) e ${FLEET.reserve * 100} % de reserva`, p.total],
+    ] as [string, number][],
+    grounded: (g: number) => `Rajadas de ${g} km/h acima do limite de ${FLEET.gust_limit_kmh} km/h: drones em terra.`, close: "Fechar", play: "Reproduzir", pause: "Pausa", timeline: "Linha temporal",
+    legendArea: "Fogo", legendForecast: "Previsão 6 h", legendVillage: "Evacuada", legendDrone: "Drone",
+    sourcesNote: "Cada facto aparece a partir da hora em que foi publicado.",
+    accuracyTitle: "Previsão vs. realidade", observed: "Observado", predicted: "Previsto", overlap: "Sobreposição",
+    method: "Cada previsão parte do perímetro observado por satélite (GWIS) e é comparada com o seguinte. 1 é perfeito.",
+    growth: (g: string) => `Só no crescimento novo, a sobreposição mediana é ${g}. O modelo não inclui o combate.`,
+    mapFailed: "O mapa não carregou.", map: "Mapa 3D de Portugal",
   },
   en: {
-    live: "Live", replay: "Arganil 2025", replayLong: "Historical replay · real data", threeD: "3D", twoD: "2D",
-    noFires: "No active fires right now", activeFires: (n: number) => `${n} active fire${n === 1 ? "" : "s"}`,
-    checkFailed: "Could not confirm the current situation", partial: "Check incomplete",
-    checked: "Checked", via: "via", snapshot: "Live service offline: showing the last check",
-    loadingLive: "Checking sources…", watch: "Watch the Arganil 2025 fire",
-    area: "Modelled area", spread: "Head spread", wind: "Wind", temp: "Temp.", rh: "RH",
-    evacuated: "villages evacuated", accuracy: "Model accuracy", method: "", accuracyTitle: "Forecast vs. reality", observedHa: "Observed", predictedHa: "Predicted (p50)", overlap: "Overlap", growthNote: (g: string) => `Overlap on new growth only (stricter): median ${g}. The model has no firefighting, so it overpredicts on days of heavy suppression; the first run starts from the ignition point and underpredicted.`, legendDrones: "Simulated drones and routes", drones: "drones", sources: "sources", facts: "facts", from: "from", gusts: "Gusts", status: "Status", started: "Start",
-    timeline: "Timeline", play: "Play", pause: "Pause", automation: "Automatic response",
-    observed: "observed", simulated: "simulated", legendBurned: "Modelled burned area (10/50/90 %)",
-    legendForecast: "Forecast 6 h / 12 h", legendSmoke: "PM2.5 smoke", legendVillage: "Village evacuated / threatened",
-    mapFailed: "The map did not load. Check the connection.", close: "Close", model: "model",
-    sourcesTitle: "Sources", sourcesNote: "Each item appears only from the time it was public.",
-    steps: { reported: "Alert", dispatched: "Dispatch", first_alert_dispatch: "1st alert", active: "Active", corroborated_by_news: "Confirmed by press", forecast: "Forecast computed", drones_launched: "Drones launched" },
+    live: "Live", replay: "Arganil 2025",
+    noFires: "No active fires", activeFires: (n: number) => `${n} active fire${n === 1 ? "" : "s"}`,
+    checkFailed: "Could not check", partial: "Check incomplete", checking: "Checking…",
+    checkedAt: "Mainland Portugal · checked at", area: "Area", spread: "Spread", wind: "Wind", evacuated: "Evacuated",
+    waiting: "Waiting for the first alert.", alert: "Alert", drones: "drones", simulated: "simulated",
+    sources: "Sources", accuracy: "Accuracy", dronesStat: "Drones", inAir: "airborne", launched: "drones launched", legendPin: "Nearby event",
+    pinKinds: { event: "Event", shelter: "Shelter", road: "Road closed" }, source: "source",
+    fleetTitle: "How many drones", fleetNote: "A simple calculation using only data public at the time. Drones and dispatch are simulated; demonstration constants.",
+    fleetRows: (p: FleetPlan) => [
+      [`Active front ${p.front_km.toFixed(1)} km ÷ ${p.segment_km.toFixed(1)} km per drone (each point seen every ${FLEET.revisit_min} min)`, p.perimeter],
+      [`Wind ${Math.round(p.wind_kmh)} km/h: 1 scout at the head + 1 per ${FLEET.head_wind_step_kmh} km/h`, p.head],
+      [`${p.sites} places and events within ${FLEET.site_radius_km} km ÷ ${FLEET.sites_per_drone} per drone`, p.overwatch],
+      ["Airborne", p.airborne],
+      [`Rotation: ${FLEET.endurance_min} min flight, ${FLEET.recharge_min} min recharge, ${Math.round(p.transit_min)} min transit (÷ ${p.duty.toFixed(2)}) and ${FLEET.reserve * 100} % reserve`, p.total],
+    ] as [string, number][],
+    grounded: (g: number) => `Gusts of ${g} km/h above the ${FLEET.gust_limit_kmh} km/h limit: drones grounded.`, close: "Close", play: "Play", pause: "Pause", timeline: "Timeline",
+    legendArea: "Fire", legendForecast: "6 h forecast", legendVillage: "Evacuated", legendDrone: "Drone",
+    sourcesNote: "Each fact appears from the time it was published.",
+    accuracyTitle: "Forecast vs. reality", observed: "Observed", predicted: "Predicted", overlap: "Overlap",
+    method: "Each forecast starts from the observed satellite perimeter (GWIS) and is scored against the next. 1 is perfect.",
+    growth: (g: string) => `On new growth only, median overlap is ${g}. The model does not include firefighting.`,
+    mapFailed: "The map did not load.", map: "3D map of Portugal",
   },
 };
 
 export default function OpsConsole() {
-  const [locale, setLocale] = useState<Locale>("pt");
+  const [locale, setLocale] = useLocale();
   const [mode, setMode] = useState<Mode>("live");
   const [threeD, set3D] = useState(true);
   const [ready, setReady] = useState(false);
@@ -70,45 +91,33 @@ export default function OpsConsole() {
   const [frame, setFrame] = useState<ReplayFrame | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [drawer, setDrawer] = useState(false);
-  const [accuracy, setAccuracy] = useState<{ method: string; observed_source: { name: string; url: string }[]; rows: ValidationRow[] } | null>(null);
-  const [showAccuracy, setShowAccuracy] = useState(false);
-  const [toast, setToast] = useState<{ at: string; text: string; publisher: string } | null>(null);
-  const [now, setNow] = useState<number | null>(null);
+  const [panel, setPanel] = useState<"sources" | "accuracy" | "fleet" | null>(null);
+  const [accuracy, setAccuracy] = useState<Accuracy | null>(null);
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
   const frames = useRef(new Map<string, ReplayFrame>());
   const lastT = useRef(0);
-  const lastShown = useRef<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const L = T[locale];
+  const [loaded, setLoaded] = useState<Record<string, ReplayFrame>>({});
 
-  useEffect(() => { document.documentElement.lang = locale; }, [locale]);
-  useEffect(() => {
-    const tick = () => setNow(Date.now());
-    const first = setTimeout(tick, 0), id = setInterval(tick, 15_000);
-    return () => { clearTimeout(first); clearInterval(id); };
-  }, []);
 
-  // Map: satellite on 3D terrain from the first frame, no button needed.
+  // Satellite imagery on 3D terrain from the first frame.
   useEffect(() => {
     let cancelled = false, instance: LibreMap | null = null;
     (async () => {
       const [maplibre, style] = await Promise.all([loadMapLibre(), loadOpsStyle()]);
       if (cancelled || !container.current) return;
       instance = new maplibre.Map({
-        container: container.current, style, ...PORTUGAL, maxPitch: 80, zoom: PORTUGAL.zoom - (window.innerWidth <= 760 ? 0.9 : 0),
-        attributionControl: false, fadeDuration: 150,
+        container: container.current, style, ...PORTUGAL, zoom: PORTUGAL.zoom - (phone() ? 0.9 : 0),
+        maxPitch: 80, attributionControl: false, fadeDuration: 150,
       });
       map.current = instance;
       instance.addControl(new maplibre.AttributionControl({ compact: true }), "bottom-left");
-      instance.addControl(new maplibre.NavigationControl({ visualizePitch: true }), "bottom-right");
       instance.on("load", () => {
         if (cancelled || !instance) return;
-        instance.setPadding(framePadding());
+        instance.setPadding(framePadding("live"));
         addReplayLayers(instance);
         setReplayVisible(instance, false);
-        // Keep the credits collapsed behind the (i) button; they stay one click away.
         instance.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
         setReady(true);
       });
@@ -128,13 +137,13 @@ export default function OpsConsole() {
       if (base) {
         try {
           const r = await fetch(base.replace(/\/$/, "") + "/api/live/status", { cache: "no-store" });
-          if (r.ok) { const v = (await r.json()) as LiveStatus; if (!cancelled) setLive({ ...v, origin: "service" }); return; }
-        } catch { /* fall through to the snapshot */ }
+          if (r.ok) { const v = (await r.json()) as LiveStatus; if (!cancelled) setLive(v); return; }
+        } catch { /* fall back to the last capture */ }
       }
       const r = await fetch("/fixtures/v2/live-status.json", { cache: "no-store" });
       if (!r.ok) throw new Error("no live status");
       const v = (await r.json()) as LiveStatus;
-      if (!cancelled) setLive({ ...v, origin: "snapshot" });
+      if (!cancelled) setLive(v);
     })().catch(() => { if (!cancelled) setLive("failed"); });
     return () => { cancelled = true; };
   }, []);
@@ -146,12 +155,13 @@ export default function OpsConsole() {
     if (!r.ok) throw new Error("frame");
     const f = (await r.json()) as ReplayFrame;
     frames.current.set(file, f);
+    setLoaded((prev) => (prev[file] ? prev : { ...prev, [file]: f }));
     return f;
   }, []);
 
   const enterReplay = useCallback(async () => {
     setMode("replay");
-    setDrawer(false);
+    setPanel(null);
     let idx = index;
     if (!idx) {
       const r = await fetch(REPLAY_BASE + "index.json");
@@ -160,32 +170,33 @@ export default function OpsConsole() {
     }
     const start = Date.parse(idx.window.from);
     lastT.current = start;
-    lastShown.current = null;
     setT(start);
     setPlaying(true);
     idx.frames.forEach((f) => void loadFrame(f.file).catch(() => undefined));
   }, [index, loadFrame]);
 
-  // Camera and layer visibility follow the mode.
+  const enterLive = () => { setPlaying(false); setPanel(null); setMode("live"); };
+
+  // Camera and layers follow the mode.
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
     setReplayVisible(m, mode === "replay");
     if (mode === "replay" && index) {
-      m.flyTo({ center: index.ignition.position, zoom: window.innerWidth <= 760 ? 10.9 : 11.6, padding: framePadding(),
+      m.flyTo({ center: index.ignition.position, zoom: phone() ? 10.9 : 11.6, padding: framePadding(),
         pitch: threeD ? 64 : 0, bearing: threeD ? -28 : 0, duration: 3200, essential: true });
     } else if (mode === "live") {
-      m.flyTo({ ...PORTUGAL, zoom: PORTUGAL.zoom - (window.innerWidth <= 760 ? 0.9 : 0), padding: framePadding(),
+      m.flyTo({ ...PORTUGAL, zoom: PORTUGAL.zoom - (phone() ? 0.9 : 0), padding: framePadding("live"),
         pitch: threeD ? PORTUGAL.pitch : 0, bearing: threeD ? PORTUGAL.bearing : 0, duration: 2200, essential: true });
     }
   }, [mode, ready, index]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (ready && map.current) setThreeD(map.current, threeD); }, [threeD, ready]);
 
-  // Frame on screen = latest frame not after t.
+  // The frame on screen is the latest one not after t.
   useEffect(() => {
     if (!index || mode !== "replay") return;
-    const k = frameAt(index, t), file = index.frames[k].file;
+    const file = index.frames[frameAt(index, t)].file;
     let cancelled = false;
     void loadFrame(file).then((f) => { if (!cancelled) setFrame(f); }).catch(() => undefined);
     return () => { cancelled = true; };
@@ -212,279 +223,291 @@ export default function OpsConsole() {
     return () => cancelAnimationFrame(raf);
   }, [playing, index, mode]);
 
-  // Key moments: official statuses and the first report of each kind of impact.
-  const moments = useMemo(() => {
-    if (!index) return [];
-    const out: { at: string; text: string; publisher: string; kind: string }[] = index.timeline
-      .filter((s) => ["Início", "Despacho de 1º Alerta", "Em Curso"].includes(s.status))
-      .map((s) => ({ at: s.at, text: `Fogos.pt: ${s.status}`, publisher: "Fogos.pt", kind: "official" }));
-    for (const cat of ["ignition_cause", "evacuation", "shelter", "road_closure", "event_gathering"]) {
-      const e = index.evidence.filter((x) => x.category === cat && x.quality === "verified").sort((a, b) => a.known_at.localeCompare(b.known_at))[0];
-      if (e && e.known_at <= index.window.to) out.push({ at: e.known_at, text: locale === "pt" ? e.quote : e.statement_en, publisher: e.publisher, kind: cat });
-    }
-    return out.sort((a, b) => a.at.localeCompare(b.at));
-  }, [index, locale]);
-
-  useEffect(() => {
-    if (!playing) return;
-    const hit = [...moments].reverse().find((m) => Date.parse(m.at) <= t);
-    if (!hit || hit.at === lastShown.current) return;
-    lastShown.current = hit.at;
-    setToast(hit);
-    // The hide timer lives in a ref: this effect re-runs every animation frame.
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 6500);
-  }, [t, moments, playing]);
-  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
-
+  // Everything below is filtered to the minute: nothing appears before it was public.
   const minute = Math.floor(t / 60_000);
-  const knownEvidence = useMemo(() => {
-    if (!index) return [];
-    const cut = minute * 60_000;
-    return index.evidence.filter((e) => e.quality === "verified" && Date.parse(e.known_at) <= cut).sort((a, b) => b.known_at.localeCompare(a.known_at));
-  }, [index, minute]);
-  const villages = useMemo(() => (index ? villagesAt(index, minute * 60_000) : []), [index, minute]);
-  const publishers = new Set(knownEvidence.map((e) => e.page)).size;
+  const cut = minute * 60_000;
+  const known = useMemo(() => (index ? index.evidence
+    .filter((e) => e.quality === "verified" && Date.parse(e.known_at) <= cut)
+    .sort((a, b) => b.known_at.localeCompare(a.known_at)) : []), [index, cut]);
+  const villages = useMemo(() => (index ? villagesAt(index, cut) : []), [index, cut]);
   const evacuated = villages.filter((v) => v.evacuated).length;
+  const latest = useMemo(() => known.find((e) => ["evacuation", "shelter", "road_closure", "event_gathering", "ignition_cause", "threatened_place"].includes(e.category)), [known]);
+  const steps = useMemo(() => (index?.automation ?? []).filter((a) => Date.parse(a.at) <= cut), [index, cut]);
+  const alertAt = steps.find((a) => a.step === "reported")?.at;
+  const pins = useMemo(() => (index ? pinsAt(index, cut) : []), [index, cut]);
   useEffect(() => { if (ready && map.current) showVillages(map.current, villages); }, [villages, ready]);
-  useEffect(() => { if (ready && map.current && frame) showDrones(map.current, frame, minute * 60_000); }, [frame, minute, ready]);
-  const steps = useMemo(() => (index?.automation ?? [])
-    .filter((a) => ["reported", "forecast", "drones_launched", "corroborated_by_news"].includes(a.step) && Date.parse(a.at) <= minute * 60_000), [index, minute]);
+
+  // Drone fleet: sized from the front, the wind and nearby places, all as known at the minute on screen.
+  const sitesAt = useCallback((at: number) => (index ? villagesAt(index, at).filter((v) => distanceKm(v.position, index.ignition.position) <= FLEET.site_radius_km) : []), [index]);
+  const planFor = useCallback((f: ReplayFrame, at: number) => {
+    const w = f.weather;
+    return planFleet(f.model.front_km, w ? w.wind_mps * 3.6 : 0, w?.gust_mps != null ? w.gust_mps * 3.6 : null, sitesAt(at).length);
+  }, [sitesAt]);
+  const alertMs = alertAt ? Date.parse(alertAt) : null;
+  // Drones needed in the air at every moment the inputs change (alert, new frame, new report), computed once.
+  const schedule = useMemo(() => {
+    if (!index || alertMs == null) return [] as [number, number][];
+    return [...new Set([alertMs, ...index.frames.map((f) => Date.parse(f.t)), ...index.evidence.map((e) => Date.parse(e.known_at))])]
+      .filter((m) => m >= alertMs).sort((x, y) => x - y)
+      .flatMap((m) => { const f = loaded[index.frames[frameAt(index, m)].file]; return f ? [[m, planFor(f, m).airborne] as [number, number]] : []; });
+  }, [index, alertMs, loaded, planFor]);
+  const plan = useMemo(() => (frame && alertMs != null && cut >= alertMs ? planFor(frame, cut) : null), [frame, alertMs, cut, planFor]);
+  const fleetView = useMemo(() => {
+    if (!index || !frame || !plan || alertMs == null || plan.grounded) return null;
+    const alertFrame = loaded[index.frames[frameAt(index, alertMs)].file] ?? frame;
+    const base = stagingPoint(index.ignition.position, alertFrame.weather?.wind_from_deg ?? 0);
+    const tasks = droneTasks(plan, index.ignition.position, outerRing(frame.predicted.p50), outerRing(frame.forecast.h6), sitesAt(cut).map((v) => v.position));
+    // Slot i launches the first moment the plan needed more than i drones in the air.
+    const launch: number[] = [];
+    for (const [m, need] of schedule) {
+      if (m > cut) break;
+      while (launch.length < need) launch.push(m);
+    }
+    while (launch.length < tasks.length) launch.push(cut);
+    const drones = tasks.map((task, i) => {
+      const transitMs = (distanceKm(base, task.target) / FLEET.cruise_kmh) * 3_600_000;
+      const k = Math.max(0, Math.min(1, (cut - launch[i]) / Math.max(60_000, transitMs)));
+      return { ...task, position: [base[0] + (task.target[0] - base[0]) * k, base[1] + (task.target[1] - base[1]) * k] as [number, number] };
+    });
+    return { base, drones };
+  }, [index, frame, plan, alertMs, cut, sitesAt, schedule, loaded]);
+  useEffect(() => { if (ready && map.current) showFleet(map.current, fleetView?.base ?? null, fleetView?.drones ?? []); }, [fleetView, ready]);
+
+  // Pins: DOM markers (visible from any 3D angle) with a small card of what was reported there.
+  const markers = useRef(new Map<string, import("maplibre-gl").Marker>());
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m) return;
+    let cancelled = false;
+    void loadMapLibre().then(({ Marker, Popup }) => {
+      if (cancelled) return;
+      const want = mode === "replay" ? pins : [];
+      const keep = new Set(want.map((p) => p.id + ":" + p.items.length + ":" + locale));
+      for (const [key, marker] of markers.current) if (!keep.has(key)) { marker.remove(); markers.current.delete(key); }
+      for (const pin of want) {
+        const key = pin.id + ":" + pin.items.length + ":" + locale;
+        if (markers.current.has(key)) continue;
+        const Lx = T[locale];
+        const card = document.createElement("div");
+        const h = document.createElement("strong");
+        h.textContent = `${Lx.pinKinds[pin.kind]} · ${pin.place}`;
+        card.append(h);
+        for (const item of pin.items.slice(0, 3)) {
+          const p = document.createElement("p");
+          p.textContent = locale === "pt" ? item.quote : item.statement_en;
+          const a = document.createElement("a");
+          a.href = item.url; a.target = "_blank"; a.rel = "noreferrer";
+          a.textContent = `${lisbon(item.known_at, locale, true)} · ${item.publisher}`;
+          card.append(p, a);
+        }
+        const popup = new Popup({ closeButton: false, maxWidth: "280px", offset: 22, className: "ops-popup" }).setDOMContent(card);
+        const el = pinElement(pin.kind, h.textContent);
+        const marker = new Marker({ element: el, anchor: "bottom", opacityWhenCovered: "1" }).setLngLat(pin.position).addTo(m);
+        // The map must not see pin presses, or its own click handling closes the card at once.
+        for (const type of ["mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend", "dblclick"]) el.addEventListener(type, (e) => e.stopPropagation());
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (popup.isOpen()) popup.remove(); else popup.setLngLat(pin.position).addTo(m);
+        });
+        markers.current.set(key, marker);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [pins, ready, mode, locale]);
+  useEffect(() => () => { for (const marker of markers.current.values()) marker.remove(); markers.current.clear(); }, []);
+
   const openAccuracy = useCallback(async () => {
-    setShowAccuracy(true);
-    setDrawer(false);
+    setPanel("accuracy");
     if (!accuracy) {
       const r = await fetch("/fixtures/v2/arganil-validation.json");
       if (r.ok) setAccuracy(await r.json());
     }
   }, [accuracy]);
-  const reportedAt = index?.timeline[0]?.at;
-  const beforeReport = !!reportedAt && t < Date.parse(reportedAt);
+
+  const togglePlay = () => {
+    if (!index) return;
+    if (!playing && t >= Date.parse(index.window.to)) { lastT.current = Date.parse(index.window.from); setT(lastT.current); }
+    setPlaying(!playing);
+  };
 
   return (
-    <main className={s.shell} data-panel={mode === "replay" && (drawer || showAccuracy) ? "open" : undefined}>
-      <div ref={container} className={s.map} aria-label={locale === "pt" ? "Mapa 3D de Portugal" : "3D map of Portugal"} />
-      <div className={s.vignette} aria-hidden />
+    <main className={s.shell} data-panel={panel ? "open" : undefined}>
+      <div ref={container} className={s.map} aria-label={L.map} />
 
-      <header className={s.topLeft}>
-        <div className={s.brand}>
-          <span className={s.brandMark} aria-hidden>
-            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2.5c1.2 5.2-4.4 5.6-3.4 10 .3 1.2 1.2 2 2.3 2.2-1-3.3 3.1-4.6 3.2-7.9 4.1 4 5.3 7.4 4.2 10.6A6.6 6.6 0 0 1 5.6 16c-.6-5 3.6-7.6 6.4-13.5Z" /></svg>
-          </span>
-          <span className={s.brandName}>EmberWatch</span>
-        </div>
-        <span className={mode === "live" ? s.pillLive : s.pillReplay}>
-          <i />{mode === "live" ? L.live : L.replayLong}
-        </span>
-        <span className={s.clock} suppressHydrationWarning>
-          {mode === "replay" && index ? lisbon(new Date(t).toISOString(), locale, true) : now ? lisbon(new Date(now).toISOString(), locale, true) : ""}
-          <small>Lisboa</small>
-        </span>
-      </header>
+      <SiteNav active="map" locale={locale} />
 
-      <nav className={s.topRight} aria-label={locale === "pt" ? "Controlos" : "Controls"}>
+      <nav className={s.controls} aria-label="EmberWatch">
         <div className={s.segmented} role="group">
-          <button aria-pressed={mode === "live"} onClick={() => { setPlaying(false); setMode("live"); }}><i className={s.dotLive} />{L.live}</button>
-          <button aria-pressed={mode === "replay"} onClick={() => void enterReplay()}><i className={s.dotReplay} />{L.replay}</button>
+          <button aria-pressed={mode === "live"} onClick={enterLive}>{L.live}</button>
+          <button aria-pressed={mode === "replay"} onClick={() => void enterReplay()}>{L.replay}</button>
         </div>
-        <div className={s.segmented} role="group" aria-label="3D / 2D">
-          <button aria-pressed={threeD} onClick={() => set3D(true)}>{L.threeD}</button>
-          <button aria-pressed={!threeD} onClick={() => set3D(false)}>{L.twoD}</button>
-        </div>
-        <div className={s.segmented} role="group" aria-label="Idioma / Language">
-          <button aria-pressed={locale === "pt"} onClick={() => setLocale("pt")}>PT</button>
-          <button aria-pressed={locale === "en"} onClick={() => setLocale("en")}>EN</button>
-        </div>
+        <button className={s.toggle} onClick={() => set3D(!threeD)} aria-label={threeD ? "2D" : "3D"}>{threeD ? "2D" : "3D"}</button>
+        <button className={s.toggle} onClick={() => setLocale(locale === "pt" ? "en" : "pt")} lang={locale === "pt" ? "en" : "pt"}>{locale === "pt" ? "EN" : "PT"}</button>
       </nav>
 
       {mode === "live" && (
-        <section className={s.liveCard} aria-live="polite">
+        <section className={`${s.card} ${s.compact}`} aria-live="polite">
           {live === null ? (
-            <p className={s.muted}>{L.loadingLive}</p>
-          ) : live === "failed" || live.state === "check_failed" ? (
-            <>
-              <div className={s.stateRow}><span className={s.stateWarn} aria-hidden>!</span><h1>{L.checkFailed}</h1></div>
-            </>
+            <p className={s.secondary}>{L.checking}</p>
+          ) : live === "failed" || live.state === "check_failed" || live.state === "partial" ? (
+            <h1 className={s.title}><i className={s.dotWarn} />{live !== "failed" && live.state === "partial" ? L.partial : L.checkFailed}</h1>
           ) : (
             <>
-              <div className={s.stateRow}>
-                <span className={live.state === "no_active_fires" ? s.stateOk : s.stateWarn} aria-hidden>
-                  {live.state === "no_active_fires" ? <svg viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" d="m5 12.5 4.2 4.2L19 7" /></svg> : "!"}
-                </span>
-                <h1>{live.state === "no_active_fires" ? L.noFires : live.state === "active_fires" ? L.activeFires(live.active.length) : L.partial}</h1>
-              </div>
-              {live.statement && (
-                <p className={s.quote}>“{live.statement}”{locale === "en" && live.statement_en ? <span> ({live.statement_en})</span> : null}</p>
-              )}
-              <p className={s.meta}>
-                {L.checked} {lisbon(live.checked_at, locale, true)} ·{" "}
-                {live.sources.map((src, i) => (
-                  <a key={src.url} href={src.url} target="_blank" rel="noreferrer">{i ? ", " : ""}{src.name.replace(" public incident list", "")}</a>
-                ))}{" "}
-                {L.via} Context.dev
+              <h1 className={s.title}>
+                <i className={live.state === "no_active_fires" ? s.dotOk : s.dotFire} />
+                {live.state === "no_active_fires" ? L.noFires : L.activeFires(live.active.length)}
+              </h1>
+              <p className={s.secondary}>
+                {L.checkedAt} {lisbon(live.checked_at, locale)} ·{" "}
+                {live.sources.map((src) => <a key={src.url} href={src.url} target="_blank" rel="noreferrer">Fogos.pt</a>)}
               </p>
-              {live.origin === "snapshot" && <p className={s.snapshot}>{L.snapshot}</p>}
             </>
           )}
-          <button className={s.cta} onClick={() => void enterReplay()}>
-            {L.watch}
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden><path fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 12h13m-5-6 6 6-6 6" /></svg>
-          </button>
         </section>
       )}
 
       {mode === "replay" && index && frame && (
-        <section className={s.situation}>
-          <div className={s.sitHead}>
-            <div>
-              <h1>Piódão · Arganil</h1>
-              <p className={s.muted}>{L.started} {lisbon(index.timeline[0].at, locale, true)} · {index.ignition.nature}</p>
-            </div>
-            {frame.fogos_status && !beforeReport && <span className={s.status}>{frame.fogos_status.status}</span>}
+        <section className={s.card}>
+          <div className={s.head}>
+            <h1 className={s.title}>Piódão, Arganil</h1>
+            {frame.fogos_status && alertAt && <span className={s.tertiary}>{frame.fogos_status.status}</span>}
           </div>
-          {beforeReport ? (
-            <p className={s.preReport}>{locale === "pt" ? "Ainda sem alerta. A aguardar a primeira ocorrência…" : "No alert yet. Waiting for the first report…"}</p>
+          <p className={s.secondary}>{lisbon(new Date(t).toISOString(), locale, true)}</p>
+
+          {!alertAt ? (
+            <p className={s.waiting}>{L.waiting}</p>
           ) : (
             <>
-              <div className={s.stats}>
-                <div><span>{L.area}</span><strong>{fmt(frame.model.area_ha_p50, locale)}<small> ha</small></strong><em>{fmt(frame.model.area_ha_p10, locale)}–{fmt(frame.model.area_ha_p90, locale)}</em></div>
-                <div><span>{L.spread}</span><strong>{frame.model.head_ros_m_min.toFixed(1)}<small> m/min</small></strong><em>{L.model}</em></div>
-                {frame.weather && (
+              <dl className={s.stats}>
+                <div><dt>{L.area}</dt><dd>{fmt(frame.model.area_ha_p50, locale)}<small>ha</small></dd></div>
+                {frame.weather && <div><dt>{L.wind}</dt><dd>{Math.round(frame.weather.wind_mps * 3.6)}<small>km/h {compassPoint(frame.weather.wind_from_deg, locale)}</small></dd></div>}
+                <div><dt>{L.evacuated}</dt><dd>{evacuated}</dd></div>
+                {plan && (
                   <div>
-                    <span>{L.wind}</span>
-                    <strong>
-                      <svg className={s.windArrow} style={{ transform: `rotate(${frame.weather.wind_from_deg + 180}deg)` }} viewBox="0 0 24 24" width="15" height="15" aria-hidden><path fill="currentColor" d="M12 3 18 19l-6-3.5L6 19Z" /></svg>
-                      {Math.round(frame.weather.wind_mps * 3.6)}<small> km/h</small>
-                    </strong>
-                    <em>{L.from} {compassPoint(frame.weather.wind_from_deg, locale)}</em>
+                    <dt>{L.dronesStat}</dt>
+                    <dd><button className={s.statButton} onClick={() => setPanel(panel === "fleet" ? null : "fleet")}>{plan.total}</button><small>{plan.airborne} {L.inAir}</small></dd>
                   </div>
                 )}
-              </div>
-              {frame.weather && (
-                <p className={s.conditions}>
-                  {L.temp} <strong>{Math.round(frame.weather.temp_c)} °C</strong>
-                  <i />{L.rh} <strong>{Math.round(frame.weather.rh_pct)} %</strong>
-                  {frame.weather.gust_mps != null && <><i />{L.gusts} <strong>{Math.round(frame.weather.gust_mps * 3.6)} km/h</strong></>}
-                  <span>ERA5</span>
-                </p>
+              </dl>
+              <p className={s.tertiary}>
+                {L.alert} {lisbon(alertAt, locale)}
+                {plan && !plan.grounded && <> · {L.launched} {lisbon(alertAt, locale)} ({L.simulated})</>}
+              </p>
+              {latest && (
+                <a className={s.latest} href={latest.url} target="_blank" rel="noreferrer">
+                  <span>{lisbon(latest.known_at, locale)} · {latest.publisher}</span>
+                  {locale === "pt" ? latest.quote : latest.statement_en}
+                </a>
               )}
-              <ol className={s.steps} aria-label={L.automation}>
-                {steps.map((a) => (
-                  <li key={a.step + a.at}>
-                    <time>{lisbon(a.at, locale)}</time>
-                    <span>{L.steps[a.step as keyof typeof L.steps] ?? a.step}{a.step === "drones_launched" && frame.drones_legacy?.count ? ` · ${frame.drones_legacy.count} ${L.drones}` : ""}</span>
-                    <em className={a.basis === "simulated" ? s.tagSim : s.tagObs}>{a.basis === "simulated" ? L.simulated : L.observed}</em>
-                  </li>
-                ))}
-              </ol>
-              <div className={s.sitFoot}>
-                <span><strong>{evacuated}</strong> {L.evacuated}</span>
-                <button onClick={() => { setShowAccuracy(false); setDrawer(true); }}><strong>{knownEvidence.length}</strong> {L.facts} · <strong>{publishers}</strong> {L.sources} →</button>
-              </div>
-              <button className={s.accuracyLink} onClick={() => void openAccuracy()}>{L.accuracy} <span aria-hidden>→</span></button>
             </>
           )}
+
+          <div className={s.foot}>
+            <ul className={s.legend} aria-label="Legenda">
+              <li><i style={{ background: FIRE.p50 }} />{L.legendArea}</li>
+              <li><i className={s.dash} />{L.legendForecast}</li>
+              <li><i className={s.round} style={{ background: "#ff453a" }} />{L.legendVillage}</li>
+              <li><i className={s.round} style={{ background: FIRE.drone }} />{L.legendDrone}</li>
+              <li><i className={s.pin} style={{ background: PIN_COLORS.event }} />{L.legendPin}</li>
+            </ul>
+            <div className={s.links}>
+              <button onClick={() => setPanel(panel === "sources" ? null : "sources")}>{L.sources}</button>
+              <button onClick={() => void (panel === "accuracy" ? setPanel(null) : openAccuracy())}>{L.accuracy}</button>
+            </div>
+          </div>
         </section>
       )}
 
-      {mode === "replay" && toast && (
-        <div className={s.toast} role="status">
-          <time>{lisbon(toast.at, locale, true)}</time>
-          <p>{toast.text}</p>
-          <span>{toast.publisher}</span>
-        </div>
-      )}
-
-      {mode === "replay" && drawer && index && (
-        <aside className={s.drawer} aria-label={L.sourcesTitle}>
-          <div className={s.drawerHead}>
-            <div><h2>{L.sourcesTitle}</h2><p className={s.muted}>{L.sourcesNote}</p></div>
-            <button onClick={() => setDrawer(false)} aria-label={L.close}>×</button>
-          </div>
-          <ol className={s.evidence}>
-            {knownEvidence.slice(0, 60).map((e) => (
+      {mode === "replay" && panel === "sources" && (
+        <aside className={s.panel} aria-label={L.sources}>
+          <PanelHead title={L.sources} note={L.sourcesNote} close={L.close} onClose={() => setPanel(null)} />
+          <ol className={s.list}>
+            {known.slice(0, 80).map((e) => (
               <li key={e.id}>
-                <div className={s.evMeta}><time>{lisbon(e.known_at, locale, true)}</time><a href={e.url} target="_blank" rel="noreferrer">{e.publisher} ↗</a></div>
-                <p>{locale === "pt" ? `“${e.quote}”` : e.statement_en}</p>
+                <a href={e.url} target="_blank" rel="noreferrer">
+                  <span>{lisbon(e.known_at, locale, true)} · {e.publisher}</span>
+                  {locale === "pt" ? e.quote : e.statement_en}
+                </a>
               </li>
             ))}
           </ol>
         </aside>
       )}
 
-      {mode === "replay" && index && (
-        <footer className={s.timeline}>
-          <button className={s.play} onClick={() => {
-            if (!playing && t >= Date.parse(index.window.to)) { lastT.current = Date.parse(index.window.from); setT(lastT.current); }
-            setPlaying(!playing);
-          }} aria-label={playing ? L.pause : L.play}>
-            {playing
-              ? <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
-              : <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden><path fill="currentColor" d="M8 5.5v13l10.5-6.5Z" /></svg>}
-          </button>
-          <div className={s.track}>
-            <div className={s.ticks} aria-hidden>
-              {moments.map((m) => (
-                <i key={m.at + m.kind} data-kind={m.kind} title={m.text}
-                  style={{ left: pct(Date.parse(m.at), index) + "%" }} />
-              ))}
-            </div>
-            <input type="range" aria-label={L.timeline}
-              min={Date.parse(index.window.from)} max={Date.parse(index.window.to)} step={60_000} value={t}
-              style={{ "--p": pct(t, index) + "%" } as React.CSSProperties}
-              onChange={(e) => { setPlaying(false); lastT.current = Number(e.target.value); setT(lastT.current); }} />
-            <div className={s.trackLabels}>
-              <span>{lisbon(index.window.from, locale, true)}</span>
-              <span>{lisbon(index.window.to, locale, true)}</span>
-            </div>
+      {mode === "replay" && panel === "fleet" && plan && (
+        <aside className={s.panel} aria-label={L.fleetTitle}>
+          <PanelHead title={L.fleetTitle} note={L.fleetNote} close={L.close} onClose={() => setPanel(null)} />
+          <div className={s.table}>
+            <table>
+              <tbody>
+                {L.fleetRows(plan).map(([label, value], i) => (
+                  <tr key={i} className={i === 3 || i === 4 ? s.total : undefined}><td>{label}</td><td>{value}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            {plan.grounded && plan.gust_kmh != null && <p className={s.tertiary}>{L.grounded(Math.round(plan.gust_kmh))}</p>}
           </div>
-        </footer>
+        </aside>
       )}
 
-      {mode === "replay" && (
-        <div className={s.legend}>
-          <span><i style={{ background: `linear-gradient(90deg, ${FIRE.p10}, ${FIRE.p50}, ${FIRE.p90})` }} />{L.legendBurned}</span>
-          <span><i className={s.legendDash} />{L.legendForecast}</span>
-          <span><i style={{ background: FIRE.smoke, opacity: 0.6 }} />{L.legendSmoke}</span>
-          <span><i className={s.legendDot} />{L.legendVillage}</span>
-          <span><i className={s.legendDrone} />{L.legendDrones}</span>
-        </div>
-      )}
-
-      {mode === "replay" && showAccuracy && (
-        <aside className={s.drawer} aria-label={L.accuracyTitle}>
-          <div className={s.drawerHead}>
-            <div><h2>{L.accuracyTitle}</h2><p className={s.muted}>Arganil · Piódão, {locale === "pt" ? "13–20 ago. 2025" : "13–20 Aug 2025"}</p></div>
-            <button onClick={() => setShowAccuracy(false)} aria-label={L.close}>×</button>
-          </div>
-          {accuracy ? (
-            <div className={s.accuracy}>
-              <p className={s.muted}>{locale === "pt" ? L.method : accuracy.method}</p>
+      {mode === "replay" && panel === "accuracy" && (
+        <aside className={s.panel} aria-label={L.accuracyTitle}>
+          <PanelHead title={L.accuracyTitle} note={L.method} close={L.close} onClose={() => setPanel(null)} />
+          {accuracy && (
+            <div className={s.table}>
               <table>
-                <thead><tr><th /><th>{L.observedHa}</th><th>{L.predictedHa}</th><th>{L.overlap}</th></tr></thead>
+                <thead><tr><th /><th>{L.observed}</th><th>{L.predicted}</th><th>{L.overlap}</th></tr></thead>
                 <tbody>
                   {accuracy.rows.map((r) => (
                     <tr key={r.cycle}>
                       <td>{lisbon(r.to, locale, true)}</td>
                       <td>{fmt(r.observed_area_ha, locale)}</td>
                       <td>{fmt(r.predicted_area_ha_p50, locale)}</td>
-                      <td><span className={s.bar}><i style={{ width: r.dice_total * 100 + "%" }} /></span>{r.dice_total.toFixed(2)}</td>
+                      <td>{r.dice_total.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p className={s.note}>{L.growthNote(median(accuracy.rows.map((r) => r.dice_growth)).toFixed(2))}</p>
-              <p className={s.note}>{accuracy.observed_source.map((src) => <a key={src.url} href={src.url} target="_blank" rel="noreferrer">{src.name} ↗ </a>)}</p>
+              <p className={s.tertiary}>
+                {L.growth(median(accuracy.rows.map((r) => r.dice_growth)).toFixed(2))}{" "}
+                {accuracy.observed_source[0] && <a href={accuracy.observed_source[0].url} target="_blank" rel="noreferrer">GWIS / GDACS</a>}
+              </p>
             </div>
-          ) : <p className={s.muted} style={{ padding: 16 }}>…</p>}
+          )}
         </aside>
       )}
 
-      {mapFailed && <div className={s.mapFailed} role="alert">{L.mapFailed}</div>}
+      {mode === "replay" && index && (
+        <footer className={s.timeline}>
+          <button className={s.play} onClick={togglePlay} aria-label={playing ? L.pause : L.play}>
+            {playing
+              ? <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+              : <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden><path fill="currentColor" d="M8 5.5v13l10.5-6.5Z" /></svg>}
+          </button>
+          <input type="range" aria-label={L.timeline}
+            min={Date.parse(index.window.from)} max={Date.parse(index.window.to)} step={60_000} value={t}
+            style={{ "--p": pct(t, index) + "%" } as React.CSSProperties}
+            onChange={(e) => { setPlaying(false); lastT.current = Number(e.target.value); setT(lastT.current); }} />
+        </footer>
+      )}
+
+      {mapFailed && <p className={s.failed} role="alert">{L.mapFailed}</p>}
     </main>
   );
 }
 
+function PanelHead({ title, note, close, onClose }: { title: string; note: string; close: string; onClose: () => void }) {
+  return (
+    <div className={s.panelHead}>
+      <div><h2>{title}</h2><p>{note}</p></div>
+      <button onClick={onClose} aria-label={close}>
+        <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden><path stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+  );
+}
+
+const dec = (n: number, d: number) => n.toFixed(d).replace(".", ",");
 const median = (xs: number[]) => { const v = [...xs].sort((a, b) => a - b), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
 const fmt = (n: number, locale: Locale) => new Intl.NumberFormat(locale === "pt" ? "pt-PT" : "en-GB", { maximumFractionDigits: 0 }).format(n);
 const pct = (t: number, index: ReplayIndex) => {
