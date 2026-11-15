@@ -4,8 +4,7 @@
 //! ground see the fire running, what is burning, how dry the region is, or which
 //! roads and villages lie ahead. Context.dev supplies those from the live web:
 //!
-//! 1. `POST /news/search` – Portuguese articles about the incident in a time window
-//!    (works for historical replay too).
+//! 1. `POST /web/search` – Portuguese articles with an explicit date window.
 //! 2. `POST /web/search` – fresh official/local pages (live runs only).
 //! 3. `POST /web/scrape` + JSON schema – structured fire-behaviour facts per article,
 //!    each with a verbatim excerpt.
@@ -744,6 +743,7 @@ mod tests {
         let live = client
             .gather(IntelMode::Live, "Sever do Vouga", at, 30.0)
             .await;
+        assert!(live.errors.is_empty(), "{:?}", live.errors);
         assert_eq!(
             live.calls,
             vec!["web/search", "web/search", "web/scrape", "web/answers"]

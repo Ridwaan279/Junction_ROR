@@ -117,29 +117,69 @@ fn word_value(word: &str) -> Option<f64> {
 }
 pub fn quantities(text: &str) -> Vec<Quantity> {
     let lower = normalize(text).to_lowercase();
-    let mut numbers = numeric_values(&lower);
-    if numbers.is_empty() {
-        let words: Vec<_> = lower
-            .split(|c: char| !c.is_alphabetic())
-            .filter(|s| !s.is_empty())
-            .collect();
-        let mut value = 0.;
-        let mut active = false;
-        for word in words.into_iter().chain([""]) {
-            if let Some(n) = word_value(word) {
-                value += n;
-                active = true;
-            } else if word == "mil" {
-                value = value.max(1.) * 1000.;
-                active = true;
-            } else if word == "centenas" {
-                value = value.max(1.) * 100.;
-                active = true;
-            } else if word != "e" && active {
+    // Tokenise digits and words together: a sentence can contain both
+    // "367 bombeiros" and "cinco aeronaves", or the expression "3 mil".
+    let chars: Vec<char> = lower.chars().collect();
+    let mut words = Vec::new();
+    let mut i = 0;
+    while i < chars.len() {
+        let start = i;
+        if chars[i].is_ascii_digit() {
+            i += 1;
+            while i < chars.len() {
+                if chars[i].is_ascii_digit()
+                    || matches!(chars[i], '.' | ',')
+                    || (chars[i] == ' '
+                        && chars
+                            .iter()
+                            .skip(i + 1)
+                            .take_while(|c| c.is_ascii_digit())
+                            .count()
+                            == 3)
+                {
+                    i += 1;
+                } else {
+                    break;
+                }
+            }
+        } else if chars[i].is_alphabetic() {
+            i += 1;
+            while i < chars.len() && chars[i].is_alphabetic() {
+                i += 1;
+            }
+        } else {
+            i += 1;
+            continue;
+        }
+        words.push(chars[start..i].iter().collect::<String>());
+    }
+    let mut numbers = Vec::new();
+    let (mut value, mut active, mut joined) = (0.0_f64, false, false);
+    for word in words.iter().map(String::as_str).chain([""]) {
+        if let Some(n) = numeric(word).or_else(|| word_value(word)) {
+            let compound = joined
+                && !lower.contains("entre ")
+                && ((value >= 1000. && value % 1000. == 0. && n < 1000.)
+                    || (value >= 100. && value % 100. == 0. && n < 100.)
+                    || (value >= 20. && value % 10. == 0. && n < 10.));
+            if active && !compound {
                 numbers.push(value);
                 value = 0.;
-                active = false;
             }
+            value += n;
+            active = true;
+            joined = false;
+        } else if matches!(word, "mil" | "centenas") {
+            value = value.max(1.) * if word == "mil" { 1000. } else { 100. };
+            active = true;
+            joined = false;
+        } else if word == "e" && active {
+            joined = true;
+        } else if active {
+            numbers.push(value);
+            value = 0.;
+            active = false;
+            joined = false;
         }
     }
     let approximate = [
@@ -563,6 +603,9 @@ mod tests {
         assert!(quantities("cerca de 300")[0].approximate);
         assert_eq!(quantities("entre 10 e 20")[0].upper, Some(20.));
         assert!(!number_supported(50., "150 bombeiros"));
+        assert!(number_supported(5., "367 bombeiros e cinco aeronaves"));
+        assert!(number_supported(3200., "3 mil e duzentos hectares"));
+        assert!(!number_supported(3., "3 mil hectares"));
     }
     #[test]
     fn dst_and_relative_time() {

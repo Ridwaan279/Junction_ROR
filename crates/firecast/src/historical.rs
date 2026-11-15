@@ -595,16 +595,6 @@ struct Cycle {
 
 const SMOKE_THRESHOLDS: [f64; 3] = [35.0, 150.0, 500.0];
 
-/// Number of drones for a fire state: two scouts at detection, then one per 4 km
-/// of active front plus one per 150 ha/h of growth, capped at 24. A resource-
-/// allocation heuristic for the demonstration, not a physical quantity.
-pub fn fleet_size(detected: bool, front_km: f64, growth_ha_h: f64) -> usize {
-    if !detected {
-        return 0;
-    }
-    (2.0 + (front_km / 4.0).round() + (growth_ha_h / 150.0).round()).clamp(2.0, 24.0) as usize
-}
-
 fn run_cycle(
     ds: &Dataset,
     landscape: &Landscape,
@@ -663,6 +653,11 @@ fn probability_at(e: &EnsembleResult, t: f64) -> Vec<f64> {
 /// Run the full replay and return the JSON consumed by the web UI.
 pub fn replay(ds: &Dataset, cfg: &ReplayConfig) -> Result<Value, FirecastError> {
     ds.validate()?;
+    if cfg.frame_step_h <= 0 || cfg.members == 0 {
+        return Err(FirecastError::Config(
+            "positive replay step and ensemble size required".into(),
+        ));
+    }
     let started = std::time::Instant::now();
     let frame = ds.frame();
     let (n, cell) = (ds.domain.size, ds.domain.cell_m);
@@ -869,6 +864,7 @@ pub fn replay(ds: &Dataset, cfg: &ReplayConfig) -> Result<Value, FirecastError> 
         let mut smoke_json = Vec::new();
         let mut transport = (0.0, 0.0);
         let mut smoke_field: Option<(LocalFrame, usize, f64, Vec<f64>)> = None;
+        let mut planning_plume = Value::Null;
         if let Some(wx) = wx {
             let (elev, _) = solar::position(centre_ll, at);
             let stability = stability_class(wx.wind_mps, elev, wx.cloud_pct, wx.shortwave_wm2);
@@ -898,6 +894,7 @@ pub fn replay(ds: &Dataset, cfg: &ReplayConfig) -> Result<Value, FirecastError> 
                     mixing_height_m: stability.default_mixing_height_m(),
                 };
                 let plume = summarise(&source, &met);
+                planning_plume = json!({"source":source,"met":met});
                 let (size, scell) = (121usize, 700.0);
                 let extent = size as f64 * scell;
                 let centre = (
@@ -959,7 +956,64 @@ pub fn replay(ds: &Dataset, cfg: &ReplayConfig) -> Result<Value, FirecastError> 
         }
         frame_json["wind"] = json!(arrows);
         let detected = at >= ds.detection_time;
-        let drones = fleet_size(detected, front_km, growth_ha_h);
+        let horizon = (dt + 3600.).min(c.ensemble.horizon_s);
+        let burn_1h = probability_at(&c.ensemble, horizon);
+        let burn_6h = probability_at(&c.ensemble, (dt + 21600.).min(c.ensemble.horizon_s));
+        let burn_mission = probability_at(
+            &c.ensemble,
+            (dt + crate::fleet::Airframe::default().endurance_s).min(c.ensemble.horizon_s),
+        );
+        let mut edge_m = 0.;
+        let mut head_sectors = std::collections::BTreeSet::new();
+        for k in 0..n * n {
+            if burn_1h[k] < 0.5 {
+                continue;
+            }
+            let (x, y) = (k % n, k / n);
+            let mut edge = false;
+            for (dx, dy) in [(1isize, 0isize), (-1, 0), (0, 1), (0, -1)] {
+                let (xx, yy) = (x as isize + dx, y as isize + dy);
+                if xx < 0
+                    || yy < 0
+                    || xx >= n as isize
+                    || yy >= n as isize
+                    || burn_1h[yy as usize * n + xx as usize] < 0.5
+                {
+                    edge_m += cell;
+                    edge = true;
+                }
+            }
+            if edge
+                && let Some(s) =
+                    cell_spread(&landscape, &c.hours, &beds, &central.perturbation, hour, k)
+            {
+                let az = bearing_of((x as f64 + 0.5) * cell - cx, (y as f64 + 0.5) * cell - cy);
+                let delta = (az - s.head_bearing)
+                    .sin()
+                    .atan2((az - s.head_bearing).cos())
+                    .abs();
+                if s.head_ros_mps >= 0.1 && delta <= std::f64::consts::FRAC_PI_4 {
+                    head_sectors.insert(
+                        (az.rem_euclid(std::f64::consts::TAU) / std::f64::consts::FRAC_PI_4).floor()
+                            as u8,
+                    );
+                }
+            }
+        }
+        let sizing = crate::fleet::size(
+            edge_m,
+            head_sectors.len(),
+            0,
+            0.,
+            &crate::fleet::Airframe::default(),
+        )?;
+        let drones = if detected { sizing.count } else { 0 };
+        // Intermediate offline planning grids; the split public frames omit these
+        // arrays and retain only derived outputs. Outside this domain is unknown.
+        frame_json["planning"] = json!({"origin_lon_lat":frame.origin_lon_lat,"size":n,"cell_m":cell,
+            "burn_1h":burn_1h,"burn_6h":burn_6h,"burn_mission":burn_mission,
+            "front_1h_m":edge_m,"head_sectors":head_sectors.len().max(1),
+            "head_ros_threshold_mps":0.1,"plume":planning_plume});
         frame_json["model"] = json!({"area_ha_p10": round(q(0.1), 0), "area_ha_p50": round(q(0.5), 0), "area_ha_p90": round(q(0.9), 0),
             "front_km": round(front_km, 1), "growth_ha_h": round(growth_ha_h, 0), "head_ros_m_min": round(head_ros * 60.0, 1),
             "head_intensity_kw_m": round(head_int, 0), "fire_type": crate::rothermel::fire_type(crown)});
@@ -977,7 +1031,11 @@ pub fn replay(ds: &Dataset, cfg: &ReplayConfig) -> Result<Value, FirecastError> 
             drones,
         );
         frames.push(frame_json);
-        at += Duration::hours(cfg.frame_step_h);
+        at += if at - first < Duration::hours(3) {
+            Duration::minutes(30)
+        } else {
+            Duration::hours(cfg.frame_step_h)
+        };
     }
 
     Ok(json!({
@@ -989,7 +1047,8 @@ pub fn replay(ds: &Dataset, cfg: &ReplayConfig) -> Result<Value, FirecastError> 
             "sources": ds.sources, "members": cfg.members, "frame_step_h": cfg.frame_step_h, "runtime_ms": started.elapsed().as_millis() as u64,
             "model": crate::forecast::MODEL_VERSION,
             "method": "Forecast from the ignition point to the first observed perimeter, then re-initialised from each observed perimeter (GWIS) and scored against the next one with the Sørensen–Dice coefficient (1 = perfect overlap).",
-            "fleet_rule": "Drones = 2 at detection + 1 per 4 km of active front + 1 per 150 ha/h of growth (max 24). Two multirotor scouts (15 m/s, 60 min), the rest fixed-wing VTOL perimeter drones (18 m/s, 90 min), all demonstration values. Bases sit 3 km outside the modelled fire in the cleanest air; routes avoid cells with ≥30% burn probability within the hour and slow down in smoke; task points spread along the flanks and rear, never the head.",
+            "early_frame_step_minutes":30,
+            "fleet_rule": "Deterministic perimeter/head/exposure demand divided by duty cycle, with configured reserve (fleet::size). This intermediate replay keeps legacy local route graphics; the split generated demo uses sourced fixed hypothetical stations and smoke-blocking regional planning. Aircraft parameters are demonstration values.",
         },
         "perimeters": ds.perimeters.iter().map(|p| json!({"time": p.time, "area_ha": p.area_ha, "source": p.source, "url": p.url, "geometry": p.geometry})).collect::<Vec<_>>(),
         "events": ds.events,
@@ -1349,10 +1408,10 @@ mod tests {
             Some(2.0 / 3.0)
         );
         assert_eq!(dice(&[false], &[false]), None);
-        assert_eq!(fleet_size(false, 10.0, 500.0), 0);
-        assert_eq!(fleet_size(true, 0.0, 0.0), 2);
-        assert_eq!(fleet_size(true, 40.0, 1500.0), 22);
-        assert_eq!(fleet_size(true, 400.0, 9000.0), 24);
+        let cfg = crate::fleet::Airframe::default();
+        assert_eq!(crate::fleet::size(0., 1, 0, 0., &cfg).unwrap().count, 2);
+        let small = crate::fleet::size(40_000., 1, 0, 0., &cfg).unwrap().count;
+        assert!(crate::fleet::size(400_000., 1, 0, 0., &cfg).unwrap().count > small);
     }
 
     #[test]

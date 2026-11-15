@@ -24,6 +24,7 @@ use tokio::sync::{Mutex, broadcast};
 use tokio_stream::wrappers::BroadcastStream;
 use tower_http::cors::CorsLayer;
 pub mod firecast_api;
+pub mod fleet_api;
 pub mod live_api;
 pub mod platform_api;
 pub mod platform_ui;
@@ -147,6 +148,7 @@ pub fn router_with_live_options(
         )
         .with_state(state)
         .merge(live_api::router(live))
+        .merge(fleet_api::default_router())
         .layer(
             CorsLayer::new()
                 .allow_origin(origins)
@@ -306,11 +308,16 @@ async fn sources(
 }
 async fn stations(
     State(state): State<AppState>,
-    Query(query): Query<RunQuery>,
-) -> ApiResult<Json<Vec<Weather>>> {
+    Query(query): Query<std::collections::BTreeMap<String, String>>,
+) -> ApiResult<Json<Value>> {
+    // New unscoped station catalog; retain the original run-scoped weather
+    // station response for existing clients that provide run_id.
+    let Some(run_id) = query.get("run_id") else {
+        return Ok(Json(fleet_api::stations_value()));
+    };
     let engine = state.engine.lock().await;
-    scope(&engine, &query.run_id)?;
-    Ok(Json(engine.snapshot().weather))
+    scope(&engine, run_id)?;
+    Ok(Json(json!(engine.snapshot().weather)))
 }
 async fn drones(
     State(state): State<AppState>,

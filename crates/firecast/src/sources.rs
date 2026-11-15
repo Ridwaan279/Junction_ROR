@@ -143,11 +143,34 @@ wind_speed_100m,wind_direction_100m,cloud_cover,shortwave_radiation,precipitatio
         height: usize,
         cell_m: f64,
     ) -> Result<Dem, FirecastError> {
-        const Z: u32 = 11;
+        self.dem_tiles_at_zoom(frame, width, height, cell_m, 11)
+            .await
+    }
+
+    /// Explicit resolution for an offline regional planning DEM. No synthetic
+    /// fallback: a missing tile fails the capture. The same 16-tile bound applies.
+    pub async fn dem_tiles_at_zoom(
+        &self,
+        frame: LocalFrame,
+        width: usize,
+        height: usize,
+        cell_m: f64,
+        zoom: u32,
+    ) -> Result<Dem, FirecastError> {
+        if !(8..=11).contains(&zoom)
+            || width == 0
+            || height == 0
+            || width.checked_mul(height).is_none_or(|n| n > 250_000)
+            || !cell_m.is_finite()
+            || cell_m <= 0.
+        {
+            return Err(FirecastError::Config("invalid bounded regional DEM".into()));
+        }
+        let z = zoom;
         let sw = frame.to_lon_lat(0.0, 0.0);
         let ne = frame.to_lon_lat(width as f64 * cell_m, height as f64 * cell_m);
-        let (x0, y1) = tile_xy(sw, Z);
-        let (x1, y0) = tile_xy(ne, Z);
+        let (x0, y1) = tile_xy(sw, z);
+        let (x1, y0) = tile_xy(ne, z);
         let (tx0, tx1, ty0, ty1) = (
             x0.floor() as u32,
             x1.floor() as u32,
@@ -164,7 +187,7 @@ wind_speed_100m,wind_direction_100m,cloud_cover,shortwave_radiation,precipitatio
             for tx in tx0..=tx1 {
                 let url = self
                     .terrarium
-                    .replace("{z}", &Z.to_string())
+                    .replace("{z}", &z.to_string())
                     .replace("{x}", &tx.to_string())
                     .replace("{y}", &ty.to_string());
                 tiles.push(((tx, ty), url));
@@ -184,7 +207,7 @@ wind_speed_100m,wind_direction_100m,cloud_cover,shortwave_radiation,precipitatio
         for y in 0..height {
             for x in 0..width {
                 let p = frame.to_lon_lat((x as f64 + 0.5) * cell_m, (y as f64 + 0.5) * cell_m);
-                let (gx, gy) = tile_xy(p, Z);
+                let (gx, gy) = tile_xy(p, z);
                 let (px, py) = (gx * 256.0 - 0.5, gy * 256.0 - 0.5);
                 let sample = |sx: f64, sy: f64| -> Option<f64> {
                     let (tx, ty) = ((sx / 256.0).floor() as u32, (sy / 256.0).floor() as u32);
