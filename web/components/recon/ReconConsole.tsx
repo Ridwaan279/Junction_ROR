@@ -64,7 +64,7 @@ export default function ReconConsole() {
     catch { setError(true); } finally { setBusy(false); }
   }
   return <main className={s.page}>
-    <header className={s.header}><Link href="/">← EmberWatch</Link><span className={s.badge}>{pt ? "RECONHECIMENTO SIMULADO" : "SIMULATED RECONNAISSANCE"}</span></header>
+    <header className={s.header}><Link href="/">← Brasa Scout</Link><span className={s.badge}>{pt ? "RECONHECIMENTO SIMULADO" : "SIMULATED RECONNAISSANCE"}</span></header>
     <h1>{pt ? "Uma vista sobre o incêndio" : "A view of the incident"}</h1>
     <p className={s.muted}>{pt ? "Cenário sintético · drone cinemático Gazebo · sem aeronaves reais ou despacho operacional" : "Synthetic scenario · Gazebo kinematic drone · no real aircraft or operational dispatch"}</p>
     {error && <p role="alert" className={s.alert}>{pt ? "Backend indisponível. Os últimos dados podem estar desatualizados." : "Backend unavailable. Last received data may be stale."}</p>}

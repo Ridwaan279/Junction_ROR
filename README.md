@@ -1,6 +1,6 @@
- # BrasaScout
+# Brasa Scout
 
-EmberWatch brings wildfire reports, weather and terrain onto one map of mainland
+Brasa Scout brings wildfire reports, weather and terrain onto one map of mainland
 Portugal. It keeps the source behind each report visible, replays how an incident
 developed, and explores how simulated drones could respond.
 

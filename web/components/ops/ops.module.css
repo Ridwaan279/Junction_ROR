@@ -29,7 +29,7 @@
 .shell a { color: inherit; }
 
 /* Top */
-.siteHeader { position: absolute; top: 20px; left: 24px; display: flex; align-items: baseline; gap: 22px; z-index: 2; }
+.siteHeader { position: absolute; top: 20px; left: 24px; display: flex; align-items: center; gap: 22px; z-index: 2; }
 .shell .wordmark, .doc .wordmark { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: var(--label); text-decoration: none; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55); }
 .tabs { display: flex; gap: 16px; }
 .shell .tabs a, .doc .tabs a { font-size: 13px; color: var(--secondary); text-decoration: none; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6); }
@@ -202,7 +202,7 @@
   .docBody h1 { font-size: 28px; }
   .figures { grid-template-columns: repeat(2, 1fr); }
   .docTable td:first-child { white-space: normal; }
-  .doc .siteHeader { flex-direction: row; gap: 18px; align-items: baseline; }
+  .doc .siteHeader { flex-direction: row; gap: 18px; align-items: center; }
 }
 
 .shell .sarLine { display: block; width: 100%; margin-top: 12px; padding: 9px 11px; border-radius: 10px; text-align: left;

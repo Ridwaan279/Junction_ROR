@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 export const metadata: Metadata = {
-  title: "EmberWatch · Portugal",
+  title: "Brasa Scout · Portugal",
   description:
     "Cited wildfire evidence, source freshness, and inspectable synthetic replay for mainland Portugal.",
 };

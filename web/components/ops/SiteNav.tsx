@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import s from "./ops.module.css";
 
 export type Locale = "pt" | "en";
@@ -14,8 +15,10 @@ export default function SiteNav({ active, locale }: { active: "map" | "data" | "
   const L = LABELS[locale];
   return (
     <header className={s.siteHeader}>
-      <Link href="/" className={s.wordmark}>EmberWatch</Link>
-      <nav className={s.tabs} aria-label="EmberWatch">
+      <Link href="/" className={s.wordmark} aria-label="Brasa Scout">
+        <Image src="/brasa-scout-logo.png" alt="Brasa Scout" width={144} height={42} style={{ display: "block", height: "auto" }} />
+      </Link>
+      <nav className={s.tabs} aria-label="Brasa Scout">
         {(["map", "data", "methods", "recon"] as const).map((k) => (
           <Link key={k} href={k === "map" ? "/" : "/" + k} aria-current={active === k ? "page" : undefined}>{L[k]}</Link>
         ))}

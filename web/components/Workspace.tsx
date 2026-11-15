@@ -33,7 +33,7 @@ export default function Workspace() {
           <span className="brand-mark">
             <Icon name="flame" size={28} />
           </span>
-          <span>EmberWatch</span>
+          <span>Brasa Scout</span>
         </div>
         <p>{error ? t.notLoaded : t.loading}</p>
         {error && (
@@ -66,12 +66,12 @@ export default function Workspace() {
   return (
     <main className="workspace">
       <header className="topbar">
-        <Link className="brand" href="/" aria-label="EmberWatch">
+        <Link className="brand" href="/" aria-label="Brasa Scout">
           <span className="brand-mark">
             <Icon name="flame" size={27} />
           </span>
           <span>
-            EmberWatch<small>{t.subtitle}</small>
+            Brasa Scout<small>{t.subtitle}</small>
           </span>
         </Link>
         <nav

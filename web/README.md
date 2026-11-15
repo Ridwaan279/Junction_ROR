@@ -1,4 +1,4 @@
-# EmberWatch web
+# Brasa Scout web
 
 Next.js map workspace for mainland Portugal. Default data is explicitly synthetic.
 Not suitable for emergency decisions or real drone dispatch.

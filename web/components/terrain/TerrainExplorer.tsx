@@ -302,7 +302,7 @@ export default function TerrainExplorer() {
       <header className={s.header}>
         <Link href="/" className={s.brand} aria-label={t.back}>
           <span className={s.brandMark}><TerrainIcon name="mountain" size={25} /></span>
-          <span>EmberWatch<span className={s.brandDivider}>/</span><strong>Portugal</strong></span>
+          <span>Brasa Scout<span className={s.brandDivider}>/</span><strong>Portugal</strong></span>
         </Link>
         <div className={s.headerEnd}>
           <span className={s.mapTag}><span />{t.explorer}</span>

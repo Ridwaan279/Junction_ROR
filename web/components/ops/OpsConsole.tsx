@@ -361,7 +361,7 @@ export default function OpsConsole() {
 
       <SiteNav active="map" locale={locale} />
 
-      <nav className={s.controls} aria-label="EmberWatch">
+      <nav className={s.controls} aria-label="Brasa Scout">
         <div className={s.segmented} role="group">
           <button aria-pressed={mode === "live"} onClick={enterLive}>{L.live}</button>
           <button disabled={!ready} aria-pressed={mode === "replay"} onClick={() => void enterReplay()}>{L.replay}</button>
