@@ -102,6 +102,89 @@ def hazard_mask(hz: Hazard, gx0, gy0, res, shape, extra=0.0):
     return m
 
 
+def window_kind(R, x, y, rad):
+    (r0, r1, c0, c1), _, _ = window(R, x - rad, y - rad, x + rad, y + rad)
+    return R["kind"][r0:r1, c0:c1]
+
+
+def plan_fleet(a, R, sc, hz, start, route, fire, spread, wind, cruise_z, hover_z, mesh_z, occupied, log):
+    """SIMULATED containment fleet: pads, layered routes, station altitude, forward refill tank."""
+    res = float(R["res"])
+    # launch pads in a row across the start->fire direction (each level-checked like the single pad)
+    ux, uy = fire[0] - start[0], fire[1] - start[1]
+    L = math.hypot(ux, uy)
+    px_, py_ = -uy / L, ux / L
+    pads = []
+    for k in range(60):
+        if len(pads) == a.fleet:
+            break
+        off = (k // 2 + (k % 2)) * (1 if k % 2 else -1) * a.fleet_spacing
+        back = 0.0 if k < 20 else -a.fleet_spacing * (1 + (k - 20) // 20)
+        x, y = start[0] + px_ * off + ux / L * back, start[1] + py_ * off + uy / L * back
+        if occupied(x, y, 5.0) or any(math.dist((x, y), q[:2]) < a.fleet_spacing * 0.9 for q in pads):
+            continue
+        mz = [mesh_z(R, x + o[0], y + o[1]) for o in [(0, 0), (6, 0), (-6, 0), (0, 6), (0, -6)]]
+        if max(mz) - min(mz) > 2.0:
+            continue
+        top = max(mesh_z(R, x + dx, y + dy) for dx in (-2.5, 0, 2.5) for dy in (-2.5, 0, 2.5)) + 0.15
+        pads.append((x, y, top))
+    if len(pads) < a.fleet:
+        return f"only {len(pads)} level launch pads found near the start for a fleet of {a.fleet}"
+    pads.sort(key=lambda q: math.dist(q[:2], start[:2]))
+    # station altitude: above the highest canopy over the whole potential fire area
+    xs = [fire[0]] + [p["x"] for p in spread]
+    ys = [fire[1]] + [p["y"] for p in spread]
+    (r0, r1, c0, c1), _, _ = window(R, min(xs) - 30, min(ys) - 30, max(xs) + 30, max(ys) + 30)
+    station_z = float(R["top"][r0:r1, c0:c1].max()) + a.station_above_canopy
+    staging = tuple(sc["safe_point_enu"])
+    # forward refill tank: open, level ground upwind of the fire, outside the hazard, straight clear hop
+    if wind["source"] != "unknown":
+        dx, dy = downwind_unit(wind["from_deg"])
+        up = math.atan2(-dy, -dx)
+    else:
+        up = math.atan2(start[1] - fire[1], start[0] - fire[0])
+    span = 400
+    (gr0, gr1, gc0, gc1), gx0, gy0 = window(R, staging[0] - span, staging[1] - span, staging[0] + span, staging[1] + span)
+    top_w = R["top"][gr0:gr1, gc0:gc1]
+    hz_m = hazard_mask(hz, gx0, gy0, res, top_w.shape)
+    g = make_grid(gx0, gy0, res, top_w, station_z, a.v_clear, a.h_margin, hz_m)
+    tank = None
+    for dist in range(140, 360, 20):
+        for k in range(0, 19):
+            ang = up + (k // 2 + k % 2) * (1 if k % 2 else -1) * math.radians(10)
+            x, y = fire[0] + dist * math.cos(ang), fire[1] + dist * math.sin(ang)
+            kw = window_kind(R, x, y, 10.0)
+            if kw.size == 0 or np.any(kw > 0) or hz.blocked((x, y), 10.0):
+                continue
+            mz = [mesh_z(R, x + o[0], y + o[1]) for o in [(0, 0), (4, 0), (-4, 0), (0, 4), (0, -4)]]
+            if max(mz) - min(mz) > 2.5 or not g.segment_free((x, y), staging):
+                continue
+            tank = (x, y, min(mz))
+            break
+        if tank:
+            break
+    if tank is None:
+        return "no open level ground with a clear hop to the staging point for the forward refill tank"
+    drones = []
+    for k, pad in enumerate(pads):
+        dz = 5.0 * k  # altitude layering for deconfliction (all layers are above the planned clearance)
+        r = [[pad[0], pad[1], route[0][2] + dz]] + [[q[0], q[1], q[2] + dz] for q in route[1:]]
+        drones.append({"id": k, "px4_instance": k, "namespace": f"/px4_{k}", "mav_sys_id": k + 1,
+                       "pad_enu": [round(v, 2) for v in pad], "route3d": [[round(v, 2) for v in q] for q in r],
+                       "station_z": round(station_z + dz, 2), "refill_z": round(tank[2] + 8.0 + 3.0 * k, 2)})
+    log.append(f"fleet of {a.fleet}: station z {station_z:.1f}, forward tank at {tank[0]:.0f},{tank[1]:.0f} "
+               f"({math.dist(tank[:2], fire):.0f} m from the seed)")
+    return {"label": "SIMULATED containment fleet - holds the spread until ground crews arrive; does not "
+                     "extinguish; water loads, refill tank and crew ETA are assumptions",
+            "n": a.fleet, "drones": drones, "staging_enu": [round(v, 2) for v in staging],
+            "station_base_z": round(station_z, 2),
+            "refill": {"enu": [round(v, 2) for v in tank], "refill_s": a.refill_s,
+                       "note": "SIMULATED forward water tank (e.g. one carried in by the first responders)"},
+            "water_capacity_s": a.water_capacity_s, "wet_radius_m": a.wet_radius, "wet_duration_s": a.wet_duration,
+            "firefighter_eta_s": a.firefighter_eta, "min_station_separation_m": 2 * a.wet_radius * 0.8,
+            "min_station_distance_to_burning_m": 12.0}
+
+
 def synthetic_snapshot(lat, lon, seed, now: datetime) -> dict:
     tmpl = json.load(open(_repo_path("contracts", "fixtures", "snapshot.json"), encoding="utf-8"))
     ts = now.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -154,9 +237,27 @@ def main(argv=None) -> int:
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--distance", type=float, default=800.0, help="drone start distance from fire (m)")
     ap.add_argument("--min-distance", type=float, default=300.0, help="smallest labelled fallback distance")
-    ap.add_argument("--spread-points", type=int, default=12, help="illustrative spread points (0 = no spread)")
-    ap.add_argument("--spread-step", type=float, default=6.0)
-    ap.add_argument("--spread-interval", type=float, default=8.0, help="sim-s between ignitions")
+    ap.add_argument("--fire-in", choices=("vegetation", "clearing"), default="vegetation",
+                    help="vegetation: SIMULATED crown fire seeded in tree cover next to town, spreading through "
+                         "tree cells; clearing: small fire on open ground (previous demo)")
+    ap.add_argument("--spread-points", type=int, default=None, help="illustrative spread points (0 = no spread)")
+    ap.add_argument("--spread-step", type=float, default=None)
+    ap.add_argument("--spread-interval", type=float, default=None, help="sim-s between ignitions")
+    ap.add_argument("--hover-above-canopy", type=float, default=14.0,
+                    help="vegetation mode: hover z = highest canopy within 40 m of the fire + this")
+    ap.add_argument("--drop-range", type=float, default=None, help="simulated drop effective range (m)")
+    ap.add_argument("--fleet", type=int, default=0,
+                    help="N>0: SIMULATED containment fleet of N drones (wet the fuel ahead of the front, rotate to a "
+                         "forward refill tank, hand over to ground crews at --firefighter-eta)")
+    ap.add_argument("--fleet-spacing", type=float, default=10.0, help="launch pad spacing (m)")
+    ap.add_argument("--firefighter-eta", type=float, default=420.0,
+                    help="SIMULATED ground-crew arrival, sim-s after ignition (assumption, not a dispatch time)")
+    ap.add_argument("--water-capacity-s", type=float, default=24.0, help="simulated spray time per tank load (s)")
+    ap.add_argument("--refill-s", type=float, default=15.0, help="simulated refill time at the forward tank (s)")
+    ap.add_argument("--wet-radius", type=float, default=18.0, help="simulated wetted radius around a drop target (m)")
+    ap.add_argument("--wet-duration", type=float, default=90.0, help="fuel stays wet this long after a drop (s)")
+    ap.add_argument("--station-above-canopy", type=float, default=20.0,
+                    help="fleet station altitude above the highest canopy in the fire area (m)")
     ap.add_argument("--town-radius", type=float, default=700.0, help="fire chosen near buildings within this radius")
     ap.add_argument("--world", default=None, help="generated world dir (default ros2/generated/arganil)")
     ap.add_argument("--out-dir", required=True)
@@ -171,13 +272,23 @@ def main(argv=None) -> int:
     ap.add_argument("--force-blocked", action="store_true",
                     help="TEST: surround the fire with a ring hazard so no safe path exists")
     a = ap.parse_args(argv)
+    veg = a.fire_in == "vegetation"
+    dflt = {"spread_points": (160, 12), "spread_step": (10.0, 6.0), "spread_interval": (1.15, 8.0), "drop_range": (25.0, 10.0)}
+    if a.fleet > 0 and a.spread_interval is None:
+        a.spread_interval = 3.0  # slower spread so the fleet's containment has a window to act
+    for k, (v_veg, v_clr) in dflt.items():
+        if getattr(a, k) is None:
+            setattr(a, k, v_veg if veg else v_clr)
     world = os.path.abspath(a.world or _repo_path("ros2", "generated", "arganil"))
     os.makedirs(a.out_dir, exist_ok=True)
     meta, R = load_world(world)
     rng = np.random.default_rng(a.seed)
     log: list[str] = []
     res = float(R["res"])
-    fcfg = FireModelConfig()
+    # vegetation: faster-growing, larger illustrative fire; more suppression per water-second so a
+    # long hover can still bring the (much larger) burning area down. Illustrative values only.
+    fcfg = FireModelConfig(initial_intensity=0.45, growth_rate=0.03, suppression_rate=0.40, r_max_m=6.0) if veg \
+        else FireModelConfig()
 
     def ground(x, y):
         return raster_sample(R, x, y, "ground")
@@ -192,15 +303,23 @@ def main(argv=None) -> int:
         print("REJECTED: no buildings in town radius", file=sys.stderr)
         return 2
     fire = None
-    for _ in range(400):
+    for _ in range(400 if not veg else 1500):
         b = blds[int(rng.integers(len(blds)))]
         cx, cy = np.mean(b["poly"], 0)
-        ang, d = rng.uniform(0, 2 * math.pi), rng.uniform(10, 30)
+        ang, d = rng.uniform(0, 2 * math.pi), (rng.uniform(10, 30) if not veg else rng.uniform(20, 90))
         x, y = cx + d * math.cos(ang), cy + d * math.sin(ang)
-        if not occupied(x, y, fcfg.r_max_m + 2.0):
-            fire = (float(x), float(y))
-            near_building = b["osm_id"]
-            break
+        if veg:
+            # inside tree cover (not a building), with a substantial forest patch around it
+            (r0, r1, c0, c1), _, _ = window(R, x - 30, y - 30, x + 30, y + 30)
+            k = R["kind"][r0:r1, c0:c1]
+            here = raster_sample(R, x, y, "kind")
+            if here != 2 or k.size == 0 or np.mean(k == 2) < 0.45 or np.any(window_kind(R, x, y, 6.0) == 1):
+                continue
+        elif occupied(x, y, fcfg.r_max_m + 2.0):
+            continue
+        fire = (float(x), float(y))
+        near_building = b["osm_id"]
+        break
     if fire is None:
         print("NO VALID FIRE POINT (all candidates inside obstacles)", file=sys.stderr)
         return 3
@@ -237,7 +356,7 @@ def main(argv=None) -> int:
     else:
         wind = {"source": "unknown", "from_deg": None, "speed_mps": None,
                 "note": "wind unknown: conservative circular hazard, vertical smoke"}
-    r_core = fcfg.r_max_m
+    r_core = fcfg.r_max_m if not veg else 10.0
     # ---- illustrative spread footprint (seeded): downwind-biased random walk, never into buildings
     spread = []
     pts = [fire]
@@ -246,18 +365,30 @@ def main(argv=None) -> int:
     tries = 0
     while len(spread) < a.spread_points and tries < 2000:
         tries += 1
-        par = pts[int(srng.integers(max(0, len(pts) - 4), len(pts)))]
+        pi = int(srng.integers(max(0, len(pts) - 4), len(pts)))
+        par = pts[pi]
         base = math.atan2(dw[1], dw[0]) if dw else srng.uniform(0, 2 * math.pi)
-        ang = base + srng.uniform(-math.radians(60), math.radians(60))
+        if veg:  # parent: any recent front point (wide, ragged front); flanks + some backing spread
+            pi = int(srng.integers(max(0, len(pts) - 24), len(pts)))
+            par = pts[pi]
+            ang = base + srng.normal(0.0, math.radians(70)) if srng.uniform() < 0.85 else srng.uniform(0, 2 * math.pi)
+        else:
+            ang = base + srng.uniform(-math.radians(60), math.radians(60))
         q = (par[0] + a.spread_step * math.cos(ang), par[1] + a.spread_step * math.sin(ang))
         if any(math.dist(q, o) < a.spread_step * 0.6 for o in pts):
             continue
         (r0, r1, c0, c1), _, _ = window(R, q[0] - 2, q[1] - 2, q[0] + 2, q[1] + 2)
         if np.any(R["kind"][r0:r1, c0:c1] == 1):
             continue  # do not spread into building footprints
+        if veg and raster_sample(R, q[0], q[1], "kind") != 2:
+            continue  # SIMULATED crown fire only spreads through tree cells (fuel)
         pts.append(q)
-        spread.append({"x": round(q[0], 2), "y": round(q[1], 2), "z": round(ground(*q), 2),
-                       "t_ignite_s": round(a.spread_interval * len(pts) * srng.uniform(0.8, 1.2), 1)})
+        pt = {"x": round(q[0], 2), "y": round(q[1], 2), "z": round(ground(*q), 2),
+              "t_ignite_s": round(a.spread_interval * len(pts) * srng.uniform(0.8, 1.2), 1),
+              "parent": pi - 1}  # index into spread (-1 = the seed); fire only spreads from a burning parent
+        if veg:
+            pt["canopy_z"] = round(raster_sample(R, q[0], q[1], "top"), 2)
+        spread.append(pt)
     if wind["source"] == "unknown":
         reach = max([math.dist(fire, (p["x"], p["y"])) for p in spread] or [0.0])
         hz = Hazard([Circle(fire[0], fire[1], r_core + a.plume_length + reach)])
@@ -265,7 +396,7 @@ def main(argv=None) -> int:
     else:
         ext = [((p["x"] - fire[0]) * dw[0] + (p["y"] - fire[1]) * dw[1],
                 abs(-(p["x"] - fire[0]) * dw[1] + (p["y"] - fire[1]) * dw[0])) for p in spread] or [(0.0, 0.0)]
-        hz = Hazard([Circle(fire[0], fire[1], r_core)] + [Circle(p["x"], p["y"], 3.5) for p in spread] +
+        hz = Hazard([Circle(fire[0], fire[1], r_core)] + [Circle(p["x"], p["y"], 3.5 if not veg else 9.0) for p in spread] +
                     [plume_polygon(fire, wind["from_deg"], a.plume_length + max(e[0] for e in ext),
                                    r_core + max(e[1] for e in ext), 15.0)])
         mode = "fire_core_plus_downwind_plume"
@@ -276,7 +407,11 @@ def main(argv=None) -> int:
         mode += "+TEST_forced_blocking_ring"
         log.append("TEST: forced ring hazard around fire (no-path test)")
 
-    hover_z = fz + a.hover_agl
+    if veg:
+        (r0, r1, c0, c1), _, _ = window(R, fire[0] - 40, fire[1] - 40, fire[0] + 40, fire[1] + 40)
+        hover_z = float(R["top"][r0:r1, c0:c1].max()) + a.hover_above_canopy
+    else:
+        hover_z = fz + a.hover_agl
     result = {"stage": None}
 
     def fail(stage, why):
@@ -299,8 +434,8 @@ def main(argv=None) -> int:
     else:
         base_ang = math.atan2(-fire[1], -fire[0])
     safe = None
-    drop_range = 10.0 if wind["source"] != "unknown" else 1e9
-    for dist in np.arange(standoff0, 10.01, 0.5) if wind["source"] != "unknown" else [r_core + a.plume_length + 6.5]:
+    drop_range = a.drop_range if wind["source"] != "unknown" else 1e9
+    for dist in np.arange(standoff0, a.drop_range + 0.01, 0.5) if wind["source"] != "unknown" else [r_core + a.plume_length + 6.5]:
         for k in range(0, 37):
             ang = base_ang + (k // 2 + k % 2) * (1 if k % 2 else -1) * math.radians(10)
             p = (fire[0] + dist * math.cos(ang), fire[1] + dist * math.sin(ang))
@@ -412,7 +547,9 @@ def main(argv=None) -> int:
         "terrain": "Mapterhorn DEM mesh (see features.json)",
         "fire": {"lat": mission.target_lat, "lon": mission.target_lon, "enu": [round(fire[0], 2), round(fire[1], 2)],
                  "ground_z": round(fz, 2), "near_osm_building": near_building,
-                 "spread": spread, "spread_note": "ILLUSTRATIVE seeded spread points, not a fire-spread prediction"},
+                 "spread": spread, "spread_note": "ILLUSTRATIVE seeded spread points, not a fire-spread prediction",
+                 "fuel": "tree_canopy" if veg else "open_ground",
+                 "canopy_z": round(raster_sample(R, fire[0], fire[1], "top"), 2) if veg else None},
         "start_enu": [round(start[0], 2), round(start[1], 2), round(start[2], 2)],
         "launch_pad": {"enu_top": [round(start[0], 2), round(start[1], 2), round(start[2], 2)], "size_m": 5.0,
                        "note": "simulated level launch pad (box collider) so the x500 starts level on sloped terrain"},
@@ -423,7 +560,7 @@ def main(argv=None) -> int:
                    "planning_margin_m": 2.5, "plume_length_m": a.plume_length,
                    "note": "simplified planning region, not a dispersion or sensing model"},
         "safe_point_enu": [round(safe[0], 2), round(safe[1], 2)], "safe_point_to_fire_m": round(math.dist(safe, fire), 2),
-        "drop_in_effective_range": math.dist(safe, fire) <= drop_range, "drop_effective_range_m": 10.0,
+        "drop_in_effective_range": math.dist(safe, fire) <= drop_range, "drop_effective_range_m": a.drop_range,
         "cruise_alt_m": round(cruise_z, 2), "hover_alt_z": round(hover_z, 2),
         "route3d": [[round(v, 2) for v in p] for p in route],
         "route_info": {"length_m": round(length, 1), "cruise_waypoints": len(cruise_path), "low_waypoints": len(low_path),
@@ -435,7 +572,17 @@ def main(argv=None) -> int:
         "obstacle_raster": os.path.join(world, "obstacles.npz"),
         "fire_model": vars(fcfg), "log": log,
     }
+    if a.fleet > 0:
+        fl = plan_fleet(a, R, sc, hz, start, route, fire, spread, wind, cruise_z, hover_z, mesh_z, occupied, log)
+        if isinstance(fl, str):
+            return fail("fleet", fl)
+        sc["fleet"] = fl
     json.dump(sc, open(os.path.join(a.out_dir, "scenario.json"), "w"), indent=1)
+    if a.fleet > 0:
+        print('EMBER_FLEET_POSES="' + ";".join(f"{d['pad_enu'][0]:.2f},{d['pad_enu'][1]:.2f},{d['pad_enu'][2]:.2f}"
+                                               for d in sc["fleet"]["drones"]) + '"')
+        t = sc["fleet"]["refill"]["enu"]
+        print(f"EMBER_TANK_POSE={t[0]:.2f},{t[1]:.2f},{t[2]:.2f}")
     print(f"PX4_HOME_LAT={MAP_ORIGIN[0]}\nPX4_HOME_LON={MAP_ORIGIN[1]}\nPX4_HOME_ALT={o['origin_elevation_m']}")
     print(f"PX4_GZ_MODEL_POSE={start[0]:.2f},{start[1]:.2f},{start[2] + 0.3:.2f},0,0,0")
     print(f"EMBER_PAD_POSE={start[0]:.2f},{start[1]:.2f},{start[2]:.2f}")

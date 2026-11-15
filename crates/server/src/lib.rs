@@ -28,6 +28,7 @@ pub mod fleet_api;
 pub mod live_api;
 pub mod platform_api;
 pub mod platform_ui;
+mod recon_api;
 mod webhook;
 
 #[derive(Clone)]
@@ -38,6 +39,7 @@ struct AppState {
     sequence: Arc<AtomicU64>,
     compute: emberwatch_response::ComputePool,
     firecast: firecast_api::FirecastState,
+    recon: recon_api::ReconStore,
 }
 #[derive(Deserialize)]
 struct RunQuery {
@@ -83,6 +85,7 @@ pub fn router_with_live_options(
         sequence: Arc::new(AtomicU64::new(1)),
         compute: emberwatch_response::ComputePool::new(2).expect("bounded compute pool"),
         firecast: firecast_api::FirecastState::new(firecast),
+        recon: recon_api::ReconStore::default(),
     };
     let ticker = state.clone();
     tokio::spawn(async move {
@@ -127,6 +130,7 @@ pub fn router_with_live_options(
         ],
     };
     Router::new()
+        .merge(recon_api::routes())
         .route("/healthz", get(health))
         .route("/api/scenarios", get(scenarios))
         .route("/api/snapshot", get(snapshot))

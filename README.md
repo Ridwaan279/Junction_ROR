@@ -1,129 +1,172 @@
-# EmberWatch
+ # BrasaScout
 
-Portugal wildfire evidence map and an explicitly synthetic replay/response demo.
-The source plan is [docs/PLAN.md](docs/PLAN.md); source limitations and attribution
-are tracked in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
+EmberWatch brings wildfire reports, weather and terrain onto one map of mainland
+Portugal. It keeps the source behind each report visible, replays how an incident
+developed, and explores how simulated drones could respond.
 
-## Local run
+The project has a bilingual web dashboard, a Rust backend for evidence and
+modelling, and a ROS 2/Gazebo/PX4 flight simulation. Reports and historical
+observations are kept separate from predicted spread and simulated response.
+All drone missions, water drops and dispatch decisions are simulations.
 
-Requirements: Rust 1.100.0 (rustfmt/clippy) and Node.js 22+.
+## What it does
+
+- **Map and replay:** explore Portugal in 3D and replay the Arganil/Piódão fire
+  from 13-14 August 2025 using captured public reports and archived model inputs.
+- **Cited evidence:** inspect source links, capture times, publication times,
+  extraction checks and shared reporting lineage.
+- **Spread and smoke:** run an experimental Rust fire model using terrain,
+  fuel and weather, then compare historical predictions with observed perimeters.
+- **Response planning:** inspect illustrative drone routes, fleet estimates and
+  briefings. The ROS demo flies a simulated PX4 x500 around configured hazards.
+- **Synthetic fallback:** run a separate training scenario without source keys.
+  Invented incidents are labelled synthetic throughout.
+
+The dashboard's Live view can fall back to a bundled status capture. Read its
+checked time before treating it as current. Recurring Fogos.pt ingestion remains
+disabled pending source checks; a failed or partial capture never establishes
+that there are no fires.
+
+## How it fits together
+
+```mermaid
+flowchart LR
+    Pages["Public pages via Context.dev"] --> Sources["Rust source adapters"]
+    Weather["Weather and satellite providers"] --> Sources
+    Sources --> Platform["Evidence, provenance and replay"]
+    Platform --> Models["Spread, smoke and response models"]
+    Platform --> API["Axum REST and SSE"]
+    Models --> API
+    API --> Web["Next.js map workspace"]
+    Captures["Bundled historical captures"] --> Dashboard["Historical dashboard"]
+    Snapshot["Snapshot file or API snapshot"] --> ROS["ROS 2 mission adapter"]
+    API --> Snapshot
+    ROS --> Flight["Gazebo and PX4 SITL"]
+```
+
+Historical dashboard assets are prebuilt. The interactive API workspace uses
+REST snapshots and server-sent events. ROS consumes the shared Snapshot JSON
+contract rather than importing backend internals. See the
+[ROS node and topic guide](docs/ROS.md) for the flight simulation graph.
+
+## Run the web demo
+
+Use Node.js 22+ and npm. From the repository root:
 
 ```sh
-cargo run -p emberwatch-server
 cd web
 npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. To connect the UI to the Rust service, set
-`NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080/platform/ui` before `npm run dev` or
-`npm run build`; without it the UI uses an explicitly labelled local fixture.
-The merged Agent A scenario is invented training data near Sever do Vouga, not a live incident or
-a reconstruction of the 2024 fires. No API key is needed for the offline demo.
-All dispatch, drone routes and spread are illustrative simulations.
+Open [127.0.0.1:3000](http://127.0.0.1:3000). The bundled dashboard and replay
+need no source API keys or running backend. Map tiles still require internet
+access and WebGL.
 
-Agent A's native API is mounted at `/platform` on the same Rust process. The
-`/platform/ui` adapter retains the browser contract and integrates C's simulations.
-The original `/api` endpoints and their November fixture remain available for
-compatibility; configure the browser with the URL above to use Agent A's platform.
-See [the merged platform guide](docs/AGENT_A.md) for native routes and operator controls.
+| Route | View |
+|---|---|
+| `/` | Portugal dashboard with captured status and Arganil 2025 replay |
+| `/data` | Captured evidence and source details |
+| `/methods` | Modelling methods and limitations |
+| `/terrain` | Terrain and building explorer |
+| `/workspace` | Synthetic replay and REST/SSE workspace |
 
-Open http://localhost:3000/terrain for the Portugal terrain explorer, with shaded
-relief, contours and real 3D elevation, plus tilt, orbit and place presets. The
-default OpenFreeMap/Mapterhorn map needs no API key; internet access and WebGL are
-required. See [web/README.md](web/README.md) for providers, attribution and controls.
-The explorer also offers free 3D building views of Lisboa/Porto, using mapped OSM
-footprints and explicitly approximate heights, with a click-to-inspect source panel.
+## Run the Rust service
 
-If the installed Rust toolchain is named `stable` and reports 1.100.0, `cargo
-+stable ...` uses that installation without downloading a second named copy.
-
-## Context.dev setup
-
-Codex uses the hosted MCP server with browser OAuth:
-
-```powershell
-codex mcp add context --url https://mcp.context.dev/mcp
-```
-
-Complete the browser authorization, then restart the MCP server in Codex settings
-or open a new chat if the tools are absent. This computer's OAuth connection was
-verified on 15 November 2026 by discovering 50 Context tools. See the
-[official MCP setup guide](https://docs.context.dev/install-mcp.md).
-
-The Rust application uses a separate server-side `CONTEXT_DEV_API_KEY`. On Windows,
-run these commands from the repository root:
-
-```powershell
-.\infra\context.ps1 -Action set-key  # masked local entry; never paste a key into chat
-.\infra\context.ps1 -Action status
-.\infra\context.ps1 -Action usage    # zero-credit balance check; needs logs:read
-.\infra\context.ps1 -Action probe -Page table  # one billed capture, normally 5 credits
-.\infra\context.ps1 -Action serve
-```
-
-The helper stores the key encrypted for your Windows account at
-`.state/context-dev-key.dpapi`, which Git ignores. It loads the key only for the
-command and restores the previous process environment afterward. Other operating
-systems can set `CONTEXT_DEV_API_KEY` in the server environment and use Cargo.
-Set `CONTEXT_PROBE_CAPTURE=1` in the probe process to retain public-page diagnostics
-under the ignored `.state/context-probe` directory; this does not log credentials.
-
-A fresh Context REST test matched the visible Fogos table's empty message and
-returned unknown coverage. The current Rust client independently reproduced that
-result and normalized it as partial, with no inferred incidents. Populated
-incident extraction remains unverified. Rust formatting/lint and 61 tests passed
-(one optional database test skipped). Windows Application Control (4551) blocked
-the normal probe build, so the live Rust check used the current executable
-produced by `cargo test`. To reuse that executable, add `-UseBuilt` to the probe
-command; the helper rejects an executable older than its source/configuration.
-See the dated evidence in
-[docs/DATA_SOURCES.md](docs/DATA_SOURCES.md). Starting the server keeps recurring
-Fogos scraping disabled pending source checks.
-
-## Optional PostgreSQL/PostGIS
+The toolchain is pinned to Rust 1.100.0 in `rust-toolchain.toml`. From the
+repository root, start a demo with network acquisition disabled:
 
 ```sh
-docker compose -f infra/compose.yaml up -d
-# Set DATABASE_URL from .env.example in the server process environment.
-cargo run -p emberwatch-server
+FIRECAST_AUTO=false FIRECAST_NETWORK=false cargo run --locked -p emberwatch-server
 ```
 
-The server applies both migrations when DATABASE_URL is set. Without it, Agent A
-persists datasets, source settings and replay history to `.state/platform.json`
-(configurable with STATE_PATH), while the original `/api` fixture stays in memory.
-The adapter caches forecast/route/briefing outputs in memory; recompute after a
-server restart. Database connection/migration errors stop
-startup rather than silently losing persistence. Local Compose credentials are
-development-only. Secrets are never exposed to the browser; `.env` is ignored.
+In a second terminal:
+
+```sh
+cd web
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080/platform/ui npm run dev
+```
+
+Open [the workspace](http://127.0.0.1:3000/workspace). It connects to the
+platform's synthetic training scenario through the browser adapter. Without
+`NEXT_PUBLIC_API_BASE_URL`, this view uses local synthetic fixtures.
+
+The dashboard at `/` has a separate status-loading path; the workspace adapter
+does not supply `/api/live/status`. The ROS adapter uses the original
+`/api/snapshot?run_id=synthetic-portugal` endpoint.
+
+The service reads process environment variables and does not load `.env`
+automatically. Configuration, PostgreSQL, source credentials and Windows commands
+are in the [setup guide](docs/SETUP.md).
+
+## Run the ROS demo
+
+ROS 2 Jazzy, Gazebo Harmonic and the PX4 workspace are separate dependencies.
+Start with [ros2/README.md](ros2/README.md) for build and launch commands, then
+read [docs/ROS.md](docs/ROS.md) for nodes, topics, coordinate frames and mission
+flow. [ros2/ARGANIL_DATA.md](ros2/ARGANIL_DATA.md) records the terrain sources,
+licences and scene approximations.
+
+## Repository layout
+
+| Path | Responsibility |
+|---|---|
+| `crates/domain/` | Shared types, validation, source and clock contracts |
+| `crates/platform/` | Source scheduling, fusion, replay, uploads and persistence |
+| `crates/intelligence/` | Context.dev, public-page extraction, IPMA and webhooks |
+| `crates/firecast/` | Fire spread, fuel, weather, smoke and historical evaluation |
+| `crates/response/` | Illustrative spread, route planning and PT/EN briefings |
+| `crates/server/` | Axum entry point, REST routes, SSE and composition |
+| `web/` | Next.js, TypeScript, MapLibre and deck.gl views |
+| `ros2/` | Mission adapters, planners and Gazebo/PX4 simulation |
+| `contracts/` | OpenAPI, JSON Schemas and synthetic fixtures |
+| `data/` | Captured demo evidence and historical model inputs |
+| `migrations/`, `infra/` | Database schema and local service setup |
+| `scripts/`, `tests/` | Contract validation and integration smoke checks |
 
 ## Checks
+
+Run Rust and contract checks from the repository root:
 
 ```sh
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
-# With the synthetic server running in another process:
-node tests/smoke.mjs
-cd web
+python3 -m pip install -r requirements-dev.txt
+python3 scripts/check_contracts.py
+```
+
+Run frontend checks from `web/`:
+
+```sh
 npm test
 npm run lint
 npm run typecheck
 npm run build
 ```
 
-Contracts and synthetic fixtures live in [contracts/](contracts/README.md).
-Recurring Fogos scraping remains disabled pending source checks. A source
-failure never means zero incidents. IPMA nulls and uncertain times remain
-unknown. External keys, weather coverage, historical assets and source reuse
-permission are not prerequisites for the labelled synthetic replay.
+Run ROS Python tests with `python3 -m pytest -c ros2/pytest.ini` from the root.
+They cover snapshot adaptation, coordinate conversion, hazard planning and scene
+generation without launching a flight. With the Rust service running,
+`node tests/smoke.mjs` checks the original synthetic HTTP/SSE flow.
+PostgreSQL tests require a disposable database; see the
+[setup guide](docs/SETUP.md#validation-with-postgresql).
 
-The implementation is an initial integrated slice. Fogos returned partial page
-coverage in the bounded Context probe. IPMA timestamps without a confirmed time
-basis are skipped. Agent A adds gated FIRMS/Open-Meteo adapters, scheduling,
-CSV/JSONL/point-GeoJSON uploads, replay persistence and operator authorization.
-Live upstream calls were not enabled for the merge tests. Historical assets,
-Voice and production deployment remain planned outside the current phase.
-Explanations use Rust calculations and templates; no Gemini integration is planned.
-See the intelligence/response/web
-READMEs for exact implemented behavior and limitations.
+## Data and model boundaries
+
+Positions use `[longitude, latitude]`. Timestamps are stored in UTC and displayed
+in `Europe/Lisbon`. Missing values stay `null`; capture time is not ignition time.
+Historical reports are revealed using their recorded availability rules. Later
+captures can contain edits, so replay coverage and timing remain qualified.
+
+The fire and smoke models are experimental and uncalibrated for operational use.
+ROS fire growth and water effects are illustrative model state, not camera-based
+sensing or validated suppression physics. Scene geometry and configured hazards
+do not establish complete obstacle or airspace coverage.
+
+Read the [demo data guide](docs/DEMO_DATA.md),
+[source research](docs/DATA_SOURCES.md),
+[forecast model guide](crates/firecast/README.md), and
+[web guide](web/README.md) for provenance, attribution and limitations.
+The [build plan](docs/PLAN.md) records the original scope and implementation
+checkpoints; it also includes work that remains planned.

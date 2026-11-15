@@ -8,7 +8,7 @@ test("fixture click-through, bilingual sources, seek and reset", async ({
     if (message.text().includes("Base map unavailable"))
       console.log(message.text());
   });
-  await page.goto("/");
+  await page.goto("/workspace");
   await expect(
     page.getByText("Cenário sintético", { exact: true }).first(),
   ).toBeVisible();
@@ -47,7 +47,7 @@ test("fixture click-through, bilingual sources, seek and reset", async ({
 test("mobile stays usable with map tiles unavailable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/tile.openstreetmap.org/**", (route) => route.abort());
-  await page.goto("/");
+  await page.goto("/workspace");
   await expect(
     page.getByRole("heading", { name: "Sever do Vouga (training location)" }),
   ).toBeVisible();
