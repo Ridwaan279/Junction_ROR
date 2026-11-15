@@ -1,5 +1,73 @@
 # Intelligence/source adapter handoff
 
+## Agent 2 foundation checkpoint
+
+The firecast `ContextDev` facade now delegates HTTP/authentication/errors/credit
+accounting to `ContextClient`. Portuguese incident discovery uses dated web search;
+the separate news index is not used for Portuguese coverage. Historical article
+conditions are withheld from live model adjustments. Live adjustments require
+literal field evidence and a publication time within the configured day window;
+negated positive claims are withheld. Unsupported fields remain in review metadata.
+
+`accuracy` contains NFC/whitespace quote checks, Portuguese quantities and bounds,
+Lisbon DST conversion, conservative availability times, per-unit resource
+observations, unresolved ambiguous places and agency-copy checks. Formatting-only
+quote differences remain unverified in this strict first pass.
+
+Operator commands (server environment contains `CONTEXT_DEV_API_KEY`, including
+proxy placeholders when the host injects authentication):
+
+```sh
+cargo run -p emberwatch-intelligence --example probe_context -- fogos https://fogos.pt/pt/lista --ceiling 5
+cargo run -p emberwatch-intelligence --example probe_context -- search Arganil --ceiling 1
+cargo run -p emberwatch-intelligence --example probe_context -- news 'incêndio Arganil' 2025-08-13 2025-08-14 --ceiling 1
+cargo run -p emberwatch-intelligence --example probe_context -- scrape PUBLIC_HTTPS_ARTICLE_URL --ceiling 5
+```
+
+`batch urls.json --ceiling N` shares one bounded ledger across captures. A timeout
+or missing usage stops subsequent calls; no billed POST is implicitly retried.
+Only confirmed response credits are reported as usage. Raw responses are redacted
+and saved under Git-ignored `tests/fixtures/live/` for private review.
+
+The offline archive command needs no key or credits:
+
+```sh
+cargo run -p emberwatch-intelligence --example probe_context -- archive ORIGINAL_RAW_DIRECTORY ABSOLUTE_PRIVATE_DESTINATION data/demo/arganil-early/context_dev/pages.json
+```
+
+It refuses a Git destination, preserves responses without overwriting different
+files, checks original request IDs, and hashes exact decoded Markdown UTF-8 bytes.
+The user's supplied archive yielded 23 Markdown hashes and two failed captures.
+The 25-page golden manifest is an inventory, not human gold labels. Set
+`EMBERWATCH_GOLDEN_RAW_DIR` to the private preserved responses to run hash/quote
+audits with `cargo test -p emberwatch-intelligence golden -- --nocapture`.
+Independent recall, fabrication and all documented threshold metrics remain
+pending human expected labels; no gate is claimed passed by an inventory test.
+
+## Live status
+
+The Rust server mounts `GET /api/live/status`, following the UI fixture's keys.
+Each source adds `capture_succeeded`, `positively_empty`,
+`last_successful_capture_at` and `error_code`. Unknown capture times are null,
+including when configuration/source checks prevented any upstream request.
+The state is `check_failed` or `partial` unless there is supported active evidence
+or an explicit whole-line empty statement in a successful, non-partial capture.
+Live status never reads historical or synthetic replay data.
+
+The endpoint is single-flight and cached. It checks Markdown first (bounded at
+one credit); visible incident links can trigger a separate structured capture
+(bounded at five). It does not retry failed captures. Optional runtime variables:
+
+- `EMBERWATCH_LIVE_ENABLED=1`, `FOGOS_PUBLIC_PAGE_CHECKS_PASSED=1`: explicitly enable
+  network reads after source checks; both are off by default.
+- `LIVE_STATUS_CACHE_SECONDS`: chosen cache duration, default 300 seconds.
+- `CONTEXT_LIVE_HOURLY_CREDITS`: chosen per-process hourly ceiling, default 10;
+  this is an application budget, not a provider quota. Exhaustion fails the check.
+- `CONTEXT_DEV_API_KEY`: server/proxy authentication; never a browser variable.
+
+Embedded/test routers stay offline by default. The executable opts into runtime
+configuration through `router_with_live_options`.
+
 The Rust crate returns shared `emberwatch-domain` batches. Platform owns source
 cadences/caches, retry policy, incident fusion, persistence, and SSE. No provider
 key or source-run trigger belongs in the browser.

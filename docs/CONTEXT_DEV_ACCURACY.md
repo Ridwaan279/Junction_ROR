@@ -1,5 +1,25 @@
 # Context.dev accuracy plan (Agent 2)
 
+### Foundation checkpoint — 15 November 2026
+
+Implemented: shared transport used by firecast, bounded/redacted `probe_context`,
+NFC/whitespace and Portuguese quantity/time/resource/place/lineage helpers,
+stricter model-input grounding, capture-aware live status, and an offline private
+archive importer. The supplied ZIP contains the original 25 scrape responses;
+23 successful Markdown outputs now have exact-byte hashes in `pages.json`.
+The two failures remain failures. Full articles stay outside Git.
+
+Not complete: independent human `expected.json` labels and the threshold
+evaluator/benchmark acceptance. The golden inventory/hash/quote tests do not
+prove field recall or zero fabrication. Some normalizer integration still needs
+the full labelled cases; stations, fleet, routing, exposure generation and finer
+replay frames follow in the requested order. The optional second-model extraction
+and Gemini advisor are removed from scope by the user's instruction.
+
+The Windows host blocks some Cargo build scripts, the SQLx macro and selected
+test executables with Application Control error 4551. Record actual per-target
+results; do not turn a partial test run into a passing workspace report.
+
 Goal: every fact EmberWatch shows from the web is pulled from the right page,
 extracted correctly, traceable to a quote, and never invented. This document is
 the work order for Agent 2. It is task 3 in [WORKPLAN.md](WORKPLAN.md); the

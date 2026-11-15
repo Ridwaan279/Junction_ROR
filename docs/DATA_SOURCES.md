@@ -1,5 +1,61 @@
 # Portugal data-source research
 
+## Agent 2 source-preservation and contract checkpoint — 15 November 2026
+
+The user supplied the original `emberwatch-context-dev-raw-2026-11-15.zip`.
+The ZIP and 35 extracted JSON responses are preserved privately outside Git.
+All 25 retained page request IDs were checked when applicable; the 23 responses
+with Markdown now have SHA-256 hashes in `pages.json`. Two failed captures have
+no Markdown hash. Hashes use original decoded UTF-8 bytes, with no whitespace or
+Unicode normalization. Archive fingerprint/counts are recorded in
+`data/demo/arganil-early/context_dev/raw_archive_provenance.json`.
+No full article text, authentication header or account allocation is committed.
+
+Current contract review:
+
+| Operation | Request / response used | Status and source |
+|---|---|---|
+| `POST /v1/web/scrape` | Bearer auth; URL, text/JSON formats, `maxAgeMs`, rendering wait, deadline, nullable schema. Read requested/success/data/error codes, `isPartial`, JSON truncation, request ID, cache age and consumed credits. | [Scrape](https://docs.context.dev/scrape/overview.md), [JSON](https://docs.context.dev/scrape/json.md), [errors](https://docs.context.dev/scrape/timeouts-and-errors.md). HTTP 200 is not sufficient; missing/partial output cannot imply zero incidents. |
+| `POST /v1/web/search` | Query, result bound, domain/language/country filters; dated queries use discovery operators. Read result URL/title and optional per-result Markdown `code`/`finalDOMState`, cache and usage metadata. | [Search reference](https://docs.context.dev/api-reference/web-scraping/search.md). Search rank/date hints are not proof of publication or historical availability. |
+| `POST /v1/news/search` | Historical raw calls remain preserved; Portuguese discovery in new code uses web search instead. | Separate index coverage is unverified for Portuguese publishers. The current reference was listed in the provider index but not retrievable in this research reader; do not claim a new documentation or live-contract verification. |
+| `POST /v1/web/answers` | Explicit `fast`, task, example JSON shape and deadline. Read `json_content`, sources and partial state. | [Answers](https://docs.context.dev/answers/overview). Outputs lack field-level literal verification and cannot automatically modify physics inputs. |
+| Monitor webhooks | Existing raw-body timestamped HMAC verifier retained; no monitor was created or changed. | Initial dated protocol review below remains the evidence. Concrete delivery schema still requires a representative signed payload. |
+
+The [credit guide](https://docs.context.dev/account/credits.md) specifies one base
+scrape credit, four more for successful JSON extraction, web search per ten
+returned results (rounded up) plus requested content modifiers, and ten for a
+successful fast answer. The [rate guide](https://docs.context.dev/optimization/rate-limits.md)
+describes organization concurrency and the Free-plan ten requests/minute; account
+allowances can differ. The client's configured ceiling is not an account quota.
+Missing usage is unknown and halts subsequent billed requests in that budget.
+
+The current Rust `probe_context` then made bounded live calls (15 November 2026,
+03:35 UTC), using the already-configured private credential without exposing it:
+
+| Endpoint | Request ID | Observed outcome |
+|---|---|---|
+| `web/search` (Arganil, Portuguese) | `089a9033-69ee-44ef-8e79-9027632a5adf` | Fresh response, 1 credit. |
+| `web/scrape` (Fogos public list) | `f960c398-ac64-4062-910e-51a5e1f3c314` | Markdown/JSON succeeded; exact empty message, no rows, update time null, fresh response, 5 credits. The extractor claimed complete coverage; that claim alone is not proof of national completeness. |
+| `web/answers` (fast, IPMA documentation) | `ad0af1a9-2012-49c9-8dc5-11377075b380` | Returned the documented missing-value sentinel with an IPMA URL and excerpt, 10 credits. This is a provider-contract probe, not verified physics input. |
+
+Together these calls used 16 confirmed credits. Captures are redacted and
+Git-ignored. No monitor or recurring source was enabled.
+
+The reproducible original-capture audit checked all 23 Markdown hashes. Strict
+NFC/whitespace matching supported 222/267 candidate news quotes; the quantity
+parser supported 72/90 candidate numeric values. Formatting and unsupported
+claims require review; these fractions are not independent field recall,
+fabrication or numeric-error benchmark results. The human-labelled threshold
+gate remains open. The original source records were unchanged apart from the
+three added hash/provenance properties.
+
+The live-status contract was read from Agent 1 commit `33bc89fb` and
+`docs/UI.md`; its reference snapshot is copied to
+`data/demo/live/fogos-list-check-2026-11-15.json` without changing `web/**`.
+An explicit empty statement in a successful full public-page capture is labelled
+as that source's statement at capture time, not independent proof of national
+activity. Disabled, unconfigured, failed and partial checks never show all-clear.
+
 Last setup/probe check: **15 November 2026**. Initial research: 14 November 2026.
 Agent 2 plan checkpoint, 15 November 2026: branch `codex/agent-2-intelligence`
 starts at integration commit `21e03ce`. The user's subsequent instruction removes
