@@ -5,6 +5,7 @@ COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY crates ./crates
 COPY contracts ./contracts
 COPY migrations ./migrations
+COPY data/stations ./data/stations
 RUN cargo build --release --locked -p emberwatch-server
 
 FROM debian:bookworm-slim
