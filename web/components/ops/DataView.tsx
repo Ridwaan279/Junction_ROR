@@ -2,12 +2,12 @@
 import { useEffect, useState } from "react";
 import { lisbon, REPLAY_BASES, type ReplayIndex } from "@/lib/replay";
 import SiteNav, { useLocale } from "./SiteNav";
+import LiveDataPanel from "./LiveDataPanel";
 import s from "./ops.module.css";
 
 type Search = { name: string; endpoint: string; request_id: string | null; credits: number | null; error: unknown; results: number };
 type Page = ReplayIndex["pages"][number] & { credits: number | null; request_id: string | null; time_flags: string[]; published_at: string | null };
 type Index = Omit<ReplayIndex, "pages"> & { pages: Page[]; searches: Search[] };
-type Live = { checked_at: string; state: string; statement: string | null; sources: { name: string; url: string; via: string; request_id: string | null; credits: number | null }[] };
 
 const SEARCH_LABEL: Record<string, { pt: string; en: string }> = {
   news_incendio_arganil: { pt: "Notícias: incêndio Arganil Piódão (pt)", en: "News: Arganil Piódão fire (pt)" },
@@ -74,7 +74,6 @@ const T = {
 export default function DataView() {
   const [locale, setLocale] = useLocale();
   const [index, setIndex] = useState<Index | null>(null);
-  const [live, setLive] = useState<Live | null>(null);
   const L = T[locale];
   useEffect(() => {
     void (async () => {
@@ -83,7 +82,6 @@ export default function DataView() {
         if (r?.ok) { setIndex(await r.json()); return; }
       }
     })();
-    void fetch("/fixtures/v2/live-status.json").then((r) => r.json()).then(setLive).catch(() => undefined);
   }, []);
 
   const pages = index?.pages ?? [];
@@ -100,8 +98,11 @@ export default function DataView() {
         <h1>{L.title}</h1>
         <p className={s.lead}>{L.intro}</p>
 
+        <LiveDataPanel locale={locale} />
+
         {index && (
-          <>
+          <details className={s.historicalArchive}>
+            <summary>{locale === "pt" ? "Arquivo histórico de Arganil · dados de reprodução, não ao vivo" : "Arganil historical archive · replay data, not live"}</summary>
             <section>
               <h2>{L.run}</h2>
               <dl className={s.figures}>
@@ -166,17 +167,7 @@ export default function DataView() {
                 </tbody>
               </table>
             </section>
-          </>
-        )}
-
-        {live && (
-          <section>
-            <h2>{L.live}</h2>
-            <p>{L.liveText(live.statement, lisbon(live.checked_at, locale, true))}{" "}
-              {live.sources.map((src) => <a key={src.url} href={src.url} target="_blank" rel="noreferrer">fogos.pt/pt/lista</a>)}
-              <span className={s.muted}> · {live.sources[0]?.via}</span>
-            </p>
-          </section>
+          </details>
         )}
 
         <section>

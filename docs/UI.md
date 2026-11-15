@@ -1,5 +1,35 @@
 # EmberWatch UI (Agent 1)
 
+## Portugal map restoration (15 November 2026)
+
+The operations map now uses the original Portugal terrain palette and the shared
+3D building renderer from `/terrain`, including varied roofs/facades and road/park
+textures. Texture and nearby-event toggles are independent. Lisboa and Porto
+presets go directly to building detail; zoom remains available to level 22.
+The map loads before city selection is enabled. Attributed OSM footprints and
+available heights are source data; generated roof/facade appearances are illustrative.
+
+Simulated drone assignments show timestamped deployment entries in Lisbon time,
+with station, role and ground-transfer/flight distinction. Reserve inventory is
+excluded. Quadcopter markers follow full mission legs and disappear on return;
+seeking backward removes future deployments. These are simulations, not real aircraft.
+
+The Data tab now requests `/api/live/status` through a same-origin Next.js proxy.
+Its Rust upstream defaults to `http://127.0.0.1:8080`; override server-side with
+`EMBERWATCH_API_BASE_URL`. Existing `NEXT_PUBLIC_API_BASE_URL` remains a fallback.
+Provider credentials stay in Rust. The page refreshes every 60 seconds while
+visible and has manual refresh. Rust's cache and credit budget govern actual
+captures; browser refresh is not evidence of a new scrape. Source capture times,
+request IDs, credits, errors, partial states and incident rows are displayed.
+Connection failure is explicit, with any previous result marked stale. Historical
+data is collapsed under a separate archive and is never substituted for live data.
+
+Validation: frontend lint/typecheck/build and 64 unit tests passed. Chrome desktop
+and 390px mobile checks observed the textured buildings, 11 nearby pins changing
+to zero when disabled, timestamped deployments, actual live service metadata,
+no page/console errors and no horizontal mobile overflow. The observed live
+capture was partial; it was not presented as proof of no active fires.
+
 Branch: everything now lands on `main` (the user's decision, 15 Nov 2026). Agent 2
 keeps its own branch and Agent 1 merges it into `main` at each checkpoint.
 
