@@ -4,6 +4,8 @@ Status: plan only. Nothing here is implemented until a gate below says so.
 Updated 15 November 2026: the user removed Gemini from the project. No Google
 model integration, advisor chatbot, Gemini credentials or model access is required.
 Rust produces deterministic fleet/risk explanations; Context.dev supplies web evidence.
+Delivery revision: the user removed the human benchmark requirement. Keep source
+grounding and regression tests; do not claim independent human accuracy metrics.
 Read with [AGENTS.md](../AGENTS.md), [PLAN.md](PLAN.md), [DATA_SOURCES.md](DATA_SOURCES.md)
 and, for Agent 2, [CONTEXT_DEV_ACCURACY.md](CONTEXT_DEV_ACCURACY.md).
 
@@ -84,7 +86,7 @@ Rules that keep merges trivial:
 | 0 | Done: plan, contracts and firecast work pushed to `claude/fervent-clarke-m9qsko` (`9a061da`) | Agent 1 |
 | 1 | 3D branch merged into the integration branch, all checks green, Agent 2 rebased | Agent 1 |
 | 2 | UI shell redesign on fixtures; Agent 2 delivers stations + deterministic fleet + 3D routes for the Arganil replay into `web/public/generated/` | both |
-| 3 | Context.dev accuracy harness and golden set passing thresholds; exposures (people at risk) in the replay output | Agent 2 |
+| 3 | Context.dev grounding/provenance regression checks and replay exposures. Human benchmark omitted by user request | Agent 2 |
 | 4 | Deterministic fleet/risk breakdowns and simulated observation facts wired to UI panels; no external model dependency | both |
 | 5 | End-to-end demo pass, accuracy checklist (section 8) green, screenshots | both |
 
@@ -408,7 +410,8 @@ Each agent runs the checks for what it changed and reports any it could not run.
 - Spread validation (existing): Dice and area per Arganil perimeter stay at or
   better than the current values recorded in `crates/firecast/README.md`.
 - Fleet formula unit tests and hand-computed cases (5.2); route invariants (5.3).
-- Context.dev golden-set thresholds (CONTEXT_DEV_ACCURACY.md section 6).
+- Context.dev deterministic grounding/provenance/failure regression checks. The
+  human-labelled benchmark was removed from this delivery by the user.
 - Deterministic explanations match the Rust formula; observation facts come only
   from the simulation/source state at the cursor; retired advisor fields stay empty.
 - Replay: seeking to any time shows no evidence, sitrep or exposure with a time

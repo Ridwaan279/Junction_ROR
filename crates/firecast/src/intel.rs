@@ -59,9 +59,16 @@ pub enum IntelMode {
     WhatIf,
 }
 
+type CaptureCache = std::sync::Arc<
+    std::sync::Mutex<
+        std::collections::BTreeMap<String, (std::time::Instant, Option<ArticleConditions>)>,
+    >,
+>;
 #[derive(Clone)]
 pub struct ContextDev {
     inner: ContextClient,
+    shared_budget: bool,
+    captures: CaptureCache,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -131,6 +138,7 @@ pub struct FireIntel {
     pub credits_used: f64,
     pub calls: Vec<String>,
     pub errors: Vec<String>,
+    pub budget: Option<Value>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -180,12 +188,28 @@ impl ContextDev {
         }
         Ok(Self {
             inner: ContextClient::new(api_key).map_err(|e| FirecastError::Config(e.code))?,
+            shared_budget: false,
+            captures: Default::default(),
         })
     }
     pub fn from_env() -> Option<Self> {
         std::env::var("CONTEXT_DEV_API_KEY")
             .ok()
             .and_then(|k| Self::new(k).ok())
+    }
+    pub fn with_shared_budget(&self, limit: f64) -> Result<Self, FirecastError> {
+        Ok(Self {
+            inner: self
+                .inner
+                .clone()
+                .with_budget(limit)
+                .map_err(|e| FirecastError::Config(e.code))?,
+            shared_budget: true,
+            captures: self.captures.clone(),
+        })
+    }
+    pub fn budget_status(&self) -> emberwatch_intelligence::context::BudgetStatus {
+        self.inner.budget_status()
     }
 
     async fn post(&self, path: &str, body: &Value) -> Result<(Value, f64), FirecastError> {
@@ -267,6 +291,14 @@ impl ContextDev {
         incident_hint: &str,
     ) -> Result<(Option<ArticleConditions>, f64), FirecastError> {
         validate_scrape_url(url)?;
+        let cache_key = json!([url, incident_hint]).to_string();
+        {
+            let mut cache = self.captures.lock().unwrap();
+            cache.retain(|_, (at, _)| at.elapsed() < std::time::Duration::from_secs(3600));
+            if let Some((_, conditions)) = cache.get(&cache_key) {
+                return Ok((conditions.clone(), 0.));
+            }
+        }
         let body = json!({"url":url,"formats":{"markdown":true,"json":true},"maxAgeMs":3_600_000,
             "timeoutOpts":{"milliseconds":30000,"behavior":"return-partial"},
             "jsonParams":{"schema":conditions_schema(),"instructions":format!("{EXTRACTION_RULES} Wildfire: {incident_hint}.")}});
@@ -336,6 +368,12 @@ impl ContextDev {
             c.request_id=value.get("request_id").and_then(Value::as_str).map(str::to_owned);
             Some(c)
         });
+        {
+            let mut cache = self.captures.lock().unwrap();
+            if cache.len() < 128 {
+                cache.insert(cache_key, (std::time::Instant::now(), conditions.clone()));
+            }
+        }
         Ok((conditions, credits))
     }
 
@@ -389,11 +427,20 @@ Responda só com factos suportados por fontes."
             mode: Some(mode),
             ..FireIntel::default()
         };
-        let Ok(inner) = self.inner.clone().with_budget(max_credits) else {
+        let scoped = if self.shared_budget {
+            Ok(self.inner.clone())
+        } else {
+            self.inner.clone().with_budget(max_credits)
+        };
+        let Ok(inner) = scoped else {
             intel.errors.push("Invalid credit budget".into());
             return intel;
         };
-        let bounded = Self { inner };
+        let bounded = Self {
+            inner,
+            shared_budget: self.shared_budget,
+            captures: self.captures.clone(),
+        };
         let afford = |intel: &FireIntel, cost: f64| intel.credits_used + cost <= max_credits;
         let query = format!("incêndio {place}");
         if mode != IntelMode::WhatIf && afford(&intel, 1.0) {
@@ -473,6 +520,7 @@ Responda só com factos suportados por fontes."
                 Err(e) => intel.errors.push(e.to_string()),
             }
         }
+        intel.budget = Some(serde_json::to_value(bounded.budget_status()).expect("finite budget"));
         intel
     }
 }
@@ -762,6 +810,16 @@ mod tests {
             .await;
         assert_eq!(what_if.calls, vec!["web/answers"]);
         assert!(what_if.reports.is_empty());
+        let limited = client.with_shared_budget(7.).unwrap();
+        let first = limited
+            .gather(IntelMode::Live, "Separate budget fixture", at, 7.)
+            .await;
+        assert_eq!(first.credits_used, 7.);
+        let second = limited
+            .gather(IntelMode::Live, "Separate budget fixture", at, 7.)
+            .await;
+        assert_eq!(second.credits_used, 0.);
+        assert_eq!(limited.budget_status().actual, 7.);
         server.abort();
     }
 }

@@ -79,6 +79,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   "fogos"=>{validate_fogos_url(target)?;let mut body=scrape_body(target);body["jsonParams"]["schema"]=emberwatch_intelligence::context::fogos_schema();body["jsonParams"]["instructions"]=json!("Read public incident rows only with exact supporting excerpts. Missing fields null. Never infer national completeness. Copy explicit empty text if present. No rows in a loading shell means coverage unknown. On a historical detail page retain only dated status rows and static nature/coordinates; exclude present-day weather/resource counters.");jobs.push((Endpoint::Scrape,body,5.0));}
   "scrape"=>{public_url(target)?;jobs.push((Endpoint::Scrape,scrape_body(target),5.0));}
   "batch"=>{let urls:Vec<String>=serde_json::from_slice(&std::fs::read(target)?)?;for url in urls{public_url(&url)?;jobs.push((Endpoint::Scrape,scrape_body(&url),5.0));}}
+  "capture-plan"=>{
+   let plan:Value=serde_json::from_slice(&std::fs::read(target)?)?;
+   for search in plan["searches"].as_array().ok_or("Missing searches")? {
+    if search["endpoint"]!="POST /v1/web/search" {println!("skipped news-index query: Portuguese coverage not established");continue;}
+    let body=search["body"].clone();let n=body["numResults"].as_u64().ok_or("Search needs explicit numResults")?;
+    if n==0||n>100{return Err("Search result limit outside reviewed range".into());}
+    jobs.push((Endpoint::Search,body,(n as f64/10.).ceil()));
+   }
+   for url in plan["scrape_urls"].as_array().ok_or("Missing scrape_urls")? {
+    let url=url.as_str().ok_or("Invalid scrape URL")?;public_url(url)?;
+    jobs.push((Endpoint::Scrape,scrape_body(url),5.0));
+   }
+  }
   "search"|"news"=>{
    let query=if command=="news" {
     let from=chrono::NaiveDate::parse_from_str(args.get(2).ok_or("Missing from YYYY-MM-DD")?,"%Y-%m-%d")?;
@@ -117,6 +130,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut capture = client.redacted_capture(&raw);
         capture["capture_started_at"] = json!(started);
         capture["captured_at"] = json!(chrono::Utc::now());
+        capture["_captured_at"] = capture["captured_at"].clone();
+        capture["_requested_url"] = body.get("url").cloned().unwrap_or(Value::Null);
         capture["latency_ms"] = json!(clock.elapsed().as_millis());
         let digest = hex::encode(Sha256::digest(body.to_string().as_bytes()));
         let file = directory.join(format!(
