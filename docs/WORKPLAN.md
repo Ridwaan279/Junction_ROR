@@ -119,6 +119,20 @@ basemap; a basemap failure there no longer breaks the replay panels.
    glance, style, demo flow) and wait for the answers before committing to a
    layout. The layout below is a starting proposal, not a decision.
 
+Answers from the user (first round):
+
+| Question | Answer | What it means for the build |
+|---|---|---|
+| Main viewer | Hackathon judges | Clear story in a few minutes; big visuals, little reading |
+| Visible on first open, no click | Fire + predicted spread | The 3D map opens on the fire with burn-probability bands and the 6/12 h envelope; everything else (drones, timeline, villages, sources) is one click or hover away |
+| Visual style | Realistic satellite imagery with a dark ops-room UI | Satellite basemap on 3D terrain (a free, attributable imagery source with terms checked, e.g. Sentinel-2 cloudless); dark panels and controls; fire, smoke and drones glow on top |
+| Demo flow | Runs on real-time data; a button switches to the previous simulation | Default view is **live** (current Portugal data through the server). A clear button switches to the **historical replay** (Arganil/Piódão 2025, real data), and back. Live never shows replay data and vice versa; the mode badge is always visible |
+
+Open point to confirm with the user: what the live view shows when there is no
+active fire (proposal: Portugal in 3D with today's fire-danger and weather layers,
+the time of the last successful capture, and the replay button highlighted; a
+failed capture is shown as a failure, never as "no fires").
+
 Starting proposal: one operations screen replaces the current workspace/historical split. Layout:
 
 ```
