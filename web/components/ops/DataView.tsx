@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { lisbon, REPLAY_BASE, type ReplayIndex } from "@/lib/replay";
+import { lisbon, REPLAY_BASES, type ReplayIndex } from "@/lib/replay";
 import SiteNav, { useLocale } from "./SiteNav";
 import s from "./ops.module.css";
 
@@ -77,7 +77,12 @@ export default function DataView() {
   const [live, setLive] = useState<Live | null>(null);
   const L = T[locale];
   useEffect(() => {
-    void fetch(REPLAY_BASE + "index.json").then((r) => r.json()).then(setIndex).catch(() => undefined);
+    void (async () => {
+      for (const b of REPLAY_BASES) {
+        const r = await fetch(b + "index.json").catch(() => null);
+        if (r?.ok) { setIndex(await r.json()); return; }
+      }
+    })();
     void fetch("/fixtures/v2/live-status.json").then((r) => r.json()).then(setLive).catch(() => undefined);
   }, []);
 

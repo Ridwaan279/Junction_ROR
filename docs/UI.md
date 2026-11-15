@@ -71,7 +71,7 @@ live service offline.
 
 ## Next UI steps (pending the user's further input)
 
-- Agent 2's fleet is the agreed drone source (user decision): render its stations and 3D routes once `web/public/generated/arganil-early/` is pushed; the in-browser `lib/fleet.ts` plan is the fallback until then.
+- Done: the replay loads Agent 2's `web/public/generated/arganil-early/` (fixture as fallback). Its fleet drives the Drones figure, the working panel (Agent 2's breakdown terms) and the map: cited stations, dashed ground transfer, solid terrain-following flight, drones holding on station; each drone launches at the first frame after the alert that assigns it. `lib/fleet.ts` is used only when a frame has no fleet.
 - Swap the legacy drone plan for Agent 2's `fleet` (fixed stations, 3D smoke-avoiding routes with altitude) when delivered.
 - Point the live card at `GET /api/live/status` once the Rust service serves it.
 - Finer early frames (Agent 2, WORKPLAN 5.0b) will move "Drones launched" from 08:00 to minutes after the 05:08 report.

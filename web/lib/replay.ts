@@ -16,8 +16,15 @@ export type ReplayIndex = {
   timeline: { at: string; status: string; url: string }[];
   frames: { t: string; file: string; evidence: number; exposures: number; area_ha_p50: number }[];
   pages: ReplayPage[]; evidence: ReplayEvidence[]; monitors: Monitor[]; limitations: string[];
-  automation: AutomationStep[];
+  automation?: AutomationStep[];
+  stations?: Station[];
 };
+export type Station = { id: string; name: string; position: [number, number]; simulated: boolean; drones_total: number; drones_available: number; coordinate_source: string };
+export type Waypoint = { position: [number, number, number]; t_s: number };
+export type AgentDrone = { id: string; role: string; station_id: string; task_point: [number, number];
+  route: { waypoints: Waypoint[]; legs: { kind: "flight" | "ground_transfer"; from: number; to: number }[]; detour_reason: string | null } | null };
+export type AgentFleet = { at: string; count: number; previous_count: number | null; change_reason_pt: string | null; change_reason_en: string | null;
+  breakdown: { term: string; value: number; unit: string; basis: string }[]; drones: AgentDrone[]; held: unknown[] };
 export type Exposure = {
   id: string; name: string; kind: string[]; position: [number, number]; people: number | null;
   distance_from_ignition_km: number; events: { name: string | null; scheduled_start_date: string | null; status: string | null }[];
@@ -34,11 +41,14 @@ export type ReplayFrame = {
   evidence_ids: string[];
   exposures: Exposure[];
   automation: AutomationStep[];
+  fleet?: AgentFleet | null;
   drones_legacy: { count: number; bases: [number, number][]; routes: { base: number; eta_min: number; path: [number, number][]; role: string }[] };
 };
 export type AutomationStep = { step: string; at: string; basis: "observed" | "simulated"; detail: string; url: string | null };
 
-export const REPLAY_BASE = "/fixtures/v2/arganil-early/";
+/** Agent 2's generated replay (fleet, stations, routes); the hand-built fixture is the fallback. */
+export const REPLAY_BASES = ["/generated/arganil-early/", "/fixtures/v2/arganil-early/"] as const;
+export const REPLAY_BASE = REPLAY_BASES[1];
 
 const empty: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
 const feature = (geometry: Geometry | null, properties: Record<string, unknown> = {}): GeoJSON.Feature[] =>
@@ -61,8 +71,10 @@ export function addReplayLayers(map: LibreMap) {
     "fill-opacity": ["match", ["get", "band"], "p90", 0.62, "p50", 0.42, 0.24] } });
   map.addLayer({ id: "rp-fire-edge", type: "line", source: "rp-fire", filter: ["==", ["get", "band"], "p50"], paint: {
     "line-color": "#ffd0a1", "line-width": 1 } });
-  map.addLayer({ id: "rp-routes", type: "line", source: "rp-routes", layout: { "line-cap": "round" }, paint: {
-    "line-color": FIRE.drone, "line-width": 1.2, "line-opacity": 0.6 } });
+  map.addLayer({ id: "rp-routes-ground", type: "line", source: "rp-routes", filter: ["==", ["get", "kind"], "ground_transfer"], paint: {
+    "line-color": FIRE.drone, "line-width": 1, "line-opacity": 0.45, "line-dasharray": [2, 2] } });
+  map.addLayer({ id: "rp-routes", type: "line", source: "rp-routes", filter: ["!=", ["get", "kind"], "ground_transfer"], layout: { "line-cap": "round" }, paint: {
+    "line-color": FIRE.drone, "line-width": 1.4, "line-opacity": 0.75 } });
   map.addLayer({ id: "rp-bases", type: "circle", source: "rp-bases", paint: {
     "circle-radius": 3, "circle-color": "rgba(0,0,0,0.5)", "circle-stroke-color": FIRE.drone, "circle-stroke-width": 1.2 } });
   map.addLayer({ id: "rp-drones", type: "circle", source: "rp-drones", paint: {
@@ -157,7 +169,7 @@ export function showReplayFrame(map: LibreMap, frame: ReplayFrame, ignition: [nu
 }
 
 export function setReplayVisible(map: LibreMap, visible: boolean) {
-  for (const id of ["rp-smoke", "rp-forecast", "rp-fire-fill", "rp-fire-edge", "rp-routes", "rp-bases", "rp-drones", "rp-villages", "rp-village-labels", "rp-ignition"])
+  for (const id of ["rp-smoke", "rp-forecast", "rp-fire-fill", "rp-fire-edge", "rp-routes-ground", "rp-routes", "rp-bases", "rp-drones", "rp-villages", "rp-village-labels", "rp-ignition"])
     if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
 }
 
@@ -218,4 +230,38 @@ export function rescueTargetsAt(index: ReplayIndex, t: number): RescueTarget[] {
       distance_km: Math.hypot((p.position[0] - ig[0]) * k, p.position[1] - ig[1]) * 111.32,
     }))
     .sort((a, b) => a.distance_km - b.distance_km);
+}
+
+/** Agent 2 fleet: stations in use, the outbound path of each drone (ground leg dashed, flight solid) and its position at t. */
+export function showAgentFleet(map: LibreMap, stations: Station[], drones: AgentDrone[], launches: Map<string, number>, t: number) {
+  const set = (id: string, features: GeoJSON.Feature[]) =>
+    (map.getSource(id) as GeoJSONSource | undefined)?.setData({ type: "FeatureCollection", features });
+  const routes: GeoJSON.Feature[] = [], points: GeoJSON.Feature[] = [], used = new Set<string>();
+  for (const d of drones) {
+    const launch = launches.get(d.id);
+    const w = d.route?.waypoints ?? [];
+    if (launch == null || launch > t || w.length < 2) continue;
+    used.add(d.station_id);
+    // The outbound part ends where the drone first reaches its task point (it then works on station).
+    let task = w.length - 1, best = Infinity;
+    w.forEach((p, i) => { const dd = Math.hypot(p.position[0] - d.task_point[0], p.position[1] - d.task_point[1]); if (dd < best - 1e-9) { best = dd; task = i; } });
+    for (const leg of d.route!.legs) {
+      const a = leg.from, b = Math.min(leg.to, task);
+      if (a >= b) continue;
+      routes.push({ type: "Feature", geometry: { type: "LineString", coordinates: w.slice(a, b + 1).map((p) => [p.position[0], p.position[1]]) }, properties: { kind: leg.kind } });
+    }
+    const el = (t - launch) / 1000;
+    let pos = w[task].position;
+    for (let i = 1; i <= task; i++) {
+      if (el <= w[i].t_s) {
+        const k = (el - w[i - 1].t_s) / Math.max(1e-6, w[i].t_s - w[i - 1].t_s);
+        pos = [w[i - 1].position[0] + (w[i].position[0] - w[i - 1].position[0]) * k, w[i - 1].position[1] + (w[i].position[1] - w[i - 1].position[1]) * k, 0];
+        break;
+      }
+    }
+    points.push({ type: "Feature", geometry: { type: "Point", coordinates: [pos[0], pos[1]] }, properties: { role: d.role } });
+  }
+  set("rp-routes", routes);
+  set("rp-drones", points);
+  set("rp-bases", stations.filter((st) => used.has(st.id)).map((st) => ({ type: "Feature", geometry: { type: "Point", coordinates: st.position }, properties: { name: st.name } })));
 }

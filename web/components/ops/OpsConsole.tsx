@@ -4,7 +4,7 @@ import type { Map as LibreMap } from "maplibre-gl";
 import { loadMapLibre } from "@/lib/terrain";
 import { loadOpsStyle, setThreeD } from "@/lib/ops-map";
 import {
-  addReplayLayers, compassPoint, FIRE, frameAt, lisbon, REPLAY_BASE, setReplayVisible, showReplayFrame, showVillages, villagesAt,
+  addReplayLayers, compassPoint, FIRE, frameAt, lisbon, REPLAY_BASES, setReplayVisible, showAgentFleet, showReplayFrame, showVillages, villagesAt,
   showFleet, pinsAt, pinElement, rescueTargetsAt, PIN_COLORS, type ReplayFrame, type ReplayIndex, type ValidationRow,
 } from "@/lib/replay";
 import { distanceKm, droneTasks, FLEET, outerRing, planFleet, stagingPoint, type FleetPlan } from "@/lib/fleet";
@@ -48,7 +48,8 @@ const T = {
       ["No ar", p.airborne],
       [`Rotação: ${FLEET.endurance_min} min de voo, ${FLEET.recharge_min} min de recarga, ${Math.round(p.transit_min)} min de trânsito (÷ ${dec(p.duty, 2)}) e ${FLEET.reserve * 100} % de reserva`, p.total],
     ] as [string, number][],
-    grounded: (g: number) => `Rajadas de ${g} km/h acima do limite de ${FLEET.gust_limit_kmh} km/h: drones em terra.`, close: "Fechar", play: "Reproduzir", pause: "Pausa", timeline: "Linha temporal",
+    grounded: (g: number) => `Rajadas de ${g} km/h acima do limite de ${FLEET.gust_limit_kmh} km/h: drones em terra.`,
+    agentTerms: { P_front: "Frente prevista a 1 h", t_transit: "Trânsito até ao local", airborne_perimeter: "Drones na frente", airborne_head: "Drones na cabeça do fogo", airborne_exposure: "Drones sobre locais expostos", duty: "Fração do tempo em voo", fleet: "Frota (com reserva de 20 %)" }, close: "Fechar", play: "Reproduzir", pause: "Pausa", timeline: "Linha temporal",
     legendArea: "Fogo", legendForecast: "Previsão 6 h", legendVillage: "Evacuada", legendDrone: "Drone",
     sourcesNote: "Cada facto aparece a partir da hora em que foi publicado.",
     accuracyTitle: "Previsão vs. realidade", observed: "Observado", predicted: "Previsto", overlap: "Sobreposição",
@@ -74,7 +75,8 @@ const T = {
       ["Airborne", p.airborne],
       [`Rotation: ${FLEET.endurance_min} min flight, ${FLEET.recharge_min} min recharge, ${Math.round(p.transit_min)} min transit (÷ ${p.duty.toFixed(2)}) and ${FLEET.reserve * 100} % reserve`, p.total],
     ] as [string, number][],
-    grounded: (g: number) => `Gusts of ${g} km/h above the ${FLEET.gust_limit_kmh} km/h limit: drones grounded.`, close: "Close", play: "Play", pause: "Pause", timeline: "Timeline",
+    grounded: (g: number) => `Gusts of ${g} km/h above the ${FLEET.gust_limit_kmh} km/h limit: drones grounded.`,
+    agentTerms: { P_front: "Predicted 1 h front", t_transit: "Transit to the fire", airborne_perimeter: "Drones on the front", airborne_head: "Drones at the head", airborne_exposure: "Drones over exposed places", duty: "Share of time flying", fleet: "Fleet (with 20 % reserve)" }, close: "Close", play: "Play", pause: "Pause", timeline: "Timeline",
     legendArea: "Fire", legendForecast: "6 h forecast", legendVillage: "Evacuated", legendDrone: "Drone",
     sourcesNote: "Each fact appears from the time it was published.",
     accuracyTitle: "Forecast vs. reality", observed: "Observed", predicted: "Predicted", overlap: "Overlap",
@@ -101,6 +103,7 @@ export default function OpsConsole() {
   const map = useRef<LibreMap | null>(null);
   const frames = useRef(new Map<string, ReplayFrame>());
   const lastT = useRef(0);
+  const base = useRef<string>(REPLAY_BASES[0]);
   const L = T[locale];
   const [loaded, setLoaded] = useState<Record<string, ReplayFrame>>({});
 
@@ -155,7 +158,7 @@ export default function OpsConsole() {
   const loadFrame = useCallback(async (file: string) => {
     const hit = frames.current.get(file);
     if (hit) return hit;
-    const r = await fetch(REPLAY_BASE + file);
+    const r = await fetch(base.current + file);
     if (!r.ok) throw new Error("frame");
     const f = (await r.json()) as ReplayFrame;
     frames.current.set(file, f);
@@ -168,8 +171,12 @@ export default function OpsConsole() {
     setPanel(null);
     let idx = index;
     if (!idx) {
-      const r = await fetch(REPLAY_BASE + "index.json");
-      idx = (await r.json()) as ReplayIndex;
+      // Agent 2's generated replay first; the hand-built fixture if it is missing.
+      for (const b of REPLAY_BASES) {
+        const r = await fetch(b + "index.json").catch(() => null);
+        if (r?.ok) { base.current = b; idx = (await r.json()) as ReplayIndex; break; }
+      }
+      if (!idx) return;
       setIndex(idx);
     }
     const start = Date.parse(idx.window.from);
@@ -236,8 +243,9 @@ export default function OpsConsole() {
   const villages = useMemo(() => (index ? villagesAt(index, cut) : []), [index, cut]);
   const evacuated = villages.filter((v) => v.evacuated).length;
   const latest = useMemo(() => known.find((e) => ["evacuation", "shelter", "road_closure", "event_gathering", "ignition_cause", "threatened_place"].includes(e.category)), [known]);
-  const steps = useMemo(() => (index?.automation ?? []).filter((a) => Date.parse(a.at) <= cut), [index, cut]);
-  const alertAt = steps.find((a) => a.step === "reported")?.at;
+  const steps = useMemo(() => (index?.automation ?? frame?.automation ?? []).filter((a) => Date.parse(a.at) <= cut), [index, frame, cut]);
+  const officialStart = index?.timeline.find((x) => x.status === "Início")?.at;
+  const alertAt = steps.find((a) => a.step === "reported")?.at ?? (officialStart && Date.parse(officialStart) <= cut ? officialStart : undefined);
   const pins = useMemo(() => (index ? pinsAt(index, cut) : []), [index, cut]);
   const targets = useMemo(() => (index ? rescueTargetsAt(index, cut) : []), [index, cut]);
   useEffect(() => { if (ready && map.current) showVillages(map.current, villages); }, [villages, ready]);
@@ -276,7 +284,25 @@ export default function OpsConsole() {
     });
     return { base, drones };
   }, [index, frame, plan, alertMs, cut, sitesAt, schedule, loaded]);
-  useEffect(() => { if (ready && map.current) showFleet(map.current, fleetView?.base ?? null, fleetView?.drones ?? []); }, [fleetView, ready]);
+  // Agent 2's fleet (stations, terrain-following routes) is the source when the generated replay has it.
+  const agent = frame?.fleet && alertMs != null && cut >= alertMs ? frame.fleet : null;
+  const agentAirborne = agent ? agent.breakdown.filter((b) => b.term.startsWith("airborne_")).reduce((a, b) => a + b.value, 0) : 0;
+  const launches = useMemo(() => {
+    const out = new Map<string, number>();
+    if (!index || alertMs == null) return out;
+    for (const f of index.frames) {
+      const fr = loaded[f.file], at = Date.parse(f.t);
+      if (!fr?.fleet || at > cut) continue;
+      for (const d of fr.fleet.drones) if (!out.has(d.id)) out.set(d.id, Math.max(alertMs, at));
+    }
+    return out;
+  }, [index, loaded, alertMs, cut]);
+  const firstLaunch = launches.size ? Math.min(...launches.values()) : null;
+  useEffect(() => {
+    if (!ready || !map.current) return;
+    if (agent && index) showAgentFleet(map.current, index.stations ?? [], agent.drones, launches, cut);
+    else showFleet(map.current, fleetView?.base ?? null, fleetView?.drones ?? []);
+  }, [agent, index, launches, cut, fleetView, ready]);
 
   // Pins: DOM markers (visible from any 3D angle) with a small card of what was reported there.
   const markers = useRef(new Map<string, import("maplibre-gl").Marker>());
@@ -387,16 +413,17 @@ export default function OpsConsole() {
                 <div><dt>{L.area}</dt><dd>{fmt(frame.model.area_ha_p50, locale)}<small>ha</small></dd></div>
                 {frame.weather && <div><dt>{L.wind}</dt><dd>{Math.round(frame.weather.wind_mps * 3.6)}<small>km/h {compassPoint(frame.weather.wind_from_deg, locale)}</small></dd></div>}
                 <div><dt>{L.evacuated}</dt><dd>{evacuated}</dd></div>
-                {plan && (
+                {(agent || plan) && (
                   <div>
                     <dt>{L.dronesStat}</dt>
-                    <dd><button className={s.statButton} onClick={() => setPanel(panel === "fleet" ? null : "fleet")}>{plan.total}</button><small>{plan.airborne} {L.inAir}</small></dd>
+                    <dd><button className={s.statButton} onClick={() => setPanel(panel === "fleet" ? null : "fleet")}>{agent ? agent.count : plan!.total}</button><small>{agent ? agentAirborne : plan!.airborne} {L.inAir}</small></dd>
                   </div>
                 )}
               </dl>
               <p className={s.tertiary}>
                 {L.alert} {lisbon(alertAt, locale)}
-                {plan && !plan.grounded && <> · {L.launched} {lisbon(alertAt, locale)} ({L.simulated})</>}
+                {agent && firstLaunch != null && <> · {L.launched} {lisbon(new Date(firstLaunch).toISOString(), locale)} ({L.simulated})</>}
+                {!agent && plan && !plan.grounded && <> · {L.launched} {lisbon(alertAt, locale)} ({L.simulated})</>}
               </p>
               {targets.length > 0 && (
                 <button className={s.sarLine} onClick={() => setPanel(panel === "sar" ? null : "sar")}>{L.sarLine(targets.length)} →</button>
@@ -464,7 +491,26 @@ export default function OpsConsole() {
         </aside>
       )}
 
-      {mode === "replay" && panel === "fleet" && plan && (
+      {mode === "replay" && panel === "fleet" && agent && (
+        <aside className={s.panel} aria-label={L.fleetTitle}>
+          <PanelHead title={L.fleetTitle} note={(locale === "pt" ? agent.change_reason_pt : agent.change_reason_en) ?? L.fleetNote} close={L.close} onClose={() => setPanel(null)} />
+          <div className={s.table}>
+            <table>
+              <tbody>
+                {agent.breakdown.filter((b) => b.term in L.agentTerms).map((b) => (
+                  <tr key={b.term} className={b.term === "fleet" ? s.total : undefined}>
+                    <td>{L.agentTerms[b.term as keyof typeof L.agentTerms]}<br /><span className={s.basis}>{b.basis}</span></td>
+                    <td>{termValue(b, locale)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className={s.tertiary}>{L.fleetNote}</p>
+          </div>
+        </aside>
+      )}
+
+      {mode === "replay" && panel === "fleet" && !agent && plan && (
         <aside className={s.panel} aria-label={L.fleetTitle}>
           <PanelHead title={L.fleetTitle} note={L.fleetNote} close={L.close} onClose={() => setPanel(null)} />
           <div className={s.table}>
@@ -537,6 +583,13 @@ function PanelHead({ title, note, close, onClose }: { title: string; note: strin
   );
 }
 
+const termValue = (b: { term: string; value: number; unit: string }, locale: Locale) => {
+  const n = (x: number, d: number) => (locale === "pt" ? x.toFixed(d).replace(".", ",") : x.toFixed(d));
+  if (b.unit === "m") return `${n(b.value / 1000, 1)} km`;
+  if (b.unit === "s") return `${Math.round(b.value / 60)} min`;
+  if (b.unit === "fraction") return n(b.value, 2);
+  return String(Math.round(b.value));
+};
 const dec = (n: number, d: number) => n.toFixed(d).replace(".", ",");
 const median = (xs: number[]) => { const v = [...xs].sort((a, b) => a - b), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
 const fmt = (n: number, locale: Locale) => new Intl.NumberFormat(locale === "pt" ? "pt-PT" : "en-GB", { maximumFractionDigits: 0 }).format(n);
