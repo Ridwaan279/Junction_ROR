@@ -1,5 +1,8 @@
 # EmberWatch UI (Agent 1)
 
+Branch: everything now lands on `main` (the user's decision, 15 Nov 2026). Agent 2
+keeps its own branch and Agent 1 merges it into `main` at each checkpoint.
+
 The home page (`/`) is the operations console in `web/components/ops/`. The previous
 workspace is kept at `/workspace` and the 3D terrain explorer at `/terrain`.
 
@@ -19,9 +22,9 @@ workspace is kept at `/workspace` and the 3D terrain explorer at `/terrain`.
 | Mode | What is on screen |
 |---|---|
 | Live | Portugal in 3D; status card (no active fires / N active fires / check failed), source and time of the last check, button to the replay |
-| Replay | Fire on 3D terrain: modelled burned area (10/50/90 %), 6 h and 12 h forecast envelopes, dense smoke (≥150 µg/m³), villages named in verified reports (red evacuated, amber other mentions), ignition point; situation card (Fogos.pt status, modelled area and spread, wind, temperature, humidity, gusts, automatic-response steps marked observed/simulated, evacuated villages, facts and sources); news pop-ups at key moments; timeline with play/pause; legend |
+| Replay | Simulated drones (staging points, routes draped on the terrain, drones moving along them) from the first frame that has a drone plan; "Model accuracy" panel comparing each forecast with the next observed GWIS perimeter (overlap on total and on new growth, with the reasons it over- or under-predicts). Fire on 3D terrain: modelled burned area (10/50/90 %), 6 h and 12 h forecast envelopes, dense smoke (≥150 µg/m³), villages named in verified reports (red evacuated, amber other mentions), ignition point; situation card (Fogos.pt status, modelled area and spread, wind, temperature, humidity, gusts, automatic-response steps marked observed/simulated, evacuated villages, facts and sources); news pop-ups at key moments; timeline with play/pause; legend |
 
-Rules the UI enforces: nothing is shown before it was public (frame = latest frame
+Camera framing uses map padding, so the subject sits beside the panels on desktop and below them on phones. Rules the UI enforces: nothing is shown before it was public (frame = latest frame
 not after the cursor; facts and villages filtered by `known_at` to the minute);
 unverified facts are never shown; simulated steps are labelled.
 
@@ -59,5 +62,6 @@ live service offline.
 
 ## Next UI steps (pending the user's further input)
 
-- Drone stations and smoke-avoiding routes in 3D once Agent 2 delivers `fleet`.
-- Multi-day validation view (prediction vs. observed perimeters) reachable from the replay.
+- Swap the legacy drone plan for Agent 2's `fleet` (fixed stations, 3D smoke-avoiding routes with altitude) when delivered.
+- Point the live card at `GET /api/live/status` once the Rust service serves it.
+- Finer early frames (Agent 2, WORKPLAN 5.0b) will move "Drones launched" from 08:00 to minutes after the 05:08 report.

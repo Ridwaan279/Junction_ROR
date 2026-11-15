@@ -220,6 +220,7 @@ EXPOSURE_KIND = {"evacuation": "evacuated", "threatened_place": "threatened", "s
 PEOPLE_UNITS = ("pessoa", "morador", "habitante", "residente", "aldeia")
 os.makedirs(os.path.join(OUT, "frames"), exist_ok=True)
 index_frames = []
+first_drones = next((f["t"] for f in frames if f["drones"].get("count", 0) > 0), None)
 for n, fr in enumerate(frames):
     t = datetime.fromisoformat(fr["t"].replace("Z", "+00:00"))
     known = [e for e in evidence if e["known_at"] and e["known_at"] <= fr["t"]]
@@ -262,7 +263,9 @@ for n, fr in enumerate(frames):
         automation.append({"step": "corroborated_by_news", "at": first_news["known_at"], "basis": "observed", "detail": first_news["publisher"], "url": first_news["url"]})
     if fr["t"] >= t0:
         automation.append({"step": "forecast", "at": t0, "basis": "simulated", "detail": f"EmberWatch firecast run (measured {replay['meta'].get('runtime_ms')} ms for the replay)", "url": None})
-        automation.append({"step": "drones_launched", "at": t0, "basis": "simulated", "detail": f"{fr['drones'].get('count', 0)} simulated drones in this frame", "url": None})
+    if first_drones and fr["t"] >= first_drones:
+        # The first frame that carries a drone plan; frames are 3-hourly, so this is when the plan exists.
+        automation.append({"step": "drones_launched", "at": first_drones, "basis": "simulated", "detail": f"{fr['drones'].get('count', 0)} simulated drones in this frame", "url": None})
     for a in automation:
         a["latency_s"] = int((datetime.fromisoformat(a["at"].replace("Z", "+00:00")) - datetime.fromisoformat(t0.replace("Z", "+00:00"))).total_seconds()) if a["at"] >= t0 else None
     frame = {
@@ -309,6 +312,7 @@ index = {
                  "start_local": fogos["start_text"], "nature": fogos["nature"], "place": fogos["place_text"],
                  "model_ignition": dataset["ignition_position"], "model_ignition_note": "Model frames were run from Piódão village coordinates, about 0.4 km from the Fogos.pt point."},
     "timeline": timeline,
+    "automation": frame["automation"] if frames else [],  # full time-stamped list; the UI filters by time
     "frames": index_frames,
     "pages": page_index,
     "evidence": evidence,

@@ -5,7 +5,7 @@ import { loadMapLibre } from "@/lib/terrain";
 import { loadOpsStyle, setThreeD } from "@/lib/ops-map";
 import {
   addReplayLayers, compassPoint, FIRE, frameAt, lisbon, REPLAY_BASE, setReplayVisible, showReplayFrame, showVillages, villagesAt,
-  type ReplayFrame, type ReplayIndex,
+  showDrones, type ReplayFrame, type ReplayIndex, type ValidationRow,
 } from "@/lib/replay";
 import s from "./ops.module.css";
 
@@ -19,7 +19,11 @@ type LiveStatus = {
   sources: { name: string; url: string; via: string; captured_at: string; status: string }[];
 };
 
-const PORTUGAL = { center: [-9.35, 39.7] as [number, number], zoom: 6.55, pitch: 46, bearing: -8 };
+const PORTUGAL = { center: [-8.05, 39.62] as [number, number], zoom: 6.35, pitch: 46, bearing: -8 };
+/** Keep the subject in the free part of the screen, beside (desktop) or below (phone) the panels. */
+const framePadding = () => typeof window !== "undefined" && window.innerWidth <= 760
+  ? { top: 300, bottom: 190, left: 10, right: 10 }
+  : { top: 60, bottom: 110, left: 400, right: 40 };
 const REPLAY_SECONDS = 75; // the 42-hour window plays in about 75 s
 
 const T = {
@@ -30,7 +34,7 @@ const T = {
     checked: "Verificado", via: "via", snapshot: "Serviço ao vivo desligado: a mostrar a última verificação",
     loadingLive: "A verificar fontes…", watch: "Ver o incêndio de Arganil 2025",
     area: "Área modelada", spread: "Avanço da frente", wind: "Vento", temp: "Temp.", rh: "HR",
-    evacuated: "aldeias evacuadas", sources: "fontes", facts: "factos", from: "de", gusts: "Rajadas", status: "Estado", started: "Início",
+    evacuated: "aldeias evacuadas", accuracy: "Precisão do modelo", method: "Cada previsão parte do perímetro observado por satélite (GWIS; a primeira parte do ponto de ignição) e é comparada com o perímetro observado seguinte. Sobreposição (Dice) entre a área prevista (p50) e a observada; 1 é perfeito.", accuracyTitle: "Previsão vs. realidade", observedHa: "Observado", predictedHa: "Previsto (p50)", overlap: "Sobreposição", growthNote: (g: string) => `Sobreposição só no crescimento novo (mais exigente): mediana ${g}. O modelo não inclui o combate, por isso sobrestima nos dias de supressão forte; a primeira previsão parte do ponto de ignição e subestimou.`, legendDrones: "Drones simulados e rotas", drones: "drones", sources: "fontes", facts: "factos", from: "de", gusts: "Rajadas", status: "Estado", started: "Início",
     timeline: "Linha temporal", play: "Reproduzir", pause: "Pausa", automation: "Resposta automática",
     observed: "observado", simulated: "simulado", legendBurned: "Área ardida modelada (10/50/90 %)",
     legendForecast: "Previsão 6 h / 12 h", legendSmoke: "Fumo PM2.5", legendVillage: "Aldeia evacuada / ameaçada",
@@ -45,7 +49,7 @@ const T = {
     checked: "Checked", via: "via", snapshot: "Live service offline: showing the last check",
     loadingLive: "Checking sources…", watch: "Watch the Arganil 2025 fire",
     area: "Modelled area", spread: "Head spread", wind: "Wind", temp: "Temp.", rh: "RH",
-    evacuated: "villages evacuated", sources: "sources", facts: "facts", from: "from", gusts: "Gusts", status: "Status", started: "Start",
+    evacuated: "villages evacuated", accuracy: "Model accuracy", method: "", accuracyTitle: "Forecast vs. reality", observedHa: "Observed", predictedHa: "Predicted (p50)", overlap: "Overlap", growthNote: (g: string) => `Overlap on new growth only (stricter): median ${g}. The model has no firefighting, so it overpredicts on days of heavy suppression; the first run starts from the ignition point and underpredicted.`, legendDrones: "Simulated drones and routes", drones: "drones", sources: "sources", facts: "facts", from: "from", gusts: "Gusts", status: "Status", started: "Start",
     timeline: "Timeline", play: "Play", pause: "Pause", automation: "Automatic response",
     observed: "observed", simulated: "simulated", legendBurned: "Modelled burned area (10/50/90 %)",
     legendForecast: "Forecast 6 h / 12 h", legendSmoke: "PM2.5 smoke", legendVillage: "Village evacuated / threatened",
@@ -67,6 +71,8 @@ export default function OpsConsole() {
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [drawer, setDrawer] = useState(false);
+  const [accuracy, setAccuracy] = useState<{ method: string; observed_source: { name: string; url: string }[]; rows: ValidationRow[] } | null>(null);
+  const [showAccuracy, setShowAccuracy] = useState(false);
   const [toast, setToast] = useState<{ at: string; text: string; publisher: string } | null>(null);
   const [now, setNow] = useState<number | null>(null);
   const container = useRef<HTMLDivElement>(null);
@@ -91,7 +97,7 @@ export default function OpsConsole() {
       const [maplibre, style] = await Promise.all([loadMapLibre(), loadOpsStyle()]);
       if (cancelled || !container.current) return;
       instance = new maplibre.Map({
-        container: container.current, style, ...PORTUGAL, maxPitch: 80,
+        container: container.current, style, ...PORTUGAL, maxPitch: 80, zoom: PORTUGAL.zoom - (window.innerWidth <= 760 ? 0.9 : 0),
         attributionControl: false, fadeDuration: 150,
       });
       map.current = instance;
@@ -99,6 +105,7 @@ export default function OpsConsole() {
       instance.addControl(new maplibre.NavigationControl({ visualizePitch: true }), "bottom-right");
       instance.on("load", () => {
         if (cancelled || !instance) return;
+        instance.setPadding(framePadding());
         addReplayLayers(instance);
         setReplayVisible(instance, false);
         // Keep the credits collapsed behind the (i) button; they stay one click away.
@@ -165,10 +172,11 @@ export default function OpsConsole() {
     if (!ready || !m) return;
     setReplayVisible(m, mode === "replay");
     if (mode === "replay" && index) {
-      m.flyTo({ center: [index.ignition.position[0] - 0.012, index.ignition.position[1] - 0.006], zoom: 11.6,
+      m.flyTo({ center: index.ignition.position, zoom: window.innerWidth <= 760 ? 10.9 : 11.6, padding: framePadding(),
         pitch: threeD ? 64 : 0, bearing: threeD ? -28 : 0, duration: 3200, essential: true });
     } else if (mode === "live") {
-      m.flyTo({ ...PORTUGAL, pitch: threeD ? PORTUGAL.pitch : 0, bearing: threeD ? PORTUGAL.bearing : 0, duration: 2200, essential: true });
+      m.flyTo({ ...PORTUGAL, zoom: PORTUGAL.zoom - (window.innerWidth <= 760 ? 0.9 : 0), padding: framePadding(),
+        pitch: threeD ? PORTUGAL.pitch : 0, bearing: threeD ? PORTUGAL.bearing : 0, duration: 2200, essential: true });
     }
   }, [mode, ready, index]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -239,11 +247,22 @@ export default function OpsConsole() {
   const publishers = new Set(knownEvidence.map((e) => e.page)).size;
   const evacuated = villages.filter((v) => v.evacuated).length;
   useEffect(() => { if (ready && map.current) showVillages(map.current, villages); }, [villages, ready]);
+  useEffect(() => { if (ready && map.current && frame) showDrones(map.current, frame, minute * 60_000); }, [frame, minute, ready]);
+  const steps = useMemo(() => (index?.automation ?? [])
+    .filter((a) => ["reported", "forecast", "drones_launched", "corroborated_by_news"].includes(a.step) && Date.parse(a.at) <= minute * 60_000), [index, minute]);
+  const openAccuracy = useCallback(async () => {
+    setShowAccuracy(true);
+    setDrawer(false);
+    if (!accuracy) {
+      const r = await fetch("/fixtures/v2/arganil-validation.json");
+      if (r.ok) setAccuracy(await r.json());
+    }
+  }, [accuracy]);
   const reportedAt = index?.timeline[0]?.at;
   const beforeReport = !!reportedAt && t < Date.parse(reportedAt);
 
   return (
-    <main className={s.shell}>
+    <main className={s.shell} data-panel={mode === "replay" && (drawer || showAccuracy) ? "open" : undefined}>
       <div ref={container} className={s.map} aria-label={locale === "pt" ? "Mapa 3D de Portugal" : "3D map of Portugal"} />
       <div className={s.vignette} aria-hidden />
 
@@ -350,18 +369,19 @@ export default function OpsConsole() {
                 </p>
               )}
               <ol className={s.steps} aria-label={L.automation}>
-                {frame.automation.filter((a) => ["reported", "forecast", "first_alert_dispatch", "corroborated_by_news"].includes(a.step)).slice(0, 4).map((a) => (
+                {steps.map((a) => (
                   <li key={a.step + a.at}>
                     <time>{lisbon(a.at, locale)}</time>
-                    <span>{L.steps[a.step as keyof typeof L.steps] ?? a.step}</span>
+                    <span>{L.steps[a.step as keyof typeof L.steps] ?? a.step}{a.step === "drones_launched" && frame.drones_legacy?.count ? ` · ${frame.drones_legacy.count} ${L.drones}` : ""}</span>
                     <em className={a.basis === "simulated" ? s.tagSim : s.tagObs}>{a.basis === "simulated" ? L.simulated : L.observed}</em>
                   </li>
                 ))}
               </ol>
               <div className={s.sitFoot}>
                 <span><strong>{evacuated}</strong> {L.evacuated}</span>
-                <button onClick={() => setDrawer(true)}><strong>{knownEvidence.length}</strong> {L.facts} · <strong>{publishers}</strong> {L.sources} →</button>
+                <button onClick={() => { setShowAccuracy(false); setDrawer(true); }}><strong>{knownEvidence.length}</strong> {L.facts} · <strong>{publishers}</strong> {L.sources} →</button>
               </div>
+              <button className={s.accuracyLink} onClick={() => void openAccuracy()}>{L.accuracy} <span aria-hidden>→</span></button>
             </>
           )}
         </section>
@@ -427,7 +447,37 @@ export default function OpsConsole() {
           <span><i className={s.legendDash} />{L.legendForecast}</span>
           <span><i style={{ background: FIRE.smoke, opacity: 0.6 }} />{L.legendSmoke}</span>
           <span><i className={s.legendDot} />{L.legendVillage}</span>
+          <span><i className={s.legendDrone} />{L.legendDrones}</span>
         </div>
+      )}
+
+      {mode === "replay" && showAccuracy && (
+        <aside className={s.drawer} aria-label={L.accuracyTitle}>
+          <div className={s.drawerHead}>
+            <div><h2>{L.accuracyTitle}</h2><p className={s.muted}>Arganil · Piódão, {locale === "pt" ? "13–20 ago. 2025" : "13–20 Aug 2025"}</p></div>
+            <button onClick={() => setShowAccuracy(false)} aria-label={L.close}>×</button>
+          </div>
+          {accuracy ? (
+            <div className={s.accuracy}>
+              <p className={s.muted}>{locale === "pt" ? L.method : accuracy.method}</p>
+              <table>
+                <thead><tr><th /><th>{L.observedHa}</th><th>{L.predictedHa}</th><th>{L.overlap}</th></tr></thead>
+                <tbody>
+                  {accuracy.rows.map((r) => (
+                    <tr key={r.cycle}>
+                      <td>{lisbon(r.to, locale, true)}</td>
+                      <td>{fmt(r.observed_area_ha, locale)}</td>
+                      <td>{fmt(r.predicted_area_ha_p50, locale)}</td>
+                      <td><span className={s.bar}><i style={{ width: r.dice_total * 100 + "%" }} /></span>{r.dice_total.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className={s.note}>{L.growthNote(median(accuracy.rows.map((r) => r.dice_growth)).toFixed(2))}</p>
+              <p className={s.note}>{accuracy.observed_source.map((src) => <a key={src.url} href={src.url} target="_blank" rel="noreferrer">{src.name} ↗ </a>)}</p>
+            </div>
+          ) : <p className={s.muted} style={{ padding: 16 }}>…</p>}
+        </aside>
       )}
 
       {mapFailed && <div className={s.mapFailed} role="alert">{L.mapFailed}</div>}
@@ -435,6 +485,7 @@ export default function OpsConsole() {
   );
 }
 
+const median = (xs: number[]) => { const v = [...xs].sort((a, b) => a - b), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
 const fmt = (n: number, locale: Locale) => new Intl.NumberFormat(locale === "pt" ? "pt-PT" : "en-GB", { maximumFractionDigits: 0 }).format(n);
 const pct = (t: number, index: ReplayIndex) => {
   const a = Date.parse(index.window.from), b = Date.parse(index.window.to);

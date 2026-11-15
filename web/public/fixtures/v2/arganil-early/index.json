@@ -87,6 +87,64 @@
    "request_id": "6ee242b0-7a40-4652-8188-b5057e77ed3a"
   }
  ],
+ "automation": [
+  {
+   "step": "reported",
+   "at": "2025-08-13T04:08:00Z",
+   "basis": "observed",
+   "detail": "Fogos.pt status: Início",
+   "url": "https://fogos.pt/pt/fogo/20251075979",
+   "latency_s": 0
+  },
+  {
+   "step": "forecast",
+   "at": "2025-08-13T04:08:00Z",
+   "basis": "simulated",
+   "detail": "EmberWatch firecast run (measured 4608 ms for the replay)",
+   "url": null,
+   "latency_s": 0
+  },
+  {
+   "step": "dispatched",
+   "at": "2025-08-13T04:14:00Z",
+   "basis": "observed",
+   "detail": "Fogos.pt status: Despacho",
+   "url": "https://fogos.pt/pt/fogo/20251075979",
+   "latency_s": 360
+  },
+  {
+   "step": "first_alert_dispatch",
+   "at": "2025-08-13T04:20:00Z",
+   "basis": "observed",
+   "detail": "Fogos.pt status: Despacho de 1º Alerta",
+   "url": "https://fogos.pt/pt/fogo/20251075979",
+   "latency_s": 720
+  },
+  {
+   "step": "active",
+   "at": "2025-08-13T05:16:00Z",
+   "basis": "observed",
+   "detail": "Fogos.pt status: Em Curso",
+   "url": "https://fogos.pt/pt/fogo/20251075979",
+   "latency_s": 4080
+  },
+  {
+   "step": "drones_launched",
+   "at": "2025-08-13T07:00:00Z",
+   "basis": "simulated",
+   "detail": "7 simulated drones in this frame",
+   "url": null,
+   "latency_s": 10320
+  },
+  {
+   "step": "corroborated_by_news",
+   "at": "2025-08-13T10:46:06Z",
+   "basis": "observed",
+   "detail": "diariocoimbra.pt",
+   "url": "https://www.diariocoimbra.pt/2025/08/13/fogo-de-piodao-com-origem-em-descarga-de-trovoada/",
+   "latency_s": 23886
+  }
+ ],
  "frames": [
   {
    "t": "2025-08-13T04:00:00Z",

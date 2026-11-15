@@ -16,6 +16,7 @@ export type ReplayIndex = {
   timeline: { at: string; status: string; url: string }[];
   frames: { t: string; file: string; evidence: number; exposures: number; area_ha_p50: number }[];
   pages: ReplayPage[]; evidence: ReplayEvidence[]; monitors: Monitor[]; limitations: string[];
+  automation: AutomationStep[];
 };
 export type Exposure = {
   id: string; name: string; kind: string[]; position: [number, number]; people: number | null;
@@ -32,8 +33,10 @@ export type ReplayFrame = {
   fogos_status: { at: string; status: string } | null;
   evidence_ids: string[];
   exposures: Exposure[];
-  automation: { step: string; at: string; basis: "observed" | "simulated"; detail: string; url: string | null }[];
+  automation: AutomationStep[];
+  drones_legacy: { count: number; bases: [number, number][]; routes: { base: number; eta_min: number; path: [number, number][]; role: string }[] };
 };
+export type AutomationStep = { step: string; at: string; basis: "observed" | "simulated"; detail: string; url: string | null };
 
 export const REPLAY_BASE = "/fixtures/v2/arganil-early/";
 
@@ -41,12 +44,12 @@ const empty: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: 
 const feature = (geometry: Geometry | null, properties: Record<string, unknown> = {}): GeoJSON.Feature[] =>
   geometry ? [{ type: "Feature", geometry, properties }] : [];
 
-export const FIRE = { p10: "#ffb547", p50: "#ff6a2b", p90: "#e3261f", envelope: "#ffd166", smoke: "#c7b9a8" };
+export const FIRE = { p10: "#ffb547", p50: "#ff6a2b", p90: "#e3261f", envelope: "#ffd166", smoke: "#c7b9a8", drone: "#5ee0ff" };
 
 /** Native MapLibre layers drape onto the 3D terrain (deck.gl overlays would float). */
 export function addReplayLayers(map: LibreMap) {
   if (map.getSource("rp-fire")) return;
-  for (const id of ["rp-smoke", "rp-forecast", "rp-fire", "rp-villages", "rp-ignition"]) map.addSource(id, { type: "geojson", data: empty });
+  for (const id of ["rp-smoke", "rp-forecast", "rp-fire", "rp-villages", "rp-ignition", "rp-routes", "rp-bases", "rp-drones"]) map.addSource(id, { type: "geojson", data: empty });
   map.addLayer({ id: "rp-smoke", type: "fill", source: "rp-smoke", paint: {
     "fill-color": FIRE.smoke,
     "fill-opacity": ["interpolate", ["linear"], ["get", "threshold"], 35, 0.16, 150, 0.24, 500, 0.32] } });
@@ -58,6 +61,14 @@ export function addReplayLayers(map: LibreMap) {
     "fill-opacity": ["match", ["get", "band"], "p90", 0.62, "p50", 0.42, 0.24] } });
   map.addLayer({ id: "rp-fire-edge", type: "line", source: "rp-fire", filter: ["==", ["get", "band"], "p50"], paint: {
     "line-color": "#ffd0a1", "line-width": 1.6, "line-blur": 0.6 } });
+  map.addLayer({ id: "rp-routes", type: "line", source: "rp-routes", layout: { "line-cap": "round" }, paint: {
+    "line-color": FIRE.drone, "line-width": 1.6, "line-opacity": 0.75, "line-dasharray": [1, 1.8] } });
+  map.addLayer({ id: "rp-bases", type: "circle", source: "rp-bases", paint: {
+    "circle-radius": 4, "circle-color": "#0b1218", "circle-stroke-color": FIRE.drone, "circle-stroke-width": 1.6 } });
+  map.addLayer({ id: "rp-drones-glow", type: "circle", source: "rp-drones", paint: {
+    "circle-radius": 9, "circle-color": "rgba(94, 224, 255, 0.22)", "circle-blur": 0.6 } });
+  map.addLayer({ id: "rp-drones", type: "circle", source: "rp-drones", paint: {
+    "circle-radius": 3.6, "circle-color": "#ffffff", "circle-stroke-color": FIRE.drone, "circle-stroke-width": 1.6 } });
   map.addLayer({ id: "rp-villages", type: "circle", source: "rp-villages", paint: {
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 3.5, 13, 7],
     "circle-color": ["case", ["get", "evacuated"], "#ff4d4f", "#ffc53d"],
@@ -108,7 +119,7 @@ export function showReplayFrame(map: LibreMap, frame: ReplayFrame, ignition: [nu
 }
 
 export function setReplayVisible(map: LibreMap, visible: boolean) {
-  for (const id of ["rp-smoke", "rp-forecast", "rp-fire-fill", "rp-fire-edge", "rp-villages", "rp-village-labels", "rp-ignition-halo", "rp-ignition"])
+  for (const id of ["rp-smoke", "rp-forecast", "rp-fire-fill", "rp-fire-edge", "rp-routes", "rp-bases", "rp-drones-glow", "rp-drones", "rp-villages", "rp-village-labels", "rp-ignition-halo", "rp-ignition"])
     if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
 }
 
@@ -128,4 +139,42 @@ export const lisbon = (iso: string, locale: "pt" | "en", withDate = false) =>
 export const compassPoint = (deg: number, locale: "pt" | "en") => {
   const en = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"], pt = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
   return (locale === "pt" ? pt : en)[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+};
+
+/** Simulated drones: staging points, routes, and each drone's position along its route at time t. */
+export function showDrones(map: LibreMap, frame: ReplayFrame, t: number) {
+  const d = frame.drones_legacy;
+  const set = (id: string, features: GeoJSON.Feature[]) =>
+    (map.getSource(id) as GeoJSONSource | undefined)?.setData({ type: "FeatureCollection", features });
+  const routes = d?.routes ?? [];
+  const used = new Set(routes.map((r) => r.base));
+  set("rp-bases", (d?.bases ?? []).filter((_, i) => used.has(i)).map((b) => ({ type: "Feature", geometry: { type: "Point", coordinates: b }, properties: {} })));
+  set("rp-routes", routes.map((r) => ({ type: "Feature", geometry: { type: "LineString", coordinates: r.path }, properties: { role: r.role } })));
+  const elapsed = (t - Date.parse(frame.t)) / 60_000;
+  set("rp-drones", routes.map((r, i) => {
+    // Staggered launches 1 min apart; after arrival the drone holds at its task point.
+    const progress = Math.max(0, Math.min(1, (elapsed - i) / Math.max(1, r.eta_min)));
+    return { type: "Feature", geometry: { type: "Point", coordinates: along(r.path, progress) }, properties: { role: r.role } };
+  }));
+}
+
+function along(path: [number, number][], f: number): [number, number] {
+  if (path.length < 2) return path[0];
+  const seg = path.slice(1).map((p, i) => Math.hypot(p[0] - path[i][0], (p[1] - path[i][1]) * 1.3));
+  let target = seg.reduce((a, b) => a + b, 0) * f;
+  for (let i = 0; i < seg.length; i++) {
+    if (target <= seg[i]) {
+      const k = seg[i] ? target / seg[i] : 0;
+      return [path[i][0] + (path[i + 1][0] - path[i][0]) * k, path[i][1] + (path[i + 1][1] - path[i][1]) * k];
+    }
+    target -= seg[i];
+  }
+  return path[path.length - 1];
+}
+
+/** Model-versus-observed comparison per GWIS perimeter (multi-day replay). */
+export type ValidationRow = {
+  cycle: number; from: string; to: string; hours: number; started_from: string;
+  observed_area_ha: number; predicted_area_ha_p10: number; predicted_area_ha_p50: number; predicted_area_ha_p90: number;
+  dice_total: number; dice_growth: number; observed_growth_bearing_deg: number; predicted_growth_bearing_deg: number;
 };
