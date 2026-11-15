@@ -2,6 +2,9 @@
 
 Updated **14 November 2026**. Working name: **EmberWatch**. Main track:
 Context.dev, "The Web Is Your Real-Time Database".
+Scope update **15 November 2026**: Gemini is removed. Context.dev provides web
+evidence; Rust owns fleet/risk calculations and deterministic explanations.
+The current two-agent task order is in WORKPLAN.md.
 
 Decisions: **mainland Portugal**, **Context.dev scraping Fogos.pt public pages**,
 and a **Rust backend**. This replaces v2's geography, language, sources, replay,
@@ -25,7 +28,7 @@ Read [AGENTS.md](../AGENTS.md) for collaboration rules and
 | Frontend | Next.js/TypeScript + MapLibre GL + deck.gl. MapTiler satellite/outdoor/terrain after account, quota and attribution checks. |
 | Simulation | Rust spread grid, wind blending, A*, and seeded drone simulation on bounded compute workers. Experimental results, never operational guidance. |
 | Replay | Same domain pipeline with virtual time. Primary candidate: Aveiro / Sever do Vouga, 15–18 September 2024, EMSR760; freeze a subwindow after checking data coverage. |
-| AI/voice | Gemini for Portuguese extraction, citations, summaries and explanations; optional ElevenLabs PT/EN voice. Geometry comes from code. |
+| Extraction/explanations | Context.dev nullable extraction with quote checks; Rust calculations and PT/EN templates. No generative advisor. Optional voice is outside the current two-agent phase. |
 | Transport/hosting | Axum REST + SSE + webhook endpoint; Docker locally, Next.js hosting and a long-running Rust VM/container with PostgreSQL. Hosting is not provisioned yet. |
 | Team | Four workstreams: A platform/integrator, B intelligence/sources, C forecast/response, D terrain UI. Coordinator implements A, with three workers when implementation begins. |
 
@@ -51,7 +54,7 @@ No stretch feature starts before the full pitch works.
 Retain the original judging themes of useful live web data, impact, demo
 completeness, execution and measured freshness. Current scoring, prizes,
 sponsor credits and submission deadline need confirmation from the event brief.
-Enter Context.dev/Gemini first; Tiger Data/ElevenLabs/CRACI and other tracks only
+Enter the Context.dev track first; Tiger Data/ElevenLabs/CRACI and other tracks only
 when actually integrated and eligible. v2 prize amounts and model IDs are not
 verified requirements.
 
@@ -60,7 +63,7 @@ verified requirements.
 | Layer | Choice / responsibility |
 |---|---|
 | Service | Axum REST, SSE and webhook routing; Tokio scheduling/cancellation/bounded channels; tracing and HTTP middleware. |
-| HTTP/serialization | reqwest deadlines/backoff; Serde boundary types. Context.dev, Gemini, ElevenLabs and data-provider keys remain server side. |
+| HTTP/serialization | reqwest deadlines/backoff; Serde boundary types. Context.dev and data-provider keys remain server side. |
 | Storage | SQLx + PostgreSQL/PostGIS migrations; JSONB evidence; Timescale hypertables if the host supports them, ordinary indexed tables otherwise. |
 | Compute | Rust geospatial operations, metre-based grids, A*, seeded random spread. Use a bounded worker pool or `spawn_blocking` for CPU work. |
 | Browser | Next.js/React/TypeScript, MapLibre terrain, deck.gl overlays, GeoJSON, native SSE client. |
@@ -71,7 +74,7 @@ verified requirements.
 Rust owns ingestion, replay, fusion, forecast and drone planning. TypeScript owns
 the browser. No Python service is required. Call Context.dev REST from reqwest;
 do not assume an official Rust SDK exists. Pin compatible crate/toolchain and
-frontend versions during scaffold; select actual model IDs from the account.
+frontend versions during scaffold. No Gemini model or account is required.
 
 Planned layout:
 
@@ -121,7 +124,7 @@ weather, provenance and coverage metadata. Every normalized record carries:
 | Open-Meteo | Documented forecast/elevation/archive APIs | Hourly forecast, cached terrain and replay weather | A |
 | Copernicus EMSR760 products | Verified download/import | Once per product; enforce publication time | B discovers/provides provenance; A imports |
 | CSV/GeoJSON/JSONL | Bounded upload parser | Once per upload, replayable | A |
-| Webcams/vision | Context.dev screenshot + Gemini | Phase 2, curated permitted pages only | B |
+| Webcams/vision | Deferred; no image interpretation provider selected | Outside this phase | B |
 
 ### 4.1 Fogos.pt public-page extraction
 
@@ -285,7 +288,7 @@ records as openly licensed fixtures without verifying those rights. Maintain
 fully offline synthetic Portuguese fixtures, clearly labelled, while licensed
 historical assets are assembled.
 
-## 8. Rust spread, drones and AI
+## 8. Rust spread, drones and explanations
 
 **Spread:** documented cellular grid driven by fuel, wind, slope and humidity.
 Verify the published model's equations, units, constants and time-step
@@ -308,12 +311,11 @@ diffs and measure runtime on demo hardware. No assumed sub-100 ms guarantee.
 run clock. Scout/suppressor are simulated capabilities. No vehicle control,
 aviation authorization or real dispatch is in scope.
 
-**AI:** Gemini extracts nullable Portuguese facts, geocoding hints, cited summaries,
-contradictions, exposure ranking and route explanations. It does not create
-precise coordinates, measured perimeters or authoritative status from nothing.
-Generate PT/EN briefings; optional ElevenLabs audio falls back to text. Server
-config holds model/voice IDs; cache by input hash. Gemma/Nemotron and webcam
-vision remain stretch after the complete baseline.
+**Evidence and explanations:** Context.dev extracts nullable Portuguese facts;
+Rust validates supporting quotes, numbers, dates and locations, computes exposure
+priority and explains route/fleet decisions from their inputs. Missing facts stay
+unknown. PT/EN briefings use deterministic templates. No generative advisor,
+replacement LLM or webcam interpretation is part of this phase.
 
 ## 9. Terrain UI and four-minute demo
 
@@ -431,7 +433,7 @@ shared deployment. Exact rules and paths are in AGENTS.md.
    Open-Meteo coverage; B discovers EMSR760 products/news. Build a manifest before
    claiming historical completeness.
 4. C creates a seeded Portuguese weather/hazard case; D consumes the same fixtures.
-5. Freeze interfaces/ownership/gates. Configure server-only Context/Gemini/FIRMS
+5. Freeze interfaces/ownership/gates. Configure server-only Context/FIRMS
    keys, optional ElevenLabs/map credentials and database URL by variable name.
    No Fogos API key is part of this architecture.
 

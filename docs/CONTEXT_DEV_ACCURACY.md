@@ -115,10 +115,10 @@ These captured responses become regression fixtures (section 5).
    the UI source-status card. No implicit retry of billed POSTs.
 10. **Freshness.** Use `maxAgeMs: 0` for live incident pages; record cache age
     when a cached answer is accepted for background enrichment.
-11. **Dual-extraction check (optional, uses Gemini).** For high-impact fields
-    (area burned, evacuations, people at risk), also extract from the same
-    Markdown with Gemini structured output. Agreement → keep; disagreement →
-    `unverified` with both values shown. This never replaces quote verification.
+11. **High-impact review.** For area burned, evacuations and people at risk,
+    verify the quote, number, date and locality against retained source evidence
+    and human-reviewed golden labels. Conflicting or unsupported facts stay
+    `unverified` and cannot drive automation. No second model provider is used.
 
 ## 5. Golden set and metrics
 
@@ -189,5 +189,5 @@ reason in the debug output, not silently.
 5. Golden set + metrics test + metrics table.
 6. Exposure extraction feeding `ExposureSite` (WORKPLAN 7.2) for the Arganil replay.
 7. Handoff: commit, scope check output, `cargo fmt/clippy/test` results, the
-   metrics table, env var names used (`CONTEXT_DEV_API_KEY`, and if used
-   `GEMINI_API_KEY`, `GEMINI_MODEL`).
+   metrics table, env var names used (`CONTEXT_DEV_API_KEY` and any optional
+   source-provider keys). No Gemini key or model configuration is required.
