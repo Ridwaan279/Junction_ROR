@@ -24,6 +24,7 @@ use tokio::sync::{Mutex, broadcast};
 use tokio_stream::wrappers::BroadcastStream;
 use tower_http::cors::CorsLayer;
 pub mod firecast_api;
+pub mod live_api;
 pub mod platform_api;
 pub mod platform_ui;
 mod webhook;
@@ -64,6 +65,14 @@ pub fn router_with(
     engine: Engine,
     store: Option<PgStore>,
     firecast: firecast_api::FirecastOptions,
+) -> Router {
+    router_with_live_options(engine, store, firecast, live_api::LiveOptions::offline())
+}
+pub fn router_with_live_options(
+    engine: Engine,
+    store: Option<PgStore>,
+    firecast: firecast_api::FirecastOptions,
+    live: live_api::LiveOptions,
 ) -> Router {
     let (events, _) = broadcast::channel(64);
     let state = AppState {
@@ -136,13 +145,14 @@ pub fn router_with(
             "/webhooks/context",
             post(webhook::receive).layer(axum::extract::DefaultBodyLimit::max(1024 * 1024)),
         )
+        .with_state(state)
+        .merge(live_api::router(live))
         .layer(
             CorsLayer::new()
                 .allow_origin(origins)
                 .allow_methods([Method::GET, Method::POST])
                 .allow_headers([axum::http::header::CONTENT_TYPE]),
         )
-        .with_state(state)
 }
 
 fn publish(state: &AppState, engine: &Engine, kind: &str) {

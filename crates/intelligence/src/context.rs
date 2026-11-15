@@ -1,19 +1,24 @@
 use emberwatch_domain::{SourceError, Usage};
-use serde::{Deserialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-#[derive(Debug, Clone, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Output<T> {
     pub requested: bool,
     pub success: Option<bool>,
     pub data: Option<T>,
     pub error_code: Option<String>,
+    #[serde(default, rename = "isTruncated")]
+    pub is_truncated: bool,
 }
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ScrapeResponse {
     pub url: String,
+    #[serde(default)]
     pub markdown: Output<String>,
+    #[serde(default)]
     pub json: Output<Value>,
     #[serde(default, rename = "isPartial")]
     pub is_partial: bool,
@@ -22,6 +27,34 @@ pub struct ScrapeResponse {
     pub cache_metadata: Value,
     #[serde(default)]
     pub key_metadata: Value,
+    #[serde(default)]
+    pub metadata: Value,
+}
+
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct BudgetStatus {
+    pub limit: f64,
+    pub committed: f64,
+    pub actual: f64,
+    pub outcome_unknown: bool,
+}
+
+#[derive(Clone, Copy)]
+pub enum Endpoint {
+    Scrape,
+    Search,
+    News,
+    Answers,
+}
+impl Endpoint {
+    fn path(self) -> &'static str {
+        match self {
+            Self::Scrape => "web/scrape",
+            Self::Search => "web/search",
+            Self::News => "news/search",
+            Self::Answers => "web/answers",
+        }
+    }
 }
 
 impl ScrapeResponse {
@@ -44,6 +77,7 @@ pub struct ContextClient {
     http: reqwest::Client,
     api_key: String,
     base: String,
+    budget: Arc<Mutex<BudgetStatus>>,
 }
 
 impl ContextClient {
@@ -65,7 +99,85 @@ impl ContextClient {
             http,
             api_key,
             base: "https://api.context.dev/v1".into(),
+            budget: Arc::new(Mutex::new(BudgetStatus {
+                limit: 20.0,
+                ..Default::default()
+            })),
         })
+    }
+    pub fn with_budget(mut self, limit: f64) -> Result<Self, SourceError> {
+        if !limit.is_finite() || limit < 0.0 {
+            return Err(crate::error(
+                "INVALID_BUDGET",
+                "Use a finite nonnegative credit ceiling.",
+            ));
+        }
+        self.budget = Arc::new(Mutex::new(BudgetStatus {
+            limit,
+            ..Default::default()
+        }));
+        Ok(self)
+    }
+    pub fn budget_status(&self) -> BudgetStatus {
+        self.budget.lock().unwrap().clone()
+    }
+    pub fn redacted_capture(&self, value: &Value) -> Value {
+        fn redact(value: &Value, secret: &str) -> Value {
+            match value {
+                Value::Object(fields) => Value::Object(
+                    fields
+                        .iter()
+                        .filter_map(|(key, value)| {
+                            let lower = key.to_lowercase();
+                            if lower == "key_metadata" {
+                                return Some((
+                                    key.clone(),
+                                    json!({"credits_consumed":value.get("credits_consumed")}),
+                                ));
+                            }
+                            if [
+                                "authorization",
+                                "api_key",
+                                "apikey",
+                                "token",
+                                "password",
+                                "cookie",
+                                "secret",
+                                "account_id",
+                                "organization_id",
+                            ]
+                            .iter()
+                            .any(|s| lower.contains(s))
+                            {
+                                return None;
+                            }
+                            Some((key.clone(), redact(value, secret)))
+                        })
+                        .collect(),
+                ),
+                Value::Array(values) => {
+                    Value::Array(values.iter().map(|v| redact(v, secret)).collect())
+                }
+                Value::String(s) => Value::String(s.replace(secret, "[REDACTED]")),
+                _ => value.clone(),
+            }
+        }
+        redact(value, &self.api_key)
+    }
+    /// Local upstream stubs only; never an arbitrary credential destination.
+    pub fn with_local_test_endpoint(mut self, base: String) -> Result<Self, SourceError> {
+        let url = reqwest::Url::parse(&base)
+            .map_err(|_| crate::error("INVALID_TEST_ENDPOINT", "Invalid local stub URL."))?;
+        if url.scheme() != "http"
+            || !matches!(url.host_str(), Some("127.0.0.1" | "localhost" | "[::1]"))
+        {
+            return Err(crate::error(
+                "INVALID_TEST_ENDPOINT",
+                "Only loopback stubs are allowed.",
+            ));
+        }
+        self.base = base;
+        Ok(self)
     }
     pub fn from_env() -> Result<Self, SourceError> {
         Self::new(
@@ -80,7 +192,12 @@ impl ContextClient {
             "sharedParams":{"waitFor":8000},
             "timeoutOpts":{"milliseconds":30000,"behavior":"return-partial"},
             "jsonParams":{"schema":fogos_schema(),"instructions":"Extract visible public-page rows only. Missing values are null. Never infer dates, coordinates, IDs, national completeness, or empty results from a loading shell. Visible excerpts must be exact contiguous text copied from the Markdown output, including punctuation and formatting; do not rephrase or concatenate separate rows. Preserve raw Portuguese text. If the page explicitly says there are no records, copy that exact text to explicit_empty_text. An empty filtered/table page alone does not establish national completeness. No API or hidden network requests."}});
-        self.post("web/scrape", &body).await
+        self.decode(Endpoint::Scrape, &body, 5.0).await
+    }
+    pub async fn scrape_fogos_markdown(&self, url: &str) -> Result<ScrapeResponse, SourceError> {
+        validate_fogos_url(url)?;
+        let body = json!({"url":url,"formats":{"markdown":true},"maxAgeMs":0,"sharedParams":{"waitFor":8000},"timeoutOpts":{"milliseconds":30000,"behavior":"return-partial"}});
+        self.decode(Endpoint::Scrape, &body, 1.0).await
     }
     pub async fn search_portuguese_reports(
         &self,
@@ -95,22 +212,132 @@ impl ContextClient {
                 "Provide a bounded municipality name.",
             ));
         }
-        self.post("web/search", &json!({"query":format!("incêndio rural {} Portugal",municipality),"numResults":5,
+        self.decode(Endpoint::Search, &json!({"query":format!("incêndio rural {} Portugal",municipality),"numResults":5,
             "includeDomains":["prociv.gov.pt","icnf.pt","agif.pt","rtp.pt","sicnoticias.pt"],
             "languages":["pt"],"country":"PT","queryFanout":false,
-            "markdownOptions":{"enabled":true,"maxAgeMs":0,"timeoutOpts":{"milliseconds":20000,"behavior":"return-partial"}}})).await
+            "markdownOptions":{"enabled":true,"maxAgeMs":0,"timeoutOpts":{"milliseconds":20000,"behavior":"return-partial"}}}), 6.0).await
     }
-    async fn post<T: DeserializeOwned>(&self, path: &str, body: &Value) -> Result<T, SourceError> {
+    async fn decode<T: DeserializeOwned>(
+        &self,
+        endpoint: Endpoint,
+        body: &Value,
+        ceiling: f64,
+    ) -> Result<T, SourceError> {
+        serde_json::from_value(self.request(endpoint, body, ceiling).await?)
+            .map_err(|_| crate::error("INVALID_UPSTREAM_JSON", "Unexpected Context output shape."))
+    }
+    pub async fn request(
+        &self,
+        endpoint: Endpoint,
+        body: &Value,
+        ceiling: f64,
+    ) -> Result<Value, SourceError> {
+        let minimum = match endpoint {
+            Endpoint::Scrape => {
+                let url = body
+                    .get("url")
+                    .and_then(Value::as_str)
+                    .ok_or_else(|| crate::error("INVALID_SOURCE_URL", "Missing scrape URL."))?;
+                let parsed = reqwest::Url::parse(url)
+                    .map_err(|_| crate::error("INVALID_SOURCE_URL", "Invalid scrape URL."))?;
+                if parsed
+                    .host_str()
+                    .is_some_and(|h| h == "fogos.pt" || h.ends_with(".fogos.pt"))
+                {
+                    validate_fogos_url(url)?;
+                }
+                if body.pointer("/sharedParams/actions").is_some()
+                    || body.pointer("/sharedParams/profile").is_some()
+                {
+                    return Err(crate::error(
+                        "UNBUDGETED_FEATURE",
+                        "Browser actions/profiles are outside this bounded client.",
+                    ));
+                }
+                if body
+                    .get("formats")
+                    .and_then(Value::as_object)
+                    .is_some_and(|formats| {
+                        formats.iter().any(|(key, value)| {
+                            value == &json!(true)
+                                && !matches!(key.as_str(), "markdown" | "html" | "json")
+                        })
+                    })
+                {
+                    return Err(crate::error(
+                        "UNBUDGETED_FORMAT",
+                        "Only reviewed text/JSON formats are supported.",
+                    ));
+                }
+                if body.pointer("/formats/json").and_then(Value::as_bool) == Some(true) {
+                    5.0
+                } else {
+                    1.0
+                }
+            }
+            Endpoint::Search => {
+                let results = body
+                    .get("numResults")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(10)
+                    .clamp(1, 100) as f64;
+                (results / 10.0).ceil()
+                    + if body
+                        .pointer("/markdownOptions/enabled")
+                        .and_then(Value::as_bool)
+                        == Some(true)
+                    {
+                        results
+                    } else {
+                        0.0
+                    }
+            }
+            Endpoint::News => {
+                (body.get("limit").and_then(Value::as_u64).unwrap_or(10) as f64 / 10.0).ceil()
+            }
+            Endpoint::Answers => {
+                if body.get("mode").and_then(Value::as_str) != Some("fast") {
+                    return Err(crate::error(
+                        "UNBUDGETED_MODE",
+                        "Only explicitly bounded fast answers are supported.",
+                    ));
+                }
+                10.0
+            }
+        };
+        if ceiling < minimum {
+            return Err(crate::error(
+                "CONTEXT_BUDGET",
+                "Request reservation is below the reviewed maximum charge.",
+            ));
+        }
+        if !ceiling.is_finite() || ceiling <= 0.0 {
+            return Err(crate::error(
+                "INVALID_BUDGET",
+                "A request needs a positive maximum charge.",
+            ));
+        }
+        {
+            let mut budget = self.budget.lock().unwrap();
+            if budget.outcome_unknown || budget.committed + ceiling > budget.limit {
+                return Err(crate::error(
+                    "CONTEXT_BUDGET",
+                    "Credit ceiling reached or prior outcome unknown; inspect usage before continuing.",
+                ));
+            }
+            budget.committed += ceiling;
+        }
         // Do not retry billed POSTs implicitly: a timeout may already have incurred usage.
         // A owns bounded scheduling/backoff and records one source-run identity per attempt.
         let response = self
             .http
-            .post(format!("{}/{}", self.base, path))
+            .post(format!("{}/{}", self.base, endpoint.path()))
             .bearer_auth(&self.api_key)
             .json(body)
             .send()
             .await
             .map_err(|_| {
+                self.budget.lock().unwrap().outcome_unknown = true;
                 crate::error(
                     "CONTEXT_NETWORK",
                     "Context request failed or timed out; outcome and credits may be unknown.",
@@ -118,12 +345,35 @@ impl ContextClient {
             })?;
         let status = response.status().as_u16();
         if !(200..300).contains(&status) {
+            self.budget.lock().unwrap().committed -= ceiling;
             return Err(crate::error(
                 http_error_code(status),
                 "Context rejected the request. Check authentication, credit balance, limits, or service health; do not log the response body.",
             ));
         }
-        read_json(response, 2 * 1024 * 1024).await
+        let value: Value = match read_json(response, 8 * 1024 * 1024).await {
+            Ok(value) => value,
+            Err(error) => {
+                self.budget.lock().unwrap().outcome_unknown = true;
+                return Err(error);
+            }
+        };
+        let mut budget = self.budget.lock().unwrap();
+        match value
+            .pointer("/key_metadata/credits_consumed")
+            .and_then(Value::as_f64)
+            .filter(|v| v.is_finite() && *v >= 0.0)
+        {
+            Some(credits) => {
+                budget.committed += credits - ceiling;
+                budget.actual += credits;
+                if credits > ceiling {
+                    budget.outcome_unknown = true;
+                }
+            }
+            None => budget.outcome_unknown = true,
+        }
+        Ok(value)
     }
 }
 
@@ -132,6 +382,7 @@ pub fn http_error_code(status: u16) -> &'static str {
         401 | 403 => "CONTEXT_AUTH",
         402 => "CONTEXT_CREDITS",
         429 => "CONTEXT_RATE_LIMIT",
+        408 => "CONTEXT_TIMEOUT",
         500..=599 => "CONTEXT_UPSTREAM",
         _ => "CONTEXT_REQUEST",
     }
@@ -182,7 +433,11 @@ pub fn validate_fogos_url(value: &str) -> Result<(), SourceError> {
         || url.password().is_some()
         || url.query().is_some()
         || url.fragment().is_some()
-        || !matches!(url.path(), "/pt" | "/pt/lista" | "/pt/tabela")
+        || !(matches!(url.path(), "/pt" | "/pt/lista" | "/pt/tabela")
+            || url
+                .path()
+                .strip_prefix("/pt/fogo/")
+                .is_some_and(|id| !id.is_empty() && id.chars().all(|c| c.is_ascii_digit())))
     {
         return Err(crate::error(
             "SOURCE_URL_NOT_ALLOWED",
@@ -234,10 +489,12 @@ pub struct SearchResult {
     pub url: String,
     pub title: String,
     pub description: String,
+    #[serde(default)]
     pub markdown: SearchMarkdown,
 }
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Default)]
 pub struct SearchMarkdown {
+    #[serde(default)]
     pub code: String,
     pub markdown: Option<String>,
     #[serde(rename = "finalDOMState")]
@@ -260,6 +517,66 @@ mod tests {
         Arc,
         atomic::{AtomicUsize, Ordering},
     };
+
+    #[test]
+    fn raw_capture_redacts_credentials_and_account_metadata() {
+        let client = ContextClient::new("synthetic_private_key".into()).unwrap();
+        let raw = json!({"markdown":{"data":"public text synthetic_private_key"},"key_metadata":{"credits_consumed":5,"credits_remaining":900},"organization_id":"private_org","nested":{"Authorization":"Bearer synthetic_private_key","cookie":"private"}});
+        let result = client.redacted_capture(&raw);
+        let text = result.to_string();
+        assert!(!text.contains("synthetic_private_key"));
+        assert!(!text.contains("private_org"));
+        assert!(!text.contains("credits_remaining"));
+        assert_eq!(result["key_metadata"]["credits_consumed"], 5);
+    }
+    #[tokio::test]
+    async fn budget_refuses_a_request_before_any_network_call() {
+        let client = ContextClient::new("fixture_key".into())
+            .unwrap()
+            .with_budget(0.)
+            .unwrap();
+        assert_eq!(
+            client
+                .scrape_fogos("https://fogos.pt/pt/lista")
+                .await
+                .unwrap_err()
+                .code,
+            "CONTEXT_BUDGET"
+        );
+        assert_eq!(client.budget_status().committed, 0.);
+    }
+    #[tokio::test]
+    async fn missing_charge_metadata_stops_followup_requests() {
+        let count = Arc::new(AtomicUsize::new(0));
+        let calls = count.clone();
+        let app = Router::new().route(
+            "/web/search",
+            post(move || {
+                calls.fetch_add(1, Ordering::SeqCst);
+                async { Json(json!({"results":[],"request_id":"synthetic_no_usage"})) }
+            }),
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let task = tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        let client = ContextClient::new("fixture_key".into())
+            .unwrap()
+            .with_local_test_endpoint(format!("http://{address}"))
+            .unwrap();
+        let body = json!({"query":"synthetic","numResults":1});
+        client.request(Endpoint::Search, &body, 1.).await.unwrap();
+        assert!(client.budget_status().outcome_unknown);
+        assert_eq!(
+            client
+                .request(Endpoint::Search, &body, 1.)
+                .await
+                .unwrap_err()
+                .code,
+            "CONTEXT_BUDGET"
+        );
+        assert_eq!(count.load(Ordering::SeqCst), 1);
+        task.abort();
+    }
 
     #[tokio::test]
     async fn public_scrape_sends_fresh_nullable_contract_and_checks_outputs() {

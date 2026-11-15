@@ -1,7 +1,10 @@
 //! Public-page intelligence and weather adapters. Scheduling and durable storage belong to platform.
+pub mod accuracy;
+pub mod capture_archive;
 pub mod context;
 pub mod fogos;
 pub mod ipma;
+pub mod live;
 pub mod news;
 pub mod webhook;
 

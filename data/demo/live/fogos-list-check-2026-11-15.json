@@ -1,0 +1,22 @@
+{
+ "mode": "live",
+ "origin": "snapshot",
+ "checked_at": "2026-11-15T01:54:35Z",
+ "state": "no_active_fires",
+ "statement": "Sem registo de incêndios",
+ "statement_en": "No fire records",
+ "active": [],
+ "sources": [
+  {
+   "name": "Fogos.pt public incident list",
+   "url": "https://fogos.pt/pt/lista",
+   "via": "Context.dev web/scrape",
+   "request_id": "12bff4ec-c8fe-43a8-9eae-3b879148e08b",
+   "captured_at": "2026-11-15T01:54:35Z",
+   "status": "ok",
+   "is_partial": false,
+   "credits": 1
+  }
+ ],
+ "note": "Captured once from the public page; the Rust service replaces this file with GET /api/live/status (docs/UI.md)."
+}

@@ -1,0 +1,14 @@
+{
+ "archive": "emberwatch-context-dev-raw-2026-11-15.zip",
+ "sha256": "0a1ff2e4ecd9052e354aa606a1de28e4434d663e71877d6d0ad053b569aad634",
+ "supplied_by": "user",
+ "received_date": "2026-11-15",
+ "raw_scrape_responses": 25,
+ "successful_markdown_outputs": 23,
+ "failed_without_markdown": 2,
+ "preserved_json_files": 35,
+ "private_storage": "Original ZIP and extracted responses retained outside the public Git repository",
+ "public_hashes": "pages.json: markdown_sha256, raw_response_sha256, markdown_hash_basis",
+ "matching_rule": "Original response request_id must match retained page request_id before adding a Markdown hash",
+ "human_expected_labels": "not provided; independent recall/fabrication benchmark remains pending"
+}
