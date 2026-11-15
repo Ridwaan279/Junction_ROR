@@ -79,6 +79,47 @@ export function addReplayLayers(map: LibreMap) {
     "circle-radius": 4, "circle-color": "#ffffff", "circle-stroke-color": "rgba(0,0,0,0.6)", "circle-stroke-width": 1 } });
 }
 
+export const PIN_COLORS = { event: "#bf5af2", shelter: "#30d158", road: "#ff9f0a" } as const;
+export type PinKind = keyof typeof PIN_COLORS;
+
+/** Pin element for a MapLibre Marker (DOM markers stay visible when deep valleys hide map symbols in 3D). */
+export function pinElement(kind: PinKind, label: string) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.setAttribute("aria-label", label);
+  el.style.cssText = "width:18px;height:24px;padding:0;border:0;background:none;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))";
+  el.innerHTML = `<svg viewBox="0 0 18 24" width="18" height="24" aria-hidden="true"><path d="M9 23.5C9 23.5 1 14.6 1 9a8 8 0 1 1 16 0c0 5.6-8 14.5-8 14.5Z" fill="${PIN_COLORS[kind]}" stroke="rgba(0,0,0,.55)" stroke-width="1"/><circle cx="9" cy="9" r="3.2" fill="#fff"/></svg>`;
+  return el;
+}
+
+export type Pin = { id: string; kind: PinKind; place: string; position: [number, number];
+  items: { quote: string; statement_en: string; url: string; publisher: string; known_at: string }[] };
+const SHELTER_WORDS = /abrig|acolhiment|casa do povo|centro social|encaminhad|\blares?\b|igreja/i;
+const EVENT_WORDS = /\b(festa|festas|feira|romaria|festival|arraial|procissão|concerto|evento)\b/i;
+const PIN_OFFSET: Record<PinKind, number> = { event: 0, shelter: 0.0045, road: -0.0045 };
+
+/** Events, shelters and road closures named in verified reports already public at t. */
+export function pinsAt(index: ReplayIndex, t: number): Pin[] {
+  const out = new Map<string, Pin>();
+  for (const e of index.evidence) {
+    if (e.quality !== "verified" || Date.parse(e.known_at) > t) continue;
+    const kind: PinKind | null = e.category === "event_gathering" && EVENT_WORDS.test(e.quote) ? "event"
+      : e.category === "shelter" && SHELTER_WORDS.test(e.quote) ? "shelter"
+      : e.category === "road_closure" ? "road" : null;
+    if (!kind) continue;
+    for (const p of e.places) {
+      if (!p.geonames || !p.position || MUNICIPALITIES.has(p.geonames)) continue;
+      const id = kind + ":" + p.geonames;
+      const pin = out.get(id) ?? { id, kind, place: p.geonames, position: [p.position[0] + PIN_OFFSET[kind], p.position[1]], items: [] };
+      if (!pin.items.some((x) => x.url === e.url && x.quote === e.quote))
+        pin.items.push({ quote: e.quote, statement_en: e.statement_en, url: e.url, publisher: e.publisher, known_at: e.known_at });
+      out.set(id, pin);
+    }
+  }
+  return [...out.values()];
+}
+
+
 export type Village = { name: string; position: [number, number]; evacuated: boolean; evidence: string[] };
 const MUNICIPALITIES = new Set(["Arganil", "Seia", "Oliveira do Hospital", "Pampilhosa da Serra"]);
 const IMPACT = new Set(["evacuation", "threatened_place", "shelter", "people_present", "road_closure", "event_gathering"]);
@@ -137,35 +178,13 @@ export const compassPoint = (deg: number, locale: "pt" | "en") => {
   return (locale === "pt" ? pt : en)[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
 };
 
-/** Simulated drones: staging points, routes, and each drone's position along its route at time t. */
-export function showDrones(map: LibreMap, frame: ReplayFrame, t: number) {
-  const d = frame.drones_legacy;
+/** Simulated fleet: staging point, a line to each drone's task, and the drone's current position. */
+export function showFleet(map: LibreMap, base: [number, number] | null, drones: { position: [number, number]; target: [number, number]; role: string }[]) {
   const set = (id: string, features: GeoJSON.Feature[]) =>
     (map.getSource(id) as GeoJSONSource | undefined)?.setData({ type: "FeatureCollection", features });
-  const routes = d?.routes ?? [];
-  const used = new Set(routes.map((r) => r.base));
-  set("rp-bases", (d?.bases ?? []).filter((_, i) => used.has(i)).map((b) => ({ type: "Feature", geometry: { type: "Point", coordinates: b }, properties: {} })));
-  set("rp-routes", routes.map((r) => ({ type: "Feature", geometry: { type: "LineString", coordinates: r.path }, properties: { role: r.role } })));
-  const elapsed = (t - Date.parse(frame.t)) / 60_000;
-  set("rp-drones", routes.map((r, i) => {
-    // Staggered launches 1 min apart; after arrival the drone holds at its task point.
-    const progress = Math.max(0, Math.min(1, (elapsed - i) / Math.max(1, r.eta_min)));
-    return { type: "Feature", geometry: { type: "Point", coordinates: along(r.path, progress) }, properties: { role: r.role } };
-  }));
-}
-
-function along(path: [number, number][], f: number): [number, number] {
-  if (path.length < 2) return path[0];
-  const seg = path.slice(1).map((p, i) => Math.hypot(p[0] - path[i][0], (p[1] - path[i][1]) * 1.3));
-  let target = seg.reduce((a, b) => a + b, 0) * f;
-  for (let i = 0; i < seg.length; i++) {
-    if (target <= seg[i]) {
-      const k = seg[i] ? target / seg[i] : 0;
-      return [path[i][0] + (path[i + 1][0] - path[i][0]) * k, path[i][1] + (path[i + 1][1] - path[i][1]) * k];
-    }
-    target -= seg[i];
-  }
-  return path[path.length - 1];
+  set("rp-bases", base && drones.length ? [{ type: "Feature", geometry: { type: "Point", coordinates: base }, properties: {} }] : []);
+  set("rp-routes", base ? drones.map((d) => ({ type: "Feature", geometry: { type: "LineString", coordinates: [base, d.target] }, properties: { role: d.role } })) : []);
+  set("rp-drones", drones.map((d) => ({ type: "Feature", geometry: { type: "Point", coordinates: d.position }, properties: { role: d.role } })));
 }
 
 /** Model-versus-observed comparison per GWIS perimeter (multi-day replay). */

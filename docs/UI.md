@@ -27,6 +27,9 @@ glow, no decorative badges, no zoom buttons (gestures), credits behind one (i).
 | Both | Wordmark top left; one control group top right: Live / Arganil 2025, a 2D↔3D toggle, PT↔EN |
 | Live | One compact card: status line ("No active fires" with a green dot), then "Mainland Portugal · checked at HH:MM · Fogos.pt" |
 | Replay | Card: place, current replay time, Fogos.pt status; four numbers (area, spread, wind, evacuated villages); one line with alert time and simulated drone launch; the latest verified report (links to the article); a one-line legend; two links, Sources and Accuracy. Map: modelled fire, 6 h/12 h forecast, dense smoke, villages from verified reports, simulated drones. Bottom: play/pause and a thin timeline |
+| Drones | "Drones" figure = fleet size from `web/lib/fleet.ts`: ⌈front/4.5 km⌉ + (1 + ⌊wind/20 km/h⌋) + ⌈places within 15 km/3⌉ airborne, ÷ duty (60 min flight, 20 min recharge, 5.6 min transit), +20 % reserve; grounded above 50 km/h gusts. Tap it for the working. The map draws exactly the airborne drones from a staging point 5 km upwind; launch times follow the moment each drone became necessary |
+| Pins | Events (purple), shelters (green) and road closures (orange) from verified reports, as DOM markers so they stay visible in deep valleys in 3D; tap for the quote and source |
+| Tabs | Map · Data (`/data`: everything Context.dev pulled, monitors, pages, searches, live check, accuracy rules) · Methods (`/methods`: formulas for spread, crown fire, smoke, drones, accuracy; tech stack) |
 | Panels | Sources (every verified fact public at the cursor, with link) and Accuracy (forecast vs. observed GWIS perimeters, with the stricter new-growth score) |
 
 Camera framing uses map padding, so the subject sits beside the panels on desktop and below them on phones. Rules the UI enforces: nothing is shown before it was public (frame = latest frame

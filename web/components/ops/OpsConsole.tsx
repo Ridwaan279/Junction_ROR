@@ -5,9 +5,11 @@ import { loadMapLibre } from "@/lib/terrain";
 import { loadOpsStyle, setThreeD } from "@/lib/ops-map";
 import {
   addReplayLayers, compassPoint, FIRE, frameAt, lisbon, REPLAY_BASE, setReplayVisible, showReplayFrame, showVillages, villagesAt,
-  showDrones, type ReplayFrame, type ReplayIndex, type ValidationRow,
+  showFleet, pinsAt, pinElement, PIN_COLORS, type ReplayFrame, type ReplayIndex, type ValidationRow,
 } from "@/lib/replay";
+import { distanceKm, droneTasks, FLEET, outerRing, planFleet, stagingPoint, type FleetPlan } from "@/lib/fleet";
 import s from "./ops.module.css";
+import SiteNav, { useLocale } from "./SiteNav";
 
 type Locale = "pt" | "en";
 type Mode = "live" | "replay";
@@ -34,7 +36,17 @@ const T = {
     checkFailed: "Não foi possível verificar", partial: "Verificação incompleta", checking: "A verificar…",
     checkedAt: "Portugal continental · verificado às", area: "Área", spread: "Avanço", wind: "Vento", evacuated: "Evacuadas",
     waiting: "A aguardar o primeiro alerta.", alert: "Alerta", drones: "drones", simulated: "simulado",
-    sources: "Fontes", accuracy: "Precisão", close: "Fechar", play: "Reproduzir", pause: "Pausa", timeline: "Linha temporal",
+    sources: "Fontes", accuracy: "Precisão", dronesStat: "Drones", inAir: "no ar", launched: "drones lançados", legendPin: "Ocorrência",
+    pinKinds: { event: "Evento", shelter: "Abrigo", road: "Estrada cortada" }, source: "fonte",
+    fleetTitle: "Quantos drones", fleetNote: "Cálculo simples com dados já públicos no momento. Drones e despacho são simulados; constantes de demonstração.",
+    fleetRows: (p: FleetPlan) => [
+      [`Frente ativa ${dec(p.front_km, 1)} km ÷ ${dec(p.segment_km, 1)} km por drone (passagem a cada ${FLEET.revisit_min} min)`, p.perimeter],
+      [`Vento ${Math.round(p.wind_kmh)} km/h: 1 batedor na cabeça + 1 por cada ${FLEET.head_wind_step_kmh} km/h`, p.head],
+      [`${p.sites} locais e ocorrências a menos de ${FLEET.site_radius_km} km ÷ ${FLEET.sites_per_drone} por drone`, p.overwatch],
+      ["No ar", p.airborne],
+      [`Rotação: ${FLEET.endurance_min} min de voo, ${FLEET.recharge_min} min de recarga, ${Math.round(p.transit_min)} min de trânsito (÷ ${dec(p.duty, 2)}) e ${FLEET.reserve * 100} % de reserva`, p.total],
+    ] as [string, number][],
+    grounded: (g: number) => `Rajadas de ${g} km/h acima do limite de ${FLEET.gust_limit_kmh} km/h: drones em terra.`, close: "Fechar", play: "Reproduzir", pause: "Pausa", timeline: "Linha temporal",
     legendArea: "Fogo", legendForecast: "Previsão 6 h", legendVillage: "Evacuada", legendDrone: "Drone",
     sourcesNote: "Cada facto aparece a partir da hora em que foi publicado.",
     accuracyTitle: "Previsão vs. realidade", observed: "Observado", predicted: "Previsto", overlap: "Sobreposição",
@@ -48,7 +60,17 @@ const T = {
     checkFailed: "Could not check", partial: "Check incomplete", checking: "Checking…",
     checkedAt: "Mainland Portugal · checked at", area: "Area", spread: "Spread", wind: "Wind", evacuated: "Evacuated",
     waiting: "Waiting for the first alert.", alert: "Alert", drones: "drones", simulated: "simulated",
-    sources: "Sources", accuracy: "Accuracy", close: "Close", play: "Play", pause: "Pause", timeline: "Timeline",
+    sources: "Sources", accuracy: "Accuracy", dronesStat: "Drones", inAir: "airborne", launched: "drones launched", legendPin: "Nearby event",
+    pinKinds: { event: "Event", shelter: "Shelter", road: "Road closed" }, source: "source",
+    fleetTitle: "How many drones", fleetNote: "A simple calculation using only data public at the time. Drones and dispatch are simulated; demonstration constants.",
+    fleetRows: (p: FleetPlan) => [
+      [`Active front ${p.front_km.toFixed(1)} km ÷ ${p.segment_km.toFixed(1)} km per drone (each point seen every ${FLEET.revisit_min} min)`, p.perimeter],
+      [`Wind ${Math.round(p.wind_kmh)} km/h: 1 scout at the head + 1 per ${FLEET.head_wind_step_kmh} km/h`, p.head],
+      [`${p.sites} places and events within ${FLEET.site_radius_km} km ÷ ${FLEET.sites_per_drone} per drone`, p.overwatch],
+      ["Airborne", p.airborne],
+      [`Rotation: ${FLEET.endurance_min} min flight, ${FLEET.recharge_min} min recharge, ${Math.round(p.transit_min)} min transit (÷ ${p.duty.toFixed(2)}) and ${FLEET.reserve * 100} % reserve`, p.total],
+    ] as [string, number][],
+    grounded: (g: number) => `Gusts of ${g} km/h above the ${FLEET.gust_limit_kmh} km/h limit: drones grounded.`, close: "Close", play: "Play", pause: "Pause", timeline: "Timeline",
     legendArea: "Fire", legendForecast: "6 h forecast", legendVillage: "Evacuated", legendDrone: "Drone",
     sourcesNote: "Each fact appears from the time it was published.",
     accuracyTitle: "Forecast vs. reality", observed: "Observed", predicted: "Predicted", overlap: "Overlap",
@@ -59,7 +81,7 @@ const T = {
 };
 
 export default function OpsConsole() {
-  const [locale, setLocale] = useState<Locale>("pt");
+  const [locale, setLocale] = useLocale();
   const [mode, setMode] = useState<Mode>("live");
   const [threeD, set3D] = useState(true);
   const [ready, setReady] = useState(false);
@@ -69,15 +91,15 @@ export default function OpsConsole() {
   const [frame, setFrame] = useState<ReplayFrame | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [panel, setPanel] = useState<"sources" | "accuracy" | null>(null);
+  const [panel, setPanel] = useState<"sources" | "accuracy" | "fleet" | null>(null);
   const [accuracy, setAccuracy] = useState<Accuracy | null>(null);
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
   const frames = useRef(new Map<string, ReplayFrame>());
   const lastT = useRef(0);
   const L = T[locale];
+  const [loaded, setLoaded] = useState<Record<string, ReplayFrame>>({});
 
-  useEffect(() => { document.documentElement.lang = locale; }, [locale]);
 
   // Satellite imagery on 3D terrain from the first frame.
   useEffect(() => {
@@ -133,6 +155,7 @@ export default function OpsConsole() {
     if (!r.ok) throw new Error("frame");
     const f = (await r.json()) as ReplayFrame;
     frames.current.set(file, f);
+    setLoaded((prev) => (prev[file] ? prev : { ...prev, [file]: f }));
     return f;
   }, []);
 
@@ -211,9 +234,87 @@ export default function OpsConsole() {
   const latest = useMemo(() => known.find((e) => ["evacuation", "shelter", "road_closure", "event_gathering", "ignition_cause", "threatened_place"].includes(e.category)), [known]);
   const steps = useMemo(() => (index?.automation ?? []).filter((a) => Date.parse(a.at) <= cut), [index, cut]);
   const alertAt = steps.find((a) => a.step === "reported")?.at;
-  const dronesAt = steps.find((a) => a.step === "drones_launched")?.at;
+  const pins = useMemo(() => (index ? pinsAt(index, cut) : []), [index, cut]);
   useEffect(() => { if (ready && map.current) showVillages(map.current, villages); }, [villages, ready]);
-  useEffect(() => { if (ready && map.current && frame) showDrones(map.current, frame, cut); }, [frame, cut, ready]);
+
+  // Drone fleet: sized from the front, the wind and nearby places, all as known at the minute on screen.
+  const sitesAt = useCallback((at: number) => (index ? villagesAt(index, at).filter((v) => distanceKm(v.position, index.ignition.position) <= FLEET.site_radius_km) : []), [index]);
+  const planFor = useCallback((f: ReplayFrame, at: number) => {
+    const w = f.weather;
+    return planFleet(f.model.front_km, w ? w.wind_mps * 3.6 : 0, w?.gust_mps != null ? w.gust_mps * 3.6 : null, sitesAt(at).length);
+  }, [sitesAt]);
+  const alertMs = alertAt ? Date.parse(alertAt) : null;
+  // Drones needed in the air at every moment the inputs change (alert, new frame, new report), computed once.
+  const schedule = useMemo(() => {
+    if (!index || alertMs == null) return [] as [number, number][];
+    return [...new Set([alertMs, ...index.frames.map((f) => Date.parse(f.t)), ...index.evidence.map((e) => Date.parse(e.known_at))])]
+      .filter((m) => m >= alertMs).sort((x, y) => x - y)
+      .flatMap((m) => { const f = loaded[index.frames[frameAt(index, m)].file]; return f ? [[m, planFor(f, m).airborne] as [number, number]] : []; });
+  }, [index, alertMs, loaded, planFor]);
+  const plan = useMemo(() => (frame && alertMs != null && cut >= alertMs ? planFor(frame, cut) : null), [frame, alertMs, cut, planFor]);
+  const fleetView = useMemo(() => {
+    if (!index || !frame || !plan || alertMs == null || plan.grounded) return null;
+    const alertFrame = loaded[index.frames[frameAt(index, alertMs)].file] ?? frame;
+    const base = stagingPoint(index.ignition.position, alertFrame.weather?.wind_from_deg ?? 0);
+    const tasks = droneTasks(plan, index.ignition.position, outerRing(frame.predicted.p50), outerRing(frame.forecast.h6), sitesAt(cut).map((v) => v.position));
+    // Slot i launches the first moment the plan needed more than i drones in the air.
+    const launch: number[] = [];
+    for (const [m, need] of schedule) {
+      if (m > cut) break;
+      while (launch.length < need) launch.push(m);
+    }
+    while (launch.length < tasks.length) launch.push(cut);
+    const drones = tasks.map((task, i) => {
+      const transitMs = (distanceKm(base, task.target) / FLEET.cruise_kmh) * 3_600_000;
+      const k = Math.max(0, Math.min(1, (cut - launch[i]) / Math.max(60_000, transitMs)));
+      return { ...task, position: [base[0] + (task.target[0] - base[0]) * k, base[1] + (task.target[1] - base[1]) * k] as [number, number] };
+    });
+    return { base, drones };
+  }, [index, frame, plan, alertMs, cut, sitesAt, schedule, loaded]);
+  useEffect(() => { if (ready && map.current) showFleet(map.current, fleetView?.base ?? null, fleetView?.drones ?? []); }, [fleetView, ready]);
+
+  // Pins: DOM markers (visible from any 3D angle) with a small card of what was reported there.
+  const markers = useRef(new Map<string, import("maplibre-gl").Marker>());
+  useEffect(() => {
+    const m = map.current;
+    if (!ready || !m) return;
+    let cancelled = false;
+    void loadMapLibre().then(({ Marker, Popup }) => {
+      if (cancelled) return;
+      const want = mode === "replay" ? pins : [];
+      const keep = new Set(want.map((p) => p.id + ":" + p.items.length + ":" + locale));
+      for (const [key, marker] of markers.current) if (!keep.has(key)) { marker.remove(); markers.current.delete(key); }
+      for (const pin of want) {
+        const key = pin.id + ":" + pin.items.length + ":" + locale;
+        if (markers.current.has(key)) continue;
+        const Lx = T[locale];
+        const card = document.createElement("div");
+        const h = document.createElement("strong");
+        h.textContent = `${Lx.pinKinds[pin.kind]} · ${pin.place}`;
+        card.append(h);
+        for (const item of pin.items.slice(0, 3)) {
+          const p = document.createElement("p");
+          p.textContent = locale === "pt" ? item.quote : item.statement_en;
+          const a = document.createElement("a");
+          a.href = item.url; a.target = "_blank"; a.rel = "noreferrer";
+          a.textContent = `${lisbon(item.known_at, locale, true)} · ${item.publisher}`;
+          card.append(p, a);
+        }
+        const popup = new Popup({ closeButton: false, maxWidth: "280px", offset: 22, className: "ops-popup" }).setDOMContent(card);
+        const el = pinElement(pin.kind, h.textContent);
+        const marker = new Marker({ element: el, anchor: "bottom", opacityWhenCovered: "1" }).setLngLat(pin.position).addTo(m);
+        // The map must not see pin presses, or its own click handling closes the card at once.
+        for (const type of ["mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend", "dblclick"]) el.addEventListener(type, (e) => e.stopPropagation());
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (popup.isOpen()) popup.remove(); else popup.setLngLat(pin.position).addTo(m);
+        });
+        markers.current.set(key, marker);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [pins, ready, mode, locale]);
+  useEffect(() => () => { for (const marker of markers.current.values()) marker.remove(); markers.current.clear(); }, []);
 
   const openAccuracy = useCallback(async () => {
     setPanel("accuracy");
@@ -233,7 +334,7 @@ export default function OpsConsole() {
     <main className={s.shell} data-panel={panel ? "open" : undefined}>
       <div ref={container} className={s.map} aria-label={L.map} />
 
-      <header className={s.wordmark}>EmberWatch</header>
+      <SiteNav active="map" locale={locale} />
 
       <nav className={s.controls} aria-label="EmberWatch">
         <div className={s.segmented} role="group">
@@ -279,13 +380,18 @@ export default function OpsConsole() {
             <>
               <dl className={s.stats}>
                 <div><dt>{L.area}</dt><dd>{fmt(frame.model.area_ha_p50, locale)}<small>ha</small></dd></div>
-                <div><dt>{L.spread}</dt><dd>{frame.model.head_ros_m_min.toFixed(1)}<small>m/min</small></dd></div>
                 {frame.weather && <div><dt>{L.wind}</dt><dd>{Math.round(frame.weather.wind_mps * 3.6)}<small>km/h {compassPoint(frame.weather.wind_from_deg, locale)}</small></dd></div>}
                 <div><dt>{L.evacuated}</dt><dd>{evacuated}</dd></div>
+                {plan && (
+                  <div>
+                    <dt>{L.dronesStat}</dt>
+                    <dd><button className={s.statButton} onClick={() => setPanel(panel === "fleet" ? null : "fleet")}>{plan.total}</button><small>{plan.airborne} {L.inAir}</small></dd>
+                  </div>
+                )}
               </dl>
               <p className={s.tertiary}>
                 {L.alert} {lisbon(alertAt, locale)}
-                {dronesAt && <> · {frame.drones_legacy?.count ?? 0} {L.drones} {lisbon(dronesAt, locale)} ({L.simulated})</>}
+                {plan && !plan.grounded && <> · {L.launched} {lisbon(alertAt, locale)} ({L.simulated})</>}
               </p>
               {latest && (
                 <a className={s.latest} href={latest.url} target="_blank" rel="noreferrer">
@@ -302,6 +408,7 @@ export default function OpsConsole() {
               <li><i className={s.dash} />{L.legendForecast}</li>
               <li><i className={s.round} style={{ background: "#ff453a" }} />{L.legendVillage}</li>
               <li><i className={s.round} style={{ background: FIRE.drone }} />{L.legendDrone}</li>
+              <li><i className={s.pin} style={{ background: PIN_COLORS.event }} />{L.legendPin}</li>
             </ul>
             <div className={s.links}>
               <button onClick={() => setPanel(panel === "sources" ? null : "sources")}>{L.sources}</button>
@@ -324,6 +431,22 @@ export default function OpsConsole() {
               </li>
             ))}
           </ol>
+        </aside>
+      )}
+
+      {mode === "replay" && panel === "fleet" && plan && (
+        <aside className={s.panel} aria-label={L.fleetTitle}>
+          <PanelHead title={L.fleetTitle} note={L.fleetNote} close={L.close} onClose={() => setPanel(null)} />
+          <div className={s.table}>
+            <table>
+              <tbody>
+                {L.fleetRows(plan).map(([label, value], i) => (
+                  <tr key={i} className={i === 3 || i === 4 ? s.total : undefined}><td>{label}</td><td>{value}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            {plan.grounded && plan.gust_kmh != null && <p className={s.tertiary}>{L.grounded(Math.round(plan.gust_kmh))}</p>}
+          </div>
         </aside>
       )}
 
@@ -384,6 +507,7 @@ function PanelHead({ title, note, close, onClose }: { title: string; note: strin
   );
 }
 
+const dec = (n: number, d: number) => n.toFixed(d).replace(".", ",");
 const median = (xs: number[]) => { const v = [...xs].sort((a, b) => a - b), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
 const fmt = (n: number, locale: Locale) => new Intl.NumberFormat(locale === "pt" ? "pt-PT" : "en-GB", { maximumFractionDigits: 0 }).format(n);
 const pct = (t: number, index: ReplayIndex) => {
