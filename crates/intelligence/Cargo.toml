@@ -16,6 +16,9 @@ sha2.workspace = true
 hmac.workspace = true
 hex.workspace = true
 thiserror.workspace = true
+unicode-normalization.workspace = true
+chrono-tz.workspace = true
 
 [dev-dependencies]
 axum.workspace = true
+tower.workspace = true

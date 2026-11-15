@@ -197,7 +197,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "90f342c55abaac98cc927f66d88ff467aa7728001b95c45acc9d830be457a544",
+  "raw_response_sha256": "037bd9919b66b21e3bc85283d1a3a5d384cc5aa659b00128e748dc2831ee3ad7",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://seiadigital.pt/2025/08/13/incendio-no-piodao-obriga-a-evacuar-aldeias/",
@@ -402,7 +405,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "a83b790ac8959f52ecb4ce10feba7aedf5d27fa22af420f9cd78601b04ae7283",
+  "raw_response_sha256": "084f53cbef925b18faaaad08a38f1ca73f82d91dece26dade974edebb768a9ce",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://radioboanova.sapo.pt/oliveira-do-hospital-ativa-plano-municipal-de-emergencia-e-protecao-civil/",
@@ -593,7 +599,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "31c4ff1e9a5fdd35b3485adf574509cd6b8f5ad920679123256cb8d9051bdd7e",
+  "raw_response_sha256": "7d05f6cd7492faf8d20307a1e12a78bc49ff8b491bb7d58c7052ad2789ee139b",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://correiodabeiraserra.com/trovoada-seca-podera-estar-na-origem-do-incendio-florestal-em-arganil/",
@@ -843,7 +852,10 @@
     "quote_verified": false,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "df3f937c18db71559ccdf1bb5da9b0c22279971e84ef7020fedc13c113d67045",
+  "raw_response_sha256": "efb7003fe9bd0e80b43f01570fc7a3787b42678cc13c66f312021c57455ab072",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.rtp.pt/noticias/pais/incendio-obriga-a-evacuar-aldeias-no-piodao_v1676155",
@@ -949,7 +961,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "0e1130372e83994d314fa0823993c4b6948d709cb077304ca8023ad6741c8bbd",
+  "raw_response_sha256": "4f9f8aac088ae87ce37eeedaa6943a2297dfddccfc96db3b9bbfee80f91497a7",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://sicnoticias.pt/especiais/incendios-em-portugal/2025-08-13-video-incendio-em-arganil-teve-origem-numa-trovoada-seca-b393ef54",
@@ -1125,7 +1140,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "e304adb7774359a69383bce8d00da212fc3d853c09f276e4fccf1a9425e95912",
+  "raw_response_sha256": "f783e8278abdaf3d60beae94db5770e67f857dac32c168c6c914bad04b9e1dc1",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.jn.pt/pais/artigo/fogo-obriga-a-evacuar-pelo-menos-nove-aldeias-em-piodao-/17858354",
@@ -1367,7 +1385,10 @@
     "quote_verified": true,
     "number_in_quote": true
    }
-  ]
+  ],
+  "markdown_sha256": "eecef96f2aabb866827deff49634b570981d23364775d88c1eb290324dd0cdc6",
+  "raw_response_sha256": "f7769e7d15f1e41bc2b08dd4bc256c2b30b1a1a8985bdf25b45938a48e9af460",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.publico.pt/2025/08/13/sociedade/noticia/incendios-ermidassado-dominado-vila-real-trancoso-continuam-activos-2143809",
@@ -1656,7 +1677,10 @@
     "quote_verified": true,
     "number_in_quote": true
    }
-  ]
+  ],
+  "markdown_sha256": "fd6514d9746a82919a5d841040e78eba9aa11e0e9ef254f04d67b7ad7b746a90",
+  "raw_response_sha256": "4699b21c7146c4f64b0b08989eaf3b4073de908b20763a9c2f1cda8ded750b74",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://fogos.pt/pt/fogo/20251075979",
@@ -1899,7 +1923,10 @@
     "Meteo block: current station reading dated 14/11/2026 17:00, not the fire period.",
     "Meios '0 0 0': present-day value after the incident closed, not the historical deployment."
    ]
-  }
+  },
+  "markdown_sha256": "c428bbd1b023126bb47c18fcbb3c8fbec88a621a3006fa3f858a94a5946302b4",
+  "raw_response_sha256": "339dcf1d45b5084e1bf22538fd4eebfaa8b320aed6a0c112462acb49b32d4e0e",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.noticiasdecoimbra.pt/casal-passa-ferias-no-piodao-e-encontra-o-inferno-chamas-estavam-mesmo-a-porta-da-nossa-casa/",
@@ -2035,7 +2062,10 @@
     "quote_verified": false,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "ef54ed39c6aca0d56d78f55d3300b2a855db6052eda5180a63f9eed1940e2285",
+  "raw_response_sha256": "40fe2e89d60d6a76826eea531f8976e94c28c98aa23a3863cef901786b2fce13",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.sabado.pt/portugal/detalhe/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-pioda",
@@ -2220,7 +2250,10 @@
     "quote_verified": true,
     "number_in_quote": false
    }
-  ]
+  ],
+  "markdown_sha256": "9e681c7a63fc67e79f906ab6df680c76f64655bfc271c21acfed529b22e8e206",
+  "raw_response_sha256": "de11be60fc893d42ec146fa471a722af79e76eb3c0e3dceebc98e16e1f051e74",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.asbeiras.pt/incendios-varias-aldeias-na-linha-de-fogo-em-arganil-nas-freguesias-de-piodao-e-pomares/",
@@ -2504,7 +2537,10 @@
     "quote_verified": true,
     "number_in_quote": true
    }
-  ]
+  ],
+  "markdown_sha256": "7c1b4fa12d001329456d98b9260858cc995c372f1f571b756294a5757f1c52bd",
+  "raw_response_sha256": "9f680e03c4a45f63dbd050feaf5286f337dae282fbca3e6b34256661ae1b26fe",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://observador.pt/2025/08/13/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-piodao/",
@@ -2648,7 +2684,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "b2bfc2fa1a829100832c5d2347e5a2ede1aae5190e72fa19f119869f0cf9c781",
+  "raw_response_sha256": "d76552ad9a7cc576527117a5de15ece0635cef6f4e9f764e2072393c727793c2",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.jn.pt/pais/artigo/frente-de-fogo-em-arganil-em-perigo-de-chegar-a-pampilhosa-da-serra/17858447",
@@ -2839,7 +2878,10 @@
     "quote_verified": true,
     "number_in_quote": true
    }
-  ]
+  ],
+  "markdown_sha256": "ff8394df17ee2b9a30ecd467d5c9b6489ea0fff8c8eb1472d03c257da8e15302",
+  "raw_response_sha256": "10ccbfafc1e742d572c8bec6f504a010731ebd3d3a1747560b37f1ae8f3a7fd1",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.theportugalnews.com/br/noticias/2025-08-12/aviso-de-clima-quente-em-portugal-estendido-quando-as-temperaturas-atingem-44c/599824",
@@ -2862,7 +2904,10 @@
   "printed_updated": null,
   "mentions_lusa": false,
   "markdown_chars": 1723,
-  "facts": []
+  "facts": [],
+  "markdown_sha256": "d45d1b841d1d235bde5034bbacdd13629084c5e0e621e9da3b1e74c313ce6e8c",
+  "raw_response_sha256": "811aba30bf23447e55b19ba241f8f2149640f5951314688ddc5695ccebfef7db",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://observador.pt/2025/08/14/incendios-festa-de-verao-do-piodao-em-arganil-cancelada/",
@@ -3024,7 +3069,10 @@
     "quote_verified": true,
     "number_in_quote": false
    }
-  ]
+  ],
+  "markdown_sha256": "20a8bd99fc90c098eed485029f402224db84528e009fde7582472b2019b2e149",
+  "raw_response_sha256": "1ce57ff317c368a6b07a551de9aa96c770cb57b888ed76359daf6111cc747553",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://fogos.pt/fogo/20251075979/detalhe",
@@ -3204,7 +3252,10 @@
     "Meteo block: current station reading dated 14/11/2026 17:00, not the fire period.",
     "Meios '0 0 0': present-day value after the incident closed, not the historical deployment."
    ]
-  }
+  },
+  "markdown_sha256": "2f68c48527228ef9f0b87c51e6278682aad0db1216aae646c1ce933620285cd2",
+  "raw_response_sha256": "395e5a1efa27a67862e8d6b10fee2ec8d06cb6b550a5f11cb8f1394512f69fe3",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.altominho.tv/site/2025/08/11/incendios-cerca-de-120-concelhos-em-risco-maximo/",
@@ -3420,7 +3471,10 @@
     "quote_verified": true,
     "number_in_quote": true
    }
-  ]
+  ],
+  "markdown_sha256": "8d612ac4a61bb1d006b9b2e7c61fa344d71d99467f471d1e5bb7de93f8909540",
+  "raw_response_sha256": "b92a33d803bcba61e46c93a420a1217aaf9637fd7acfcdb29cd6eac92a528e18",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://seiadigital.pt/2025/08/13/aldeias-das-freguesias-de-arganil-seia-e-oliveira-do-hospital-na-linha-de-fogo/",
@@ -3725,7 +3779,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "0880c48a259512b06b0aff7230043db12121a4c08729f67c2263b9b0d3f1c3bf",
+  "raw_response_sha256": "1e284d9c666ad7dc73e1a0c59f28d082c2cdd221a6d3153beb5c0942eb796fb8",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.vozportucalense.pt/2025/08/13/incendios-continuam-varias-aldeias-evacuadas-nos-concelhos-de-arganil-e-de-fornos-de-algodres/",
@@ -4033,7 +4090,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "fe2d4850b4b1866167853e67f5ae1628ee421db96e4bb907cec67e2268579b6d",
+  "raw_response_sha256": "5068565ae41504f6dd8dfcde10b54e25136345f837c403c760650250a5862808",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://radioboanova.sapo.pt/incendio-que-teve-inicio-no-piodao-ja-entrou-no-concelho-de-oliveira-do-hospital/",
@@ -4191,7 +4251,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "d857c32d349be273de3b91e7b3def63443de121d2e13c5c287a337fe79cef4ef",
+  "raw_response_sha256": "bcabe577604edb0f55487281613bc7f555df45424d4670d3bdf10ce9a9f8b283",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://beira.pt/portal/noticias/aviso-laranja-por-causa-do-calor-estendido-ate-quinta-feira-no-interior-do-pais/",
@@ -4357,7 +4420,10 @@
     "quote_verified": true,
     "number_in_quote": null
    }
-  ]
+  ],
+  "markdown_sha256": "b479396ab4d92780f494585b242fe293fa3b5619ac1ee480a577831e324c1526",
+  "raw_response_sha256": "5113628fe4a0b87ba70de9e59de6f084beb81220a309bd6bdb70310ddba07e8c",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  },
  {
   "url": "https://www.jn.pt/pais/artigo/fogo-vindo-do-piodao-com-uma-frente-ativa-em-seia/17858864",
@@ -4564,6 +4630,9 @@
     "quote_verified": true,
     "number_in_quote": false
    }
-  ]
+  ],
+  "markdown_sha256": "9b2c6ad1db15eabe1e22804a95f4204ce68f7988348df423143d1c4dd8557499",
+  "raw_response_sha256": "c7690da9f4657dcb0ae68f3f6dbf0cc51549f36929a72710acdabaf420180df9",
+  "markdown_hash_basis": "sha256_exact_decoded_utf8_no_normalization"
  }
 ]

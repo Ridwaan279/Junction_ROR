@@ -38,3 +38,5 @@ async-stream = "=0.3.6"
 csv = "=1.4.0"
 uuid = { version = "=1.29.2", features = ["serde", "v4", "v5"] }
 futures-util = "=0.3.34"
+unicode-normalization = "=0.1.26"
+chrono-tz = "=0.10.4"

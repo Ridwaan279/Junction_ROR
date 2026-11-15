@@ -8,6 +8,7 @@ rust-version.workspace = true
 [dependencies]
 emberwatch-domain.workspace = true
 emberwatch-response.workspace = true
+emberwatch-intelligence.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 chrono.workspace = true
@@ -15,7 +16,10 @@ reqwest.workspace = true
 tokio.workspace = true
 thiserror.workspace = true
 futures.workspace = true
+sha2.workspace = true
+hex.workspace = true
 png = "0.17"
 
 [dev-dependencies]
 axum.workspace = true
+tower.workspace = true

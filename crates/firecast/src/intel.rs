@@ -4,8 +4,7 @@
 //! ground see the fire running, what is burning, how dry the region is, or which
 //! roads and villages lie ahead. Context.dev supplies those from the live web:
 //!
-//! 1. `POST /news/search` – Portuguese articles about the incident in a time window
-//!    (works for historical replay too).
+//! 1. `POST /web/search` – Portuguese articles with an explicit date window.
 //! 2. `POST /web/search` – fresh official/local pages (live runs only).
 //! 3. `POST /web/scrape` + JSON schema – structured fire-behaviour facts per article,
 //!    each with a verbatim excerpt.
@@ -18,11 +17,14 @@ use crate::FirecastError;
 use crate::fuel::{LandCover, land_cover_from_text};
 use crate::geo::parse_compass;
 use crate::moisture::drought_reduction;
-use crate::sources::{read_bounded, truncate};
+use crate::sources::truncate;
 use chrono::{DateTime, Utc};
+use emberwatch_intelligence::{
+    accuracy::{normalize, number_supported, quote_verified},
+    context::{ContextClient, Endpoint},
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::time::Duration;
 
 /// Domains Context.dev searches and scrapes. Scrape targets outside this list are refused.
 pub const PT_DOMAINS: [&str; 18] = [
@@ -59,14 +61,27 @@ pub enum IntelMode {
 
 #[derive(Clone)]
 pub struct ContextDev {
-    http: reqwest::Client,
-    api_key: String,
-    pub base: String,
+    inner: ContextClient,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ArticleConditions {
+    #[serde(skip_deserializing)]
+    pub verified: bool,
+    pub field_quotes: std::collections::BTreeMap<String, String>,
+    #[serde(skip_deserializing)]
+    pub unverified_fields: std::collections::BTreeMap<String, Value>,
+    #[serde(skip_deserializing)]
+    pub source_published_at: Option<DateTime<Utc>>,
+    #[serde(skip_deserializing)]
+    pub source_modified_at: Option<DateTime<Utc>>,
+    #[serde(skip_deserializing)]
+    pub retrieved_at: Option<DateTime<Utc>>,
+    #[serde(skip_deserializing)]
+    pub cache_age_ms: Option<u64>,
+    #[serde(skip_deserializing)]
+    pub request_id: Option<String>,
     pub reported_spread_direction: Option<String>,
     pub reported_spread_toward_place: Option<String>,
     pub wind_description: Option<String>,
@@ -96,6 +111,8 @@ pub struct Report {
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct RegionalContext {
+    #[serde(skip_deserializing)]
+    pub verified: bool,
     pub dominant_vegetation: Vec<String>,
     pub drought_status: Option<String>,
     pub local_wind_regime: Option<String>,
@@ -146,30 +163,23 @@ pub fn conditions_schema() -> Value {
         "active_fronts":{"type":["integer","null"],"minimum":0},"vegetation":arr,"terrain_notes":s,
         "threatened_places":arr,"barriers_or_containment_lines":arr,"evacuations":arr,
         "aerial_means":{"type":["integer","null"],"minimum":0},"ground_personnel":{"type":["integer","null"],"minimum":0},
-        "recently_burned_area_mentioned":{"type":["boolean","null"]},"visible_excerpt":s},
+        "recently_burned_area_mentioned":{"type":["boolean","null"]},"visible_excerpt":s,
+        "field_quotes":{"type":"object","additionalProperties":{"type":"string"}}},
         "required":["vegetation","threatened_places","barriers_or_containment_lines","evacuations"]})
 }
 
 const EXTRACTION_RULES: &str = "Extract only facts stated in this article about the named wildfire. \
 Missing facts are null or empty. Keep Portuguese wording. Directions as written (e.g. 'para norte', 'vento de nordeste'). \
-Do not infer coordinates, times or numbers. visible_excerpt must be a verbatim sentence supporting the direction or wind facts.";
+Do not infer coordinates, times or numbers. visible_excerpt must be a verbatim sentence supporting the direction or wind facts. \
+For each non-null field, put its own exact supporting quote in field_quotes under that field name.";
 
 impl ContextDev {
     pub fn new(api_key: String) -> Result<Self, FirecastError> {
         if api_key.trim().is_empty() {
             return Err(FirecastError::Config("CONTEXT_DEV_API_KEY is empty".into()));
         }
-        let http = reqwest::Client::builder()
-            .connect_timeout(Duration::from_secs(8))
-            .timeout(Duration::from_secs(55))
-            .redirect(reqwest::redirect::Policy::none())
-            .user_agent("EmberWatch-firecast/0.1")
-            .build()
-            .map_err(|_| FirecastError::Config("HTTP client".into()))?;
         Ok(Self {
-            http,
-            api_key,
-            base: "https://api.context.dev/v1".into(),
+            inner: ContextClient::new(api_key).map_err(|e| FirecastError::Config(e.code))?,
         })
     }
     pub fn from_env() -> Option<Self> {
@@ -179,39 +189,24 @@ impl ContextDev {
     }
 
     async fn post(&self, path: &str, body: &Value) -> Result<(Value, f64), FirecastError> {
-        // Billed POSTs are never retried implicitly.
-        let response = self
-            .http
-            .post(format!("{}/{}", self.base, path))
-            .bearer_auth(&self.api_key)
-            .json(body)
-            .send()
+        let (endpoint, ceiling) = match path {
+            "web/scrape" => (Endpoint::Scrape, 5.0),
+            "web/search" => (Endpoint::Search, 1.0),
+            "news/search" => (Endpoint::News, 1.0),
+            "web/answers" => (Endpoint::Answers, 10.0),
+            _ => return Err(FirecastError::Config("Unreviewed Context endpoint".into())),
+        };
+        let value = self
+            .inner
+            .request(endpoint, body, ceiling)
             .await
-            .map_err(|_| FirecastError::Network(format!("context.dev {path}")))?;
-        let status = response.status().as_u16();
-        let bytes = read_bounded(response, 3 * 1024 * 1024).await?;
-        if !(200..300).contains(&status) {
-            let code = match status {
-                401 | 403 => "auth",
-                402 => "credits",
-                429 => "rate limit",
-                500..=599 => "upstream",
-                _ => "request",
-            };
-            return Err(FirecastError::Upstream(format!(
-                "context.dev {path}: {code} (HTTP {status})"
-            )));
-        }
-        let value: Value = serde_json::from_slice(&bytes)
-            .map_err(|_| FirecastError::Parse(format!("context.dev {path}")))?;
+            .map_err(|e| FirecastError::Upstream(e.code))?;
         let credits = value
             .pointer("/key_metadata/credits_consumed")
             .and_then(Value::as_f64)
-            .unwrap_or(match path {
-                "web/answers" => 10.0,
-                "web/scrape" => 5.0,
-                _ => 1.0,
-            });
+            .ok_or_else(|| {
+                FirecastError::Upstream("CONTEXT_USAGE_UNKNOWN; further calls stopped".into())
+            })?;
         Ok((value, credits))
     }
 
@@ -221,14 +216,27 @@ impl ContextDev {
         from: DateTime<Utc>,
         to: DateTime<Utc>,
     ) -> Result<(Vec<Report>, f64), FirecastError> {
-        let body = json!({"searchBy":{"type":"natural_language","query":query},
-            "filterBy":{"date":{"from":from.timestamp_millis(),"to":to.timestamp_millis()},"articleLanguage":["pt"]},"limit":10});
-        let (value, credits) = self.post("news/search", &body).await?;
-        Ok((parse_news(&value), credits))
+        // The provider's news index does not establish Portuguese publisher coverage.
+        let query = format!(
+            "{query} after:{} before:{}",
+            from.format("%Y-%m-%d"),
+            (to + chrono::Duration::days(1)).format("%Y-%m-%d")
+        );
+        self.web_search(&query, false).await
     }
 
     pub async fn search(&self, query: &str) -> Result<(Vec<Report>, f64), FirecastError> {
-        let body = json!({"query":query,"numResults":6,"freshness":"last_24_hours","includeDomains":PT_DOMAINS,"languages":["pt"]});
+        self.web_search(query, true).await
+    }
+    async fn web_search(
+        &self,
+        query: &str,
+        live: bool,
+    ) -> Result<(Vec<Report>, f64), FirecastError> {
+        let mut body = json!({"query":query,"numResults":6,"includeDomains":PT_DOMAINS,"languages":["pt"],"country":"pt"});
+        if live {
+            body["freshness"] = json!("last_24_hours");
+        }
         let (value, credits) = self.post("web/search", &body).await?;
         let reports = value
             .get("results")
@@ -259,13 +267,76 @@ impl ContextDev {
         incident_hint: &str,
     ) -> Result<(Option<ArticleConditions>, f64), FirecastError> {
         validate_scrape_url(url)?;
-        let body = json!({"url":url,"formats":{"json":true},"maxAgeMs":3_600_000,
+        let body = json!({"url":url,"formats":{"markdown":true,"json":true},"maxAgeMs":3_600_000,
             "timeoutOpts":{"milliseconds":30000,"behavior":"return-partial"},
             "jsonParams":{"schema":conditions_schema(),"instructions":format!("{EXTRACTION_RULES} Wildfire: {incident_hint}.")}});
         let (value, credits) = self.post("web/scrape", &body).await?;
         let ok = value.pointer("/json/success").and_then(Value::as_bool) == Some(true);
-        let data = value.pointer("/json/data").cloned().filter(|_| ok);
-        Ok((data.and_then(|d| serde_json::from_value(d).ok()), credits))
+        let ready = ok
+            && value.pointer("/markdown/success").and_then(Value::as_bool) == Some(true)
+            && value.get("isPartial").and_then(Value::as_bool) != Some(true)
+            && value.pointer("/json/isTruncated").and_then(Value::as_bool) != Some(true);
+        let data = value.pointer("/json/data").cloned().filter(|_| ready);
+        let markdown = value
+            .pointer("/markdown/data")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        let conditions = data.and_then(|mut data| {
+            let mut unverified=std::collections::BTreeMap::new();
+            let quotes = data.get("field_quotes").cloned().unwrap_or(json!({}));
+            let fallback = data
+                .get("visible_excerpt")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_owned();
+            if let Some(fields) = data.as_object_mut() {
+                for (name, value) in fields.iter_mut() {
+                    if matches!(
+                        name.as_str(),
+                        "field_quotes" | "visible_excerpt" | "verified"
+                    ) {
+                        continue;
+                    }
+                    let quote = quotes
+                        .get(name)
+                        .and_then(Value::as_str)
+                        .unwrap_or(&fallback);
+                    let supported = |v: &Value| {
+                        quote_verified(markdown, quote)
+                            && !(matches!(name.as_str(),"vegetation"|"evacuations"|"threatened_places"|"barriers_or_containment_lines")
+                                && normalize(quote).to_lowercase().split(|c:char|!c.is_alphabetic()).any(|w|matches!(w,"não"|"sem"|"nunca"|"nenhuma"|"nenhum"|"ninguém")))
+                            && match v {
+                                Value::String(s) => {
+                                    !s.is_empty() && normalize(quote).contains(&normalize(s))
+                                }
+                                Value::Number(n) => {
+                                    n.as_f64().is_some_and(|n| number_supported(n, quote))
+                                }
+                                _ => false,
+                            }
+                    };
+                    let before=value.clone();
+                    if let Value::Array(values) = value {
+                        values.retain(supported);
+                    } else if !value.is_null() && !supported(value) {
+                        *value = Value::Null;
+                    }
+                    if before!=*value {unverified.insert(name.clone(),json!({"value":before,"quote":quote,"reason":"missing_or_unsupported_literal_evidence"}));}
+                }
+            }
+            let mut c: ArticleConditions = serde_json::from_value(data).ok()?;
+            c.verified = true;
+            c.unverified_fields=unverified;
+            c.visible_excerpt=c.visible_excerpt.filter(|q|quote_verified(markdown,q));
+            let source_time=|key:&str|value.pointer(key).and_then(Value::as_str).and_then(|s|DateTime::parse_from_rfc3339(s).ok()).map(|t|t.with_timezone(&Utc));
+            c.source_published_at=source_time("/metadata/publishedTime");
+            c.source_modified_at=source_time("/metadata/modifiedTime");
+            c.retrieved_at=Some(Utc::now());
+            c.cache_age_ms=value.pointer("/cache_metadata/age_ms").and_then(Value::as_u64);
+            c.request_id=value.get("request_id").and_then(Value::as_str).map(str::to_owned);
+            Some(c)
+        });
+        Ok((conditions, credits))
     }
 
     pub async fn regional_context(
@@ -318,6 +389,11 @@ Responda só com factos suportados por fontes."
             mode: Some(mode),
             ..FireIntel::default()
         };
+        let Ok(inner) = self.inner.clone().with_budget(max_credits) else {
+            intel.errors.push("Invalid credit budget".into());
+            return intel;
+        };
+        let bounded = Self { inner };
         let afford = |intel: &FireIntel, cost: f64| intel.credits_used + cost <= max_credits;
         let query = format!("incêndio {place}");
         if mode != IntelMode::WhatIf && afford(&intel, 1.0) {
@@ -326,8 +402,8 @@ Responda só com factos suportados por fontes."
             } else {
                 chrono::Duration::hours(36)
             };
-            intel.calls.push("news/search".into());
-            match self.news(&query, at - window, at).await {
+            intel.calls.push("web/search".into());
+            match bounded.news(&query, at - window, at).await {
                 Ok((reports, c)) => {
                     intel.credits_used += c;
                     intel.reports.extend(reports);
@@ -337,7 +413,10 @@ Responda só com factos suportados por fontes."
         }
         if mode == IntelMode::Live && afford(&intel, 1.0) {
             intel.calls.push("web/search".into());
-            match self.search(&format!("{query} vento frente progride")).await {
+            match bounded
+                .search(&format!("{query} vento frente progride"))
+                .await
+            {
                 Ok((reports, c)) => {
                     intel.credits_used += c;
                     for r in reports {
@@ -359,10 +438,26 @@ Responda só com factos suportados por fontes."
                 continue;
             }
             intel.calls.push("web/scrape".into());
-            match self.extract_conditions(&url, &query).await {
+            match bounded.extract_conditions(&url, &query).await {
                 Ok((conditions, c)) => {
                     intel.credits_used += c;
-                    intel.reports[i].conditions = conditions;
+                    // Today's article capture cannot prove historical publication availability.
+                    if mode == IntelMode::Live {
+                        let eligible = conditions.as_ref().is_some_and(|c| {
+                            c.source_published_at.is_some_and(|published| {
+                                published <= at && at - published <= chrono::Duration::hours(24)
+                            }) && c.source_modified_at.is_none_or(|modified| modified <= at)
+                        });
+                        if eligible {
+                            intel.reports[i].conditions = conditions;
+                        } else {
+                            intel.errors.push("Live conditions withheld: publication time missing, stale or in the future".into());
+                        }
+                    } else {
+                        intel.errors.push(
+                            "Historical conditions withheld pending capture-time validation".into(),
+                        );
+                    }
                     extracted += 1;
                 }
                 Err(e) => intel.errors.push(e.to_string()),
@@ -370,7 +465,7 @@ Responda só com factos suportados por fontes."
         }
         if mode != IntelMode::Historical && afford(&intel, 10.0) {
             intel.calls.push("web/answers".into());
-            match self.regional_context(place).await {
+            match bounded.regional_context(place).await {
                 Ok((regional, c)) => {
                     intel.credits_used += c;
                     intel.regional = regional;
@@ -445,6 +540,16 @@ pub fn derive_adjustments(intel: &FireIntel) -> Adjustments {
         let Some(c) = &report.conditions else {
             continue;
         };
+        if !c.verified {
+            continue;
+        }
+        let quote_for = |field: &str| {
+            c.field_quotes
+                .get(field)
+                .or(c.visible_excerpt.as_ref())
+                .cloned()
+                .unwrap_or_default()
+        };
         let url = report.url.clone();
         c.vegetation.iter().for_each(|v| vote(v, &url));
         if adj.reported_spread_bearing.is_none()
@@ -453,7 +558,7 @@ pub fn derive_adjustments(intel: &FireIntel) -> Adjustments {
         {
             adj.reported_spread_bearing = Some(Sourced {
                 value: b,
-                evidence: c.visible_excerpt.clone().unwrap_or_else(|| text.clone()),
+                evidence: quote_for("reported_spread_direction"),
                 url: url.clone(),
             });
         }
@@ -466,11 +571,11 @@ pub fn derive_adjustments(intel: &FireIntel) -> Adjustments {
         {
             adj.reported_wind_from_deg = Some(Sourced {
                 value: b,
-                evidence: c
-                    .wind_description
-                    .clone()
-                    .or_else(|| c.wind_from_direction.clone())
-                    .unwrap_or_default(),
+                evidence: quote_for(if c.wind_from_direction.is_some() {
+                    "wind_from_direction"
+                } else {
+                    "wind_description"
+                }),
                 url: url.clone(),
             });
         }
@@ -479,28 +584,28 @@ pub fn derive_adjustments(intel: &FireIntel) -> Adjustments {
         {
             adj.reported_wind_kmh = Some(Sourced {
                 value: k,
-                evidence: c.wind_description.clone().unwrap_or_default(),
+                evidence: quote_for("wind_speed_kmh"),
                 url: url.clone(),
             });
         }
         for p in &c.threatened_places {
             adj.threatened_places.push(Sourced {
                 value: truncate(p, 80),
-                evidence: String::new(),
+                evidence: quote_for("threatened_places"),
                 url: url.clone(),
             });
         }
         for b in &c.barriers_or_containment_lines {
             adj.barriers.push(Sourced {
                 value: truncate(b, 80),
-                evidence: String::new(),
+                evidence: quote_for("barriers_or_containment_lines"),
                 url: url.clone(),
             });
         }
         for e in &c.evacuations {
             adj.evacuations.push(Sourced {
                 value: truncate(e, 80),
-                evidence: String::new(),
+                evidence: quote_for("evacuations"),
                 url: url.clone(),
             });
         }
@@ -512,7 +617,7 @@ pub fn derive_adjustments(intel: &FireIntel) -> Adjustments {
             });
         }
     }
-    if let Some(regional) = &intel.regional {
+    if let Some(regional) = intel.regional.as_ref().filter(|r| r.verified) {
         let url = regional
             .sources
             .first()
@@ -558,6 +663,7 @@ mod tests {
                 source: Some("RTP".into()),
                 published_at: None,
                 conditions: Some(ArticleConditions {
+                    verified: true,
                     reported_spread_direction: Some("a progredir para nordeste".into()),
                     wind_description: Some("vento forte de sudoeste".into()),
                     wind_speed_kmh: Some(35.0),
@@ -568,6 +674,7 @@ mod tests {
                 }),
             }],
             regional: Some(RegionalContext {
+                verified: true, // manually verified synthetic test input, never trusted from a model
                 dominant_vegetation: vec!["eucalipto".into()],
                 drought_status: Some("seca severa".into()),
                 sources: vec!["https://www.ipma.pt/pt/oclima/observatorio.secas/".into()],
@@ -617,31 +724,31 @@ mod tests {
             .route("/news/search", post(|| async { Json(json!({"data":[{"url":"https://www.rtp.pt/noticias/a","title":"Incêndio","published_at":"2026-08-10T12:00:00Z","source":{"name":"RTP"}}],"has_more":false,"key_metadata":{"credits_consumed":1}})) }))
             .route("/web/search", post(|| async { Json(json!({"results":[{"url":"https://www.publico.pt/b","title":"Fogo"}],"key_metadata":{"credits_consumed":1}})) }))
             .route("/web/scrape", post(|Json(body): Json<Value>| async move {
-                assert_eq!(body["formats"], json!({"json":true}));
+                assert_eq!(body["formats"], json!({"markdown":true,"json":true}));
                 assert!(body["jsonParams"]["schema"]["properties"]["reported_spread_direction"].is_object());
-                Json(json!({"url":body["url"],"json":{"requested":true,"success":true,"data":{"reported_spread_direction":"para sul","vegetation":["mato"],"threatened_places":[],"barriers_or_containment_lines":["IC2"],"evacuations":[]}},"key_metadata":{"credits_consumed":5}}))
+                Json(json!({"url":body["url"],"metadata":{"publishedTime":"2026-08-10T12:00:00Z"},"markdown":{"requested":true,"success":true,"data":"As chamas avançam para sul, em mato, junto ao IC2."},"json":{"requested":true,"success":true,"data":{"visible_excerpt":"As chamas avançam para sul, em mato, junto ao IC2.","reported_spread_direction":"para sul","vegetation":["mato"],"threatened_places":[],"barriers_or_containment_lines":["IC2"],"evacuations":[]}},"key_metadata":{"credits_consumed":5}}))
             }))
             .route("/web/answers", post(|| async { Json(json!({"json_content":{"dominant_vegetation":["pinhal"],"drought_status":"seca moderada"},"sources":["https://www.ipma.pt/x"],"key_metadata":{"credits_consumed":10}})) }));
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
         let server = tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
         let mut client = ContextDev::new("fixture_key".into()).unwrap();
-        client.base = format!("http://{addr}");
-        let at = Utc::now();
+        client.inner = client
+            .inner
+            .with_local_test_endpoint(format!("http://{addr}"))
+            .unwrap();
+        let at = DateTime::parse_from_rfc3339("2026-08-10T13:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
         let live = client
             .gather(IntelMode::Live, "Sever do Vouga", at, 30.0)
             .await;
+        assert!(live.errors.is_empty(), "{:?}", live.errors);
         assert_eq!(
             live.calls,
-            vec![
-                "news/search",
-                "web/search",
-                "web/scrape",
-                "web/scrape",
-                "web/answers"
-            ]
+            vec!["web/search", "web/search", "web/scrape", "web/answers"]
         );
-        assert_eq!(live.credits_used, 22.0);
+        assert_eq!(live.credits_used, 17.0);
         assert!(live.errors.is_empty(), "{:?}", live.errors);
         let adj = derive_adjustments(&live);
         assert_eq!(adj.reported_spread_bearing.unwrap().value, 180.0);
@@ -649,7 +756,7 @@ mod tests {
         let tight = client
             .gather(IntelMode::Live, "Sever do Vouga", at, 7.0)
             .await;
-        assert_eq!(tight.calls, vec!["news/search", "web/search", "web/scrape"]);
+        assert_eq!(tight.calls, vec!["web/search", "web/search", "web/scrape"]);
         let what_if = client
             .gather(IntelMode::WhatIf, "Sever do Vouga", at, 30.0)
             .await;

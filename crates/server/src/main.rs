@@ -34,7 +34,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         std::env::var("CONTEXT_DEV_API_KEY").is_ok()
     );
-    let app = emberwatch_server::router_with(engine, store, firecast).nest(
+    let app = emberwatch_server::router_with_live_options(
+        engine,
+        store,
+        firecast,
+        emberwatch_server::live_api::LiveOptions::from_env(),
+    )
+    .nest(
         "/platform",
         emberwatch_server::platform_api::integrated_router(platform, access),
     );

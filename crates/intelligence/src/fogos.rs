@@ -131,7 +131,7 @@ pub fn normalize_fogos_with_coverage(
     let mut rejected = 0;
     for row in page.incidents {
         let excerpt = text(&row, "visible_excerpt");
-        if excerpt.is_none_or(|value| value.trim().is_empty() || !markdown.contains(value)) {
+        if excerpt.is_none_or(|value| !crate::accuracy::quote_verified(markdown, value)) {
             rejected += 1;
             continue;
         }
@@ -139,7 +139,11 @@ pub fn normalize_fogos_with_coverage(
         // Keep only literal facts supported by the captured page, not plausible AI completion.
         let visible = |key: &str| {
             text(&row, key)
-                .filter(|value| !value.trim().is_empty() && excerpt.contains(*value))
+                .filter(|value| {
+                    !value.trim().is_empty()
+                        && crate::accuracy::normalize(excerpt)
+                            .contains(&crate::accuracy::normalize(value))
+                })
                 .map(str::to_owned)
         };
         let locality = visible("locality");
@@ -258,14 +262,15 @@ pub fn normalize_fogos_with_coverage(
     result.coverage.complete = verified
         && page.coverage == "complete"
         && !response.is_partial
+        && !response.markdown.is_truncated
+        && !response.json.is_truncated
         && rejected == 0
         && !markdown.trim().is_empty();
     result.coverage.explicit_empty = result.coverage.complete
         && result.evidence.is_empty()
-        && page
-            .explicit_empty_text
-            .as_deref()
-            .is_some_and(|text| explicit_empty_statement(text) && markdown.contains(text));
+        && page.explicit_empty_text.as_deref().is_some_and(|text| {
+            explicit_empty_statement(text) && crate::accuracy::quote_verified(markdown, text)
+        });
     if rejected > 0 {
         result.coverage.notes.push(format!(
             "Rejected {rejected} rows without literal page evidence."
