@@ -1,4 +1,4 @@
-import Workspace from "@/components/Workspace";
+import OpsConsole from "@/components/ops/OpsConsole";
 export default function Page() {
-  return <Workspace />;
+  return <OpsConsole />;
 }
