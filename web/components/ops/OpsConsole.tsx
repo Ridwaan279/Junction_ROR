@@ -2,10 +2,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Map as LibreMap } from "maplibre-gl";
 import { loadMapLibre } from "@/lib/terrain";
-import { loadOpsStyle, restorePortugalLayers, setThreeD } from "@/lib/ops-map";
-import { deploymentsAt, missionAt } from "@/lib/drone-display";
 import { useLiveStatus } from "@/lib/use-live-status";
-import { MAX_TERRAIN_ZOOM, MAX_TERRAIN_PITCH, PLACES, placeCamera } from "@/lib/terrain-data";
+import { loadOpsStyle, setThreeD } from "@/lib/ops-map";
 import {
   addReplayLayers, compassPoint, FIRE, frameAt, lisbon, REPLAY_BASES, setReplayVisible, showAgentFleet, showReplayFrame, showVillages, villagesAt,
   showFleet, pinsAt, pinElement, rescueTargetsAt, PIN_COLORS, type ReplayFrame, type ReplayIndex, type ValidationRow,
@@ -84,21 +82,18 @@ const T = {
 };
 
 export default function OpsConsole() {
-  const [locale, setLocale] = useLocale();
+  const [locale] = useLocale();
   const [mode, setMode] = useState<Mode>("live");
   const [threeD, set3D] = useState(true);
   const [ready, setReady] = useState(false);
   const [mapFailed, setMapFailed] = useState(false);
   const { data: live, error: liveError, loading: liveLoading } = useLiveStatus();
   const [eventsVisible, setEventsVisible] = useState(true);
-  const [textures, setTextures] = useState(true);
-  const [textureFailed, setTextureFailed] = useState(false);
-  const materials = useRef<Awaited<ReturnType<typeof restorePortugalLayers>>>(null);
   const [index, setIndex] = useState<ReplayIndex | null>(null);
   const [frame, setFrame] = useState<ReplayFrame | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [panel, setPanel] = useState<"sources" | "accuracy" | "fleet" | "sar" | "deployments" | null>(null);
+  const [panel, setPanel] = useState<"sources" | "accuracy" | "fleet" | "sar" | null>(null);
   const [accuracy, setAccuracy] = useState<Accuracy | null>(null);
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
@@ -109,33 +104,22 @@ export default function OpsConsole() {
   const [loaded, setLoaded] = useState<Record<string, ReplayFrame>>({});
 
 
-  // Original Portugal terrain, buildings, varied roofs and ground textures.
+  // Satellite imagery on 3D terrain from the first frame.
   useEffect(() => {
     let cancelled = false, instance: LibreMap | null = null;
-    const abort = new AbortController();
     (async () => {
-      const [maplibre, style] = await Promise.all([loadMapLibre(), loadOpsStyle(abort.signal)]);
+      const [maplibre, style] = await Promise.all([loadMapLibre(), loadOpsStyle()]);
       if (cancelled || !container.current) return;
       instance = new maplibre.Map({
         container: container.current, style, ...PORTUGAL, zoom: PORTUGAL.zoom - (phone() ? 0.9 : 0),
-        maxPitch: MAX_TERRAIN_PITCH, maxZoom: MAX_TERRAIN_ZOOM, attributionControl: false, fadeDuration: 150,
+        maxPitch: 80, attributionControl: false, fadeDuration: 150,
       });
       map.current = instance;
       instance.addControl(new maplibre.AttributionControl({ compact: true }), "bottom-left");
-      instance.addControl(new maplibre.NavigationControl({ visualizePitch: true }), "bottom-right");
-      instance.on("load", async () => {
+      instance.on("load", () => {
         if (cancelled || !instance) return;
         instance.setPadding(framePadding("live"));
-        try {
-          materials.current = await restorePortugalLayers(instance, abort.signal, () => { if (!cancelled) setTextureFailed(true); });
-        } catch { if (!cancelled) setTextureFailed(true); }
-        if (cancelled || !instance) return;
-        setThreeD(instance, true, false);
         addReplayLayers(instance);
-        instance.addSource("ops-live", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-        instance.addLayer({ id: "ops-live-fire", type: "circle", source: "ops-live", paint: {
-          "circle-radius": 7, "circle-color": "#e94724", "circle-stroke-color": "#ffffff", "circle-stroke-width": 2,
-        } });
         setReplayVisible(instance, false);
         instance.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
         setReady(true);
@@ -145,21 +129,8 @@ export default function OpsConsole() {
         if (!(e as { sourceId?: string }).sourceId && !instance?.isStyleLoaded()) setMapFailed(true);
       });
     })().catch(() => { if (!cancelled) setMapFailed(true); });
-    return () => { cancelled = true; abort.abort(); instance?.remove(); map.current = null; materials.current = null; };
+    return () => { cancelled = true; instance?.remove(); map.current = null; };
   }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    materials.current?.buildings.setDisplay(true, textures);
-    materials.current?.ground.setDisplay(textures, textures);
-  }, [textures, ready]);
-  useEffect(() => {
-    const m = map.current;
-    if (!ready || !m) return;
-    const features: GeoJSON.Feature[] = mode === "live" && !liveError ? (live?.active ?? []).flatMap((incident) =>
-      incident.position ? [{ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: incident.position }, properties: { name: incident.place } }] : []) : [];
-    (m.getSource("ops-live") as import("maplibre-gl").GeoJSONSource | undefined)?.setData({ type: "FeatureCollection", features });
-  }, [live, liveError, mode, ready]);
 
   const loadFrame = useCallback(async (file: string) => {
     const hit = frames.current.get(file);
@@ -292,19 +263,26 @@ export default function OpsConsole() {
   }, [index, frame, plan, alertMs, cut, sitesAt, schedule, loaded]);
   // Agent 2's fleet (stations, terrain-following routes) is the source when the generated replay has it.
   const agent = frame?.fleet && alertMs != null && cut >= alertMs ? frame.fleet : null;
-  const deployments = useMemo(() => index ? deploymentsAt(index, loaded, cut) : [], [index, loaded, cut]);
-  const launches = useMemo(() => new Map(deployments.map((d) => [d.drone.id, d.at])), [deployments]);
-  const agentAirborne = deployments.filter((d) => missionAt(d.drone, d.at, cut)?.phase === "flight").length;
-  const firstLaunch = deployments[0]?.at ?? null;
+  const agentAirborne = agent ? agent.breakdown.filter((b) => b.term.startsWith("airborne_")).reduce((a, b) => a + b.value, 0) : 0;
+  const launches = useMemo(() => {
+    const out = new Map<string, number>();
+    if (!index || alertMs == null) return out;
+    for (const f of index.frames) {
+      const fr = loaded[f.file], at = Date.parse(f.t);
+      if (!fr?.fleet || at > cut) continue;
+      for (const d of fr.fleet.drones) if (!out.has(d.id)) out.set(d.id, Math.max(alertMs, at));
+    }
+    return out;
+  }, [index, loaded, alertMs, cut]);
+  const firstLaunch = launches.size ? Math.min(...launches.values()) : null;
   useEffect(() => {
     if (!ready || !map.current) return;
-    if (agent && index) showAgentFleet(map.current, index.stations ?? [], deployments.map((d) => d.drone), launches, cut);
+    if (agent && index) showAgentFleet(map.current, index.stations ?? [], agent.drones, launches, cut);
     else showFleet(map.current, fleetView?.base ?? null, fleetView?.drones ?? []);
-  }, [agent, index, deployments, launches, cut, fleetView, ready]);
+  }, [agent, index, launches, cut, fleetView, ready]);
 
   // Pins: DOM markers (visible from any 3D angle) with a small card of what was reported there.
   const markers = useRef(new Map<string, import("maplibre-gl").Marker>());
-  const pinPopups = useRef(new Map<string, import("maplibre-gl").Popup>());
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
@@ -313,7 +291,7 @@ export default function OpsConsole() {
       if (cancelled) return;
       const want = mode === "replay" && eventsVisible ? pins : [];
       const keep = new Set(want.map((p) => p.id + ":" + p.items.length + ":" + locale));
-      for (const [key, marker] of markers.current) if (!keep.has(key)) { marker.remove(); markers.current.delete(key); pinPopups.current.get(key)?.remove(); pinPopups.current.delete(key); }
+      for (const [key, marker] of markers.current) if (!keep.has(key)) { marker.remove(); markers.current.delete(key); }
       for (const pin of want) {
         const key = pin.id + ":" + pin.items.length + ":" + locale;
         if (markers.current.has(key)) continue;
@@ -339,12 +317,12 @@ export default function OpsConsole() {
           e.stopPropagation();
           if (popup.isOpen()) popup.remove(); else popup.setLngLat(pin.position).addTo(m);
         });
-        markers.current.set(key, marker); pinPopups.current.set(key, popup);
+        markers.current.set(key, marker);
       }
     });
     return () => { cancelled = true; };
   }, [pins, ready, mode, locale, eventsVisible]);
-  useEffect(() => () => { for (const marker of markers.current.values()) marker.remove(); markers.current.clear(); for (const popup of pinPopups.current.values()) popup.remove(); pinPopups.current.clear(); }, []);
+  useEffect(() => () => { for (const marker of markers.current.values()) marker.remove(); markers.current.clear(); }, []);
 
   const openAccuracy = useCallback(async () => {
     setPanel("accuracy");
@@ -361,7 +339,7 @@ export default function OpsConsole() {
   };
 
   return (
-    <main className={s.shell} data-panel={panel ? "open" : undefined}>
+    <main className={s.shell} data-map-ready={ready} data-panel={panel ? "open" : undefined}>
       <div ref={container} className={s.map} aria-label={L.map} />
 
       <SiteNav active="map" locale={locale} />
@@ -369,29 +347,11 @@ export default function OpsConsole() {
       <nav className={s.controls} aria-label="EmberWatch">
         <div className={s.segmented} role="group">
           <button aria-pressed={mode === "live"} onClick={enterLive}>{L.live}</button>
-          <button aria-pressed={mode === "replay"} onClick={() => void enterReplay()}>{L.replay}</button>
+          <button disabled={!ready} aria-pressed={mode === "replay"} onClick={() => void enterReplay()}>{L.replay}</button>
         </div>
+        <button className={s.toggle} aria-pressed={eventsVisible} onClick={() => setEventsVisible(!eventsVisible)}>Events {eventsVisible ? "ON" : "OFF"}</button>
         <button className={s.toggle} onClick={() => set3D(!threeD)} aria-label={threeD ? "2D" : "3D"}>{threeD ? "2D" : "3D"}</button>
-        <button className={s.toggle} onClick={() => setLocale(locale === "pt" ? "en" : "pt")} lang={locale === "pt" ? "en" : "pt"}>{locale === "pt" ? "EN" : "PT"}</button>
       </nav>
-
-      <div className={s.mapTools} role="group" aria-label={locale === "pt" ? "Camadas do mapa" : "Map layers"}>
-        <div className={s.mapToolRow}>
-          <button aria-pressed={textures} onClick={() => setTextures(!textures)}>{locale === "pt" ? "Texturas" : "Textures"} <span>{textures ? "ON" : "OFF"}</span></button>
-          <button aria-pressed={eventsVisible} onClick={() => setEventsVisible(!eventsVisible)}>{locale === "pt" ? "Eventos" : "Events"} <span>{eventsVisible ? "ON" : "OFF"}</span></button>
-        </div>
-        <label className={s.placePicker}>{locale === "pt" ? "Explorar" : "Explore"}
-          <select disabled={!ready} aria-label={locale === "pt" ? "Explorar Portugal" : "Explore Portugal"} defaultValue="" onChange={(e) => {
-            const place = PLACES.find((p) => p.id === e.target.value);
-            if (place) { set3D(true); map.current?.flyTo({ ...placeCamera(place, true), padding: framePadding("live"), duration: 1800 }); }
-            else map.current?.flyTo({ ...PORTUGAL, padding: framePadding("live"), duration: 1800 });
-          }}>
-            <option value="">Portugal</option><option value="lisboa">Lisboa · 3D</option><option value="porto">Porto · 3D</option><option value="estrela">Serra da Estrela</option>
-          </select>
-        </label>
-        <p>{locale === "pt" ? "Aproxime-se para ver os edifícios e telhados." : "Zoom in to see the buildings and roofs."}</p>
-        {textureFailed && <p role="status">{locale === "pt" ? "Algumas texturas indisponíveis. Geometria mantida." : "Some textures unavailable. Building geometry remains visible."}</p>}
-      </div>
 
       {mode === "live" && (
         <section className={`${s.card} ${s.compact}`} aria-live="polite">
@@ -406,12 +366,11 @@ export default function OpsConsole() {
                 {live.state === "no_active_fires" ? L.noFires : L.activeFires(live.active.length)}
               </h1>
               <p className={s.secondary}>
-                {L.checkedAt} {lisbon(live.checked_at, locale, true)} ·{" "}
+                {L.checkedAt} {lisbon(live.checked_at, locale)} ·{" "}
                 {live.sources.map((src) => <a key={src.url} href={src.url} target="_blank" rel="noreferrer">Fogos.pt</a>)}
               </p>
             </>
           )}
-          <a className={s.liveDataLink} href="/data">{locale === "pt" ? "Ver dados ao vivo" : "View live data"} →</a>
         </section>
       )}
 
@@ -440,18 +399,9 @@ export default function OpsConsole() {
               </dl>
               <p className={s.tertiary}>
                 {L.alert} {lisbon(alertAt, locale)}
-                {agent && firstLaunch != null && <> · {locale === "pt" ? "Primeiro despacho" : "First deployment"} {lisbon(new Date(firstLaunch).toISOString(), locale)} ({L.simulated})</>}
+                {agent && firstLaunch != null && <> · {L.launched} {lisbon(new Date(firstLaunch).toISOString(), locale)} ({L.simulated})</>}
                 {!agent && plan && !plan.grounded && <> · {L.launched} {lisbon(alertAt, locale)} ({L.simulated})</>}
               </p>
-              {deployments.length > 0 && <div className={s.deploymentPreview}>
-                <button className={s.deploymentHeading} onClick={() => setPanel(panel === "deployments" ? null : "deployments")}>
-                  {locale === "pt" ? "Despachos de drones" : "Drone deployments"} <span>{deployments.length} · {L.simulated} ↗</span>
-                </button>
-                <ol>{[...deployments].reverse().slice(0, 3).map((d) => <li key={d.drone.id}>
-                  <time dateTime={new Date(d.at).toISOString()}>{lisbon(new Date(d.at).toISOString(), locale)}</time>
-                  <span>{d.drone.id.replace("demo-osm-", "")} <small>{d.phase === "ground_transfer" ? (locale === "pt" ? "transporte terrestre" : "ground transfer") : (locale === "pt" ? "voo" : "flight")}</small></span>
-                </li>)}</ol>
-              </div>}
               {targets.length > 0 && (
                 <button className={s.sarLine} onClick={() => setPanel(panel === "sar" ? null : "sar")}>{L.sarLine(targets.length)} →</button>
               )}
@@ -479,17 +429,6 @@ export default function OpsConsole() {
           </div>
         </section>
       )}
-
-      {mode === "replay" && panel === "deployments" && <aside className={s.panel} aria-label={locale === "pt" ? "Despachos de drones" : "Drone deployments"}>
-        <PanelHead title={locale === "pt" ? "Despachos de drones" : "Drone deployments"}
-          note={locale === "pt" ? "Horas de despacho da simulação, no fuso de Lisboa. As reservas em terra não contam como despachadas." : "Simulation deployment times in Lisbon time. Ground reserves are not counted as deployed."}
-          close={L.close} onClose={() => setPanel(null)} />
-        <ol className={s.deploymentList}>{[...deployments].reverse().map((d) => <li key={d.drone.id}>
-          <time dateTime={new Date(d.at).toISOString()}>{lisbon(new Date(d.at).toISOString(), locale, true)}</time>
-          <strong>{d.drone.id}</strong><span>{d.station?.name ?? d.drone.station_id}</span>
-          <small>{d.drone.role} · {d.phase === "ground_transfer" ? (locale === "pt" ? "transporte terrestre" : "ground transfer") : (locale === "pt" ? "voo" : "flight")} · {L.simulated}</small>
-        </li>)}</ol>
-      </aside>}
 
       {mode === "replay" && panel === "sources" && (
         <aside className={s.panel} aria-label={L.sources}>

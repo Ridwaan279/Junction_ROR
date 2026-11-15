@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { lisbon, REPLAY_BASES, type ReplayIndex } from "@/lib/replay";
 import SiteNav, { useLocale } from "./SiteNav";
 import LiveDataPanel from "./LiveDataPanel";
+import NationalData from "./NationalData";
 import s from "./ops.module.css";
 
 type Search = { name: string; endpoint: string; request_id: string | null; credits: number | null; error: unknown; results: number };
@@ -72,7 +73,7 @@ const T = {
 };
 
 export default function DataView() {
-  const [locale, setLocale] = useLocale();
+  const [locale] = useLocale();
   const [index, setIndex] = useState<Index | null>(null);
   const L = T[locale];
   useEffect(() => {
@@ -93,12 +94,12 @@ export default function DataView() {
   return (
     <main className={s.doc}>
       <SiteNav active="data" locale={locale} />
-      <button className={s.docLocale} onClick={() => setLocale(locale === "pt" ? "en" : "pt")}>{locale === "pt" ? "EN" : "PT"}</button>
       <article className={s.docBody}>
         <h1>{L.title}</h1>
         <p className={s.lead}>{L.intro}</p>
 
         <LiveDataPanel locale={locale} />
+        <NationalData />
 
         {index && (
           <details className={s.historicalArchive}>

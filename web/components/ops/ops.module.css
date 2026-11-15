@@ -277,3 +277,5 @@
  .liveSource dl { grid-template-columns:1fr; }
  .shell :global(.maplibregl-ctrl-bottom-right) { bottom:240px; }
 }
+
+.weatherGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.weatherTile{padding:14px;border:1px solid var(--hairline);border-radius:10px;min-width:0}.weatherTile h4{margin:0;font-size:15px}.weatherTile>span{font-size:10px;color:var(--secondary)}.weatherTile>strong{display:block;font-size:23px;margin:10px 0}.weatherTile dl{margin:0;display:grid;gap:5px}.weatherTile dl>div{display:flex;justify-content:space-between;gap:6px;font-size:11px}.weatherTile dt{color:var(--secondary)}.weatherTile dd{margin:0}.windChart{width:100%;display:block;margin-top:10px}.newsItems{padding-left:18px;margin:8px 0;font-size:13px}.newsItems li{margin:8px 0}.newsItems blockquote{margin:0;color:var(--secondary);line-height:1.5;overflow-wrap:anywhere}@media(max-width:760px){.weatherGrid{grid-template-columns:1fr 1fr}}@media(max-width:460px){.weatherGrid{grid-template-columns:1fr}}

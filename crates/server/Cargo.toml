@@ -13,6 +13,7 @@ emberwatch-response.workspace = true
 emberwatch-firecast.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+reqwest.workspace = true
 chrono.workspace = true
 tokio.workspace = true
 axum.workspace = true

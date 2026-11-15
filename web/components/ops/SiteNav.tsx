@@ -1,26 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import s from "./ops.module.css";
 
 export type Locale = "pt" | "en";
-const KEY = "emberwatch-locale";
-
-/** Language shared across tabs; storage is a convenience only (falls back to PT). */
-export function useLocale(): [Locale, (l: Locale) => void] {
-  const [locale, setLocale] = useState<Locale>("pt");
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(KEY);
-      if (saved === "en" || saved === "pt") setTimeout(() => setLocale(saved), 0);
-    } catch { /* storage unavailable */ }
-  }, []);
-  useEffect(() => { document.documentElement.lang = locale; }, [locale]);
-  const set = (l: Locale) => {
-    setLocale(l);
-    try { window.localStorage.setItem(KEY, l); } catch { /* storage unavailable */ }
-  };
-  return [locale, set];
+/** English-only interface; legacy stored language preferences are ignored. */
+export function useLocale(): [Locale] {
+  return ["en"];
 }
 
 const LABELS = { pt: { map: "Mapa", data: "Dados", methods: "Método" }, en: { map: "Map", data: "Data", methods: "Methods" } };

@@ -1,5 +1,31 @@
 # EmberWatch UI (Agent 1)
 
+## Current revision
+
+The user requested English only and then restored the previous satellite map
+because the terrain-map drone rendering did not work as expected. The main
+console now uses the previous satellite style and drone positioning logic, with
+quadcopter symbols and an Events toggle. The separate `/terrain` explorer remains.
+Language controls are removed from all pages and saved Portuguese preferences
+are ignored. Publisher quotations and proper place names retain their source language.
+
+The Data tab also has national background collection at `/api/live/portugal`:
+Context.dev web-search for RTP/Público news, up to two public-page scrapes per
+publisher, an IPMA public weather page, and a batched Open-Meteo forecast at nine
+mainland sample points. It displays wind speed/direction, gusts, temperature,
+humidity, rain and twelve forecast hours of wind/gusts. These are model weather
+values, not direct station measurements. Source failures remain visible.
+
+Enable on Rust with `EMBERWATCH_PORTUGAL_DATA_ENABLED=1` and
+`CONTEXT_DEV_API_KEY`. Collection is on demand, independent of wildfire activity,
+cached for 15 minutes, and uses a separate hard budget of 20 Context credits per
+hour; unknown billed outcomes freeze further calls. The browser checks every five
+minutes while visible. No paid Context monitor subscription or batch is created.
+The Next.js proxy uses `EMBERWATCH_API_BASE_URL`, default localhost:8080.
+
+The restoration description below records the earlier revision, superseded for
+the main map by this rollback.
+
 ## Portugal map restoration (15 November 2026)
 
 The operations map now uses the original Portugal terrain palette and the shared

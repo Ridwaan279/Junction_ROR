@@ -28,6 +28,7 @@ pub mod fleet_api;
 pub mod live_api;
 pub mod platform_api;
 pub mod platform_ui;
+pub mod portugal_data;
 mod webhook;
 
 #[derive(Clone)]
@@ -148,6 +149,7 @@ pub fn router_with_live_options(
         )
         .with_state(state)
         .merge(live_api::router(live))
+        .merge(portugal_data::router())
         .merge(fleet_api::default_router())
         .layer(
             CorsLayer::new()

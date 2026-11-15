@@ -4,7 +4,7 @@ import SiteNav, { useLocale } from "./SiteNav";
 import s from "./ops.module.css";
 
 export default function MethodsView() {
-  const [locale, setLocale] = useLocale();
+  const [locale] = useLocale();
   const t = (pt: string, en: string) => (locale === "pt" ? pt : en);
   const segment = (FLEET.cruise_kmh * (FLEET.revisit_min / 60)) / 2;
   const transit = (FLEET.staging_km / FLEET.cruise_kmh) * 60;
@@ -13,7 +13,6 @@ export default function MethodsView() {
   return (
     <main className={s.doc}>
       <SiteNav active="methods" locale={locale} />
-      <button className={s.docLocale} onClick={() => setLocale(locale === "pt" ? "en" : "pt")}>{locale === "pt" ? "EN" : "PT"}</button>
       <article className={s.docBody}>
         <h1>{t("Método e tecnologia", "Methods and technology")}</h1>
         <p className={s.lead}>{t(

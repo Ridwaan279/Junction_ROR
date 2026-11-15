@@ -15,7 +15,7 @@ import { CLOSE_BUILDING_ZOOM, MAX_TERRAIN_PITCH, MAX_TERRAIN_ZOOM } from "@/lib/
 import s from "./terrain.module.css";
 
 export default function TerrainExplorer() {
-  const [locale, setLocale] = useState<"en" | "pt">("en");
+  const [locale] = useState<"en" | "pt">("en");
   const t = terrainCopy[locale];
   const host = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
@@ -307,7 +307,6 @@ export default function TerrainExplorer() {
         <div className={s.headerEnd}>
           <span className={s.mapTag}><span />{t.explorer}</span>
           <Link href="/" className={s.workspaceLink}>{t.workspace} <TerrainIcon name="chevron" size={14} /></Link>
-          <div className={s.languages} aria-label="Language / Idioma">{(["en", "pt"] as const).map((code) => <button key={code} aria-pressed={locale === code} onClick={() => setLocale(code)}>{code.toUpperCase()}</button>)}</div>
           <button className={s.share} onClick={() => void share()} aria-label={t.shareLabel}><TerrainIcon name="share" size={17} /><span>{t.share}</span></button>
         </div>
       </header>

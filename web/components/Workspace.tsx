@@ -14,7 +14,7 @@ type Tab = "overview" | "sources" | "fleet" | "inbox";
 export default function Workspace() {
   const { snapshot, connection, error, busy, command, resync, dispatch, forecast } =
     useWorkspace();
-  const [locale, setLocale] = useState<Locale>("pt"),
+  const [locale] = useState<Locale>("en"),
     [tab, setTab] = useState<Tab>("overview"),
     [selectedId, setSelectedId] = useState<string | null>(null),
     [view, setView] = useState<"workspace" | "historical">("workspace");
@@ -114,20 +114,7 @@ export default function Workspace() {
             <i />
             {t[connection]}
           </div>
-          <div className="locale-switch" aria-label="Language / Idioma">
-            <button
-              aria-pressed={locale === "pt"}
-              onClick={() => setLocale("pt")}
-            >
-              PT
-            </button>
-            <button
-              aria-pressed={locale === "en"}
-              onClick={() => setLocale("en")}
-            >
-              EN
-            </button>
-          </div>
+
         </div>
       </header>
       {view === "historical" ? (

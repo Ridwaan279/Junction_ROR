@@ -503,6 +503,7 @@ dependencies = [
  "emberwatch-response",
  "futures",
  "futures-util",
+ "reqwest",
  "serde",
  "serde_json",
  "sha2",
