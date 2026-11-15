@@ -104,6 +104,10 @@ export default function Workspace() {
             <Icon name="reset" size={14} />
             {locale === "pt" ? "Arganil 2025 (histórico)" : "Arganil 2025 (historical)"}
           </button>
+          <Link href="/terrain" className="terrain-workspace-link">
+            <Icon name="layers" size={16} />
+            {locale === "pt" ? "Terreno 3D" : "3D terrain"}
+          </Link>
           <div
             className={"connection " + (!connected ? "connection-warning" : "")}
           >

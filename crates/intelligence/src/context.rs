@@ -77,8 +77,9 @@ impl ContextClient {
     pub async fn scrape_fogos(&self, url: &str) -> Result<ScrapeResponse, SourceError> {
         validate_fogos_url(url)?;
         let body = json!({"url":url,"formats":{"markdown":true,"json":true},"maxAgeMs":0,
+            "sharedParams":{"waitFor":8000},
             "timeoutOpts":{"milliseconds":30000,"behavior":"return-partial"},
-            "jsonParams":{"schema":fogos_schema(),"instructions":"Extract visible public-page rows only. Missing values are null. Never infer dates, coordinates, IDs, national completeness, or empty results from a loading shell. Visible excerpts must quote the page. Preserve raw Portuguese text. No API or hidden network requests."}});
+            "jsonParams":{"schema":fogos_schema(),"instructions":"Extract visible public-page rows only. Missing values are null. Never infer dates, coordinates, IDs, national completeness, or empty results from a loading shell. Visible excerpts must be exact contiguous text copied from the Markdown output, including punctuation and formatting; do not rephrase or concatenate separate rows. Preserve raw Portuguese text. If the page explicitly says there are no records, copy that exact text to explicit_empty_text. An empty filtered/table page alone does not establish national completeness. No API or hidden network requests."}});
         self.post("web/scrape", &body).await
     }
     pub async fn search_portuguese_reports(
@@ -269,6 +270,7 @@ mod tests {
             );
             assert_eq!(body["url"], "https://fogos.pt/pt");
             assert_eq!(body["maxAgeMs"], 0);
+            assert_eq!(body["sharedParams"]["waitFor"], 8000);
             assert_eq!(body["formats"], json!({"markdown":true,"json":true}));
             assert_eq!(
                 body["jsonParams"]["schema"]["properties"]["incidents"]["items"]["properties"]["latitude"]

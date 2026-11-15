@@ -5,7 +5,7 @@ import type { MapboxOverlay } from "@deck.gl/mapbox";
 import type { Locale } from "@/lib/i18n";
 import { compass, arrowPaths } from "@/lib/firecast";
 import { safeUrl } from "@/lib/model";
-import { style } from "./MapView";
+import { addTerrainLayers, loadMapLibre, loadTerrainStyle } from "@/lib/terrain";
 import Icon from "./Icon";
 
 type Geometry = GeoJSON.Geometry | null;
@@ -184,18 +184,25 @@ export default function HistoricalView({ locale, onExit }: { locale: Locale; onE
     let cancelled = false,
       instance: LibreMap | null = null;
     (async () => {
-      const [maplibre, { MapboxOverlay }] = await Promise.all([import("maplibre-gl"), import("@deck.gl/mapbox")]);
+      const [maplibre, { MapboxOverlay }, terrainStyle] = await Promise.all([loadMapLibre(), import("@deck.gl/mapbox"), loadTerrainStyle()]);
       if (cancelled || !container.current) return;
       instance = new maplibre.Map({
         container: container.current,
-        style: process.env.NEXT_PUBLIC_MAP_STYLE_URL || style,
+        style: terrainStyle,
         center: data.meta.domain.centre,
         zoom: 9.6,
         attributionControl: { compact: true },
       });
       map.current = instance;
       instance.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-right");
-      instance.on("load", () => {
+      instance.on("load", async () => {
+        if (cancelled || !instance) return;
+        try {
+          await addTerrainLayers(instance);
+        } catch {
+          // Relief and contours are optional; the replay stays usable without them.
+          console.warn("Terrain detail could not be initialized");
+        }
         if (cancelled || !instance) return;
         const deck = new MapboxOverlay({ interleaved: false, layers: [] });
         overlay.current = deck;
@@ -215,7 +222,10 @@ export default function HistoricalView({ locale, onExit }: { locale: Locale; onE
         );
         setReady(true);
       });
-    })();
+    })().catch((error) => {
+      // Basemap style unavailable: timeline, charts and validation still render.
+      if (!cancelled) console.warn("Replay basemap unavailable", error);
+    });
     return () => {
       cancelled = true;
       overlay.current?.finalize();

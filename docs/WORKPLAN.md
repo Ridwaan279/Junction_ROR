@@ -88,11 +88,11 @@ Rules that keep merges trivial:
 
 ## 4. Agent 1 tasks: UI/UX first, then the 3D merge
 
-### 4.1 Merge the 3D branch (Gate 1)
+### 4.1 Merge the 3D branch (Gate 1) — done
 
-Wait for the final push to `origin/codex/portugal-earth-buildings`, then merge it
-with `--no-ff`. A trial merge against commit `7027ce6` conflicted in exactly four
-files; the resolution is decided now so it is mechanical:
+Merged `origin/codex/portugal-earth-buildings` at `7d1363a` into
+`claude/fervent-clarke-m9qsko` with `--no-ff`. The four conflicts were resolved as
+below; all Rust and web checks passed after the merge.
 
 | File | Resolution |
 |---|---|
@@ -101,15 +101,25 @@ files; the resolution is decided now so it is mechanical:
 | `web/components/MapView.tsx` | Adopt their basemap: `loadMapLibre`, `loadTerrainStyle`, `addTerrainLayers` from `@/lib/terrain` replace my exported inline OSM/Terrarium `style`. Keep all firecast deck.gl layers, horizon controls and tooltips. Keep "source tile errors do not fail the map" |
 | `web/components/Workspace.tsx` | Keep both header actions: the history-replay switch and their `/terrain` link |
 
-Follow-up inside the same gate: `HistoricalView.tsx` imports `style` from
-`MapView`; switch it to the shared terrain loader so both maps share one
-basemap. Then `npm ci` (adds `earcut`, `maplibre-contour`), and run the checks in
-section 8. If the final push changes these files again, redo the trial merge in
-a scratch worktree before touching the branch.
+`HistoricalView.tsx` now uses the same terrain loader, so both maps share one
+basemap; a basemap failure there no longer breaks the replay panels.
 
 ### 4.2 UI/UX overhaul (highest priority)
 
-One operations screen replaces the current workspace/historical split. Layout:
+**User decisions (15 Nov 2026), these override anything below that conflicts:**
+
+1. **Not too much information.** The screen must stay calm and readable. Show
+   the few things that matter now; details open on demand (hover, click, expand),
+   never all at once.
+2. **3D map from the start.** The map opens in 3D (terrain, tilt) with no button
+   press needed. A **2D view** is also available as a simple toggle, and the
+   fire/smoke/drone layers work the same in both.
+3. **Ask before designing.** Whichever agent builds the UI must first ask the user
+   questions about the UI/UX (who looks at it, what must be visible at first
+   glance, style, demo flow) and wait for the answers before committing to a
+   layout. The layout below is a starting proposal, not a decision.
+
+Starting proposal: one operations screen replaces the current workspace/historical split. Layout:
 
 ```
 ┌ top bar: EmberWatch · mode badge LIVE / HISTORICAL REPLAY / SYNTHETIC · Lisbon clock · source freshness · PT/EN ┐

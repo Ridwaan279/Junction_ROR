@@ -1,9 +1,61 @@
 # Portugal data-source research
 
-Checked **14 November 2026** against the primary sources linked below.
+Last setup/probe check: **15 November 2026**. Initial research: 14 November 2026.
 The original planning research is followed by the dated implementation probes
 below. A bounded Context.dev public-page scrape has now been executed; it did
 not establish complete incident extraction, ongoing reuse rights or production readiness.
+
+## Portuguese news/language check — 15 November 2026
+
+Portuguese page retrieval and AI interpretation were tested separately from the
+earlier empty Fogos table. These are bounded feasibility checks, not a guarantee
+for every Portuguese site or a licence to redistribute articles.
+
+| Check | Observed result |
+|---|---|
+| Portuguese discovery | A Portuguese wildfire query with `languages: ["pt"]`, country PT and an RTP domain filter returned the matching Portuguese article. Request `334f8fdf-8cb7-4dd2-92b7-9a1537b23328`; 1 credit. |
+| Fresh Portuguese article | [RTP's Portel report](https://www.rtp.pt/noticias/pais/cinco-meios-aereos-e-mais-de-300-bombeiros-combatem-fogo-em-portel_n1765736), displayed update 16 September 2026, was freshly captured at 01:30:31–01:30:42 UTC. Request `464b5b83-4039-4f08-8aed-73fa776f1e98`; Markdown and JSON succeeded, cache age 0 ms, 5 credits. Portuguese extraction instructions and a nullable schema were used. This is a historical article, not current fire activity. |
+| Meaning and factual fields | Output preserved the accented Portuguese title, Portel, 367 firefighters, 129 vehicles, five aircraft, one active front, displayed update text and the raw Tuesday alert time. It correctly interpreted the article's negation as no populations at risk, left uncounted burned area null, and produced a faithful English summary. Values were compared with the publisher's article text. |
+| Evidence formatting | The risk excerpt was a literal Markdown substring. The resource and unknown-area excerpts matched visible text after removing Markdown bold markers and normalizing whitespace, but were **not** exact raw Markdown substrings. JSON instructions alone do not guarantee verbatim evidence. Existing strict source validators must not silently accept rewritten/unsupported evidence. |
+
+Official [Search reference](https://docs.context.dev/api-reference/web-scraping/search.md)
+explicitly includes Portuguese (`pt`), alongside English, Spanish, French, German,
+Italian and many other search language filters. That enum describes discovery,
+not equal extraction accuracy across languages. No per-language accuracy guarantee
+was found in the reviewed guides. The live check establishes European Portuguese
+HTML/article support; it does not benchmark other languages, scanned Portuguese
+PDFs, speech, every site layout, or populated Fogos records.
+
+Documented limits remain: [JSON extraction](https://docs.context.dev/scrape/json.md)
+uses AI over page Markdown/JSON-LD/meta tags; required non-nullable fields can
+introduce guesses. It reads up to 100,000 Markdown characters plus 20,000 metadata
+characters and can truncate longer pages. [Scrape errors](https://docs.context.dev/scrape/timeouts-and-errors.md)
+include access walls, unsupported/oversized content and timeouts; HTTP 200 alone
+does not establish successful or complete outputs. Dynamic pages may remain
+incomplete. [Browser profiles](https://docs.context.dev/scrape/browser-profiles.md)
+for authorized logins require a paid plan and do not support MFA/CAPTCHA/passkeys.
+Keep the public-page-only configuration and stop on restrictions. Missing
+coordinates, event timestamps, resource counts or source updates stay unknown;
+language support cannot recover facts absent from the source.
+
+## Context connection and fresh table probe — 15 November 2026
+
+| Check | Observed result | Consequence |
+|---|---|---|
+| Codex hosted MCP | Registered `https://mcp.context.dev/mcp`; browser OAuth completed. A new Codex app-server connection reported `authStatus=oAuth` and discovered 50 tools, including `web-scrape` and `get-usage`, without discovery errors. No model turn or monitor was started. | Configuration and authenticated discovery work. This existing chat's tool catalog did not refresh; restart the MCP server/open a new chat to expose tools there. |
+| Application key | Masked local entry saved a Windows DPAPI-encrypted key under ignored `.state`. Usage request `246426fe-f21d-4742-8c24-a7da080d9cb3` authenticated successfully, showed sufficient credits and auto-topup disabled. | The application key is usable; no key value is stored in Git, browser code, command arguments or chat. This is separate from Codex OAuth. |
+| Public browser comparison | Both [table](https://fogos.pt/pt/tabela) and [list](https://fogos.pt/pt/lista) displayed `SEM REGISTO DE INCÊNDIOS` without incident rows. | A genuine page empty message was observed; it is not independent verification of national activity or source availability. |
+| Fresh Context REST table capture | At 01:09:37–01:09:51 UTC, request `d8577776-adaa-485b-afe1-be0c807598d2` used Markdown + nullable JSON, `maxAgeMs: 0`, an 8-second render wait and 30-second return-partial deadline. Both outputs succeeded; cache age was 0 ms; cost was 5 credits. Markdown contained `Sem registo de incêndios`; JSON copied that exact empty text, returned `incidents: []`, null update time and `coverage: unknown`. The optional provider partial flag was absent. | Returned content matched the visible page. No incident locations, coordinates, resource counts or event timestamps were invented. Absence of the partial flag does not establish completeness. Local diagnostic output stays ignored, not a redistributed dataset. |
+| Live Rust execution | At 01:15:18–01:15:30 UTC, the current compiled probe made fresh request `0f913442-69fd-44ba-aada-871574854da8` to the public table. Markdown/JSON succeeded, the empty text matched literally, coverage was unknown and cache age was 0 ms; cost was 5 credits. | The real Rust client and normalizer returned `Partial`, zero validated rows, `complete=false`, `explicit_empty=false`. The executable came from the successful Cargo test build and was checked against source modification times before execution. |
+| Local validation | Formatting and workspace Clippy passed; 61 Rust tests passed, including the empty-label/unknown-coverage regression. One explicit PostgreSQL test was skipped. Ordinary `cargo run`/standalone build attempts hit Windows Application Control error 4551 on a `serde_core` build executable even outside the sandbox; Cargo test succeeded and produced the current runnable example. | `infra/context.ps1 -Action probe -UseBuilt` reuses a current executable and rejects stale source/configuration. No security policy was changed. Both successful live probes together used 10 credits; failed build attempts made no web requests. |
+
+The public no-record label is recognized only alongside separately validated
+coverage. Normalization still returns partial/unknown activity when coverage is
+unknown. Populated incident-row extraction, complete national coverage and
+website redistribution rights remain unverified. Recurring ingestion remains
+disabled. No Fogos API request, paid browser action, billing change or monitor
+was made. Setup follows the [MCP guide](https://docs.context.dev/install-mcp.md);
+rendering follows [waiting and rendering](https://docs.context.dev/scrape/waiting-and-rendering.md).
 
 ## Agent B implementation probes — 14 November 2026
 

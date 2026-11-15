@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type {
   Map as LibreMap,
   IControl,
-  StyleSpecification,
 } from "maplibre-gl";
 import type { MapboxOverlay } from "@deck.gl/mapbox";
 import type { Incident, Snapshot } from "@/lib/contracts";
@@ -19,65 +19,12 @@ import {
   isFirecast,
   smokeAlpha,
 } from "@/lib/firecast";
+import { addTerrainLayers, loadMapLibre, loadTerrainStyle } from "@/lib/terrain";
 import Icon from "./Icon";
 const BOUNDS: [[number, number], [number, number]] = [
   [-9.6, 36.9],
   [-6.1, 42.2],
 ];
-export const style: StyleSpecification = {
-  version: 8,
-  sources: {
-    osm: {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution:
-        '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
-      maxzoom: 19,
-    },
-    terrain: {
-      type: "raster-dem",
-      tiles: [
-        "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
-      ],
-      tileSize: 256,
-      encoding: "terrarium",
-      maxzoom: 13,
-      attribution:
-        'Terrain: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noreferrer">Mapzen / AWS Terrain Tiles</a>',
-    },
-  },
-  layers: [
-    {
-      id: "base",
-      type: "background",
-      paint: { "background-color": "#223b3a" },
-    },
-    {
-      id: "osm",
-      type: "raster",
-      source: "osm",
-      paint: {
-        "raster-saturation": -0.65,
-        "raster-brightness-max": 0.68,
-        "raster-brightness-min": 0.1,
-        "raster-contrast": 0.08,
-      },
-    },
-    {
-      id: "hillshade",
-      type: "hillshade",
-      source: "terrain",
-      paint: {
-        "hillshade-exaggeration": 0.6,
-        "hillshade-shadow-color": "#0c1d1b",
-        "hillshade-highlight-color": "#eef4e4",
-        "hillshade-accent-color": "#2b4a43",
-        "hillshade-illumination-direction": 315,
-      },
-    },
-  ],
-};
 const T = {
   pt: {
     now: "Agora",
@@ -139,21 +86,22 @@ export default function MapView({
       instance: LibreMap | null = null;
     (async () => {
       try {
-        const [maplibre, { MapboxOverlay }] = await Promise.all([
-          import("maplibre-gl"),
+        const [maplibre, { MapboxOverlay }, terrainStyle] = await Promise.all([
+          loadMapLibre(),
           import("@deck.gl/mapbox"),
+          loadTerrainStyle(),
         ]);
         if (cancelled || !container.current) return;
         instance = new maplibre.Map({
           container: container.current,
-          style: process.env.NEXT_PUBLIC_MAP_STYLE_URL || style,
+          style: terrainStyle,
           center: [-8, 39.6],
           zoom: 5.6,
           minZoom: 4,
           maxZoom: 15,
           maxBounds: [
-            [-12, 35],
-            [-4, 44],
+            [-20, 30],
+            [5, 50],
           ],
           attributionControl: { compact: true },
         });
@@ -162,7 +110,14 @@ export default function MapView({
           new maplibre.NavigationControl({ showCompass: false }),
           "top-right",
         );
-        instance.on("load", () => {
+        instance.on("load", async () => {
+          if (cancelled || !instance) return;
+          try {
+            await addTerrainLayers(instance);
+          } catch {
+            // The evidence map remains usable when elevation tiles fail.
+            console.warn("Terrain detail could not be initialized");
+          }
           if (cancelled || !instance) return;
           const deck = new MapboxOverlay({ interleaved: false, layers: [] });
           overlay.current = deck;
@@ -188,7 +143,7 @@ export default function MapView({
           }
         });
         instance.on("error", (event) => {
-          // A blocked tile source (base map or terrain) must not hide the map.
+          // A blocked tile source (base map, terrain, contours) must not hide the map.
           const sourceError = Boolean((event as { sourceId?: string }).sourceId);
           if (!sourceError && !instance?.isStyleLoaded()) setFailed(true);
         });
@@ -543,6 +498,11 @@ export default function MapView({
         </h1>
       </div>
       <div className="map-tools">
+        <Link className="terrain-explorer-link" href="/terrain">
+          <Icon name="layers" size={16} />
+          {locale === "pt" ? "Explorar terreno 3D" : "Explore 3D terrain"}
+          <Icon name="external" size={13} />
+        </Link>
         <button
           className="map-fit"
           aria-label={t.recenter}
