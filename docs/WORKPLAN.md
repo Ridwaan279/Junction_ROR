@@ -81,7 +81,7 @@ Rules that keep merges trivial:
 
 | Gate | Done when | Who |
 |---|---|---|
-| 0 | Done: plan, contracts and firecast work pushed to `claude/fervent-clarke-m9qsko` (`9a061da`) | Agent 1 |
+| 0 | Done: plan, contracts and firecast work pushed (`9a061da`, now on `main`) | Agent 1 |
 | 1 | 3D branch merged into the integration branch, all checks green, Agent 2 rebased | Agent 1 |
 | 2 | UI shell redesign on fixtures; Agent 2 delivers stations + deterministic fleet + 3D routes for the Arganil replay into `web/public/generated/` | both |
 | 3 | Context.dev accuracy harness and golden set passing thresholds; exposures (people at risk) in the replay output | Agent 2 |
@@ -429,17 +429,18 @@ commands, so the bridge can be added without changing the UI.
 
 ## 10. Kickoff prompt for Agent 2
 
-Agent 2 works on **its own branch** cut from `origin/claude/fervent-clarke-m9qsko`
-(its cloud session's assigned branch is fine). It never pushes to
-`claude/fervent-clarke-m9qsko`; Agent 1 merges Agent 2's branch at each gate.
+Integration branch is now **`main`** (user decision, 15 Nov 2026); the earlier
+`claude/fervent-clarke-m9qsko` is retired. Agent 2 keeps its own branch
+(`codex/agent-2-intelligence`), rebases it on `origin/main` after each gate and
+never pushes to `main`; Agent 1 merges Agent 2's branch into `main` at each gate.
 Paste this into the other agent:
 
-> You are Agent 2 (intelligence and planning) on EmberWatch. Fetch
-> `origin/claude/fervent-clarke-m9qsko` and create your own branch from it; work
-> and push only there. Read AGENTS.md, docs/WORKPLAN.md (sections 2, 5, 7, 8),
+> You are Agent 2 (intelligence and planning) on EmberWatch. Fetch `origin/main`
+> and rebase your branch `codex/agent-2-intelligence` on it (or create it from
+> `origin/main`); work and push only there, never to `main`. Read AGENTS.md, docs/WORKPLAN.md (sections 2, 5, 7, 8),
 > docs/CONTEXT_DEV_ACCURACY.md and docs/DEMO_DATA.md. You write only the paths in
 > the "Agent 2" column of WORKPLAN section 2; never edit `web/**` except
-> `web/public/generated/**`. Work in this order: (1) CONTEXT_DEV_ACCURACY.md
+> `web/public/generated/**`. Also read docs/UI.md (live-status contract and what the UI expects). Work in this order: (1) CONTEXT_DEV_ACCURACY.md
 > tasks 0–5, using the real Arganil captures in `data/demo/arganil-early/` as the
 > first golden pages; (2) WORKPLAN 5.0b (port the capture scripts to Rust, finer
 > early frames); (3) 5.1 stations, 5.2 fleet sizing, 5.3 smoke-aware 3D routes;
