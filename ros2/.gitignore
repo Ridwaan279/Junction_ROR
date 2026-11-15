@@ -1,0 +1,19 @@
+# colcon outputs
+/build/
+/install/
+/log/
+# third-party PX4 / px4_msgs / XRCE agent checkouts must live OUTSIDE this repo
+# (see README); ignore accidental local copies just in case.
+/px4/
+/PX4-Autopilot/
+/src/px4_msgs/
+/src/Micro-XRCE-DDS-Agent/
+/run_logs/
+__pycache__/
+*.pyc
+.pytest_cache/
+# generated Arganil world (derived from ODbL/CC-BY data; regenerate with gen_arganil_world)
+/generated/
+# agent coordination docs (ChatGPT prompt, protocol, shared board, screenshots) - local only
+/agent_docs/
+/collab

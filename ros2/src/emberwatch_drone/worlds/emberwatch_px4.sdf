@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EmberWatch PX4 world (world name "emberwatch_px4"). REPRESENTATIVE scene only: flat ground at
+  elevation 0, generic trees (visual only, no collision, all below the 10 m cruise altitude).
+  NOT a reconstruction of any real terrain or place.
+  * Systems = PX4 v1.17 gz_bridge/server.config (minus the camera-streaming and optical-flow
+    plugins, unused by x500) + ParticleEmitter. Declaring systems here means Gazebo does not
+    load server.config for this world.
+  * spherical_coordinates is a placeholder: PX4 sets the real origin from PX4_HOME_LAT/LON/ALT
+    (= the simulated launch site computed by `plan_scenario`).
+  * Fire, smoke, hazard zone and water drop are spawned at runtime by `fire_sim`.
+-->
+<sdf version="1.9">
+  <world name="emberwatch_px4">
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact"/>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
+    <plugin filename="gz-sim-air-pressure-system" name="gz::sim::systems::AirPressure"/>
+    <plugin filename="gz-sim-air-speed-system" name="gz::sim::systems::AirSpeed"/>
+    <plugin filename="gz-sim-apply-link-wrench-system" name="gz::sim::systems::ApplyLinkWrench"/>
+    <plugin filename="gz-sim-navsat-system" name="gz::sim::systems::NavSat"/>
+    <plugin filename="gz-sim-magnetometer-system" name="gz::sim::systems::Magnetometer"/>
+    <plugin filename="gz-sim-particle-emitter-system" name="gz::sim::systems::ParticleEmitter"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+    <scene>
+      <grid>false</grid>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <background>0.66 0.74 0.82 1</background>
+      <shadows>true</shadows>
+    </scene>
+    <light name="sunUTC" type="directional">
+      <pose>0 0 500 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1</intensity>
+      <direction>0.001 0.625 -0.78</direction>
+      <diffuse>0.904 0.904 0.904 1</diffuse>
+      <specular>0.271 0.271 0.271 1</specular>
+      <attenuation><range>2000</range><linear>0</linear><constant>1</constant><quadratic>0</quadratic></attenuation>
+    </light>
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision"><geometry><plane><normal>0 0 1</normal><size>1 1</size></plane></geometry>
+          <surface><friction><ode/></friction><bounce/><contact/></surface></collision>
+        <visual name="visual"><geometry><plane><normal>0 0 1</normal><size>300 300</size></plane></geometry>
+          <material><ambient>0.47 0.43 0.28 1</ambient><diffuse>0.47 0.43 0.28 1</diffuse><specular>0.1 0.1 0.1 1</specular></material></visual>
+      </link>
+    </model>
+    <model name="launch_pad">
+      <static>true</static>
+      <pose>0 0 0.005 0 0 0</pose>
+      <link name="l"><visual name="pad"><geometry><cylinder><radius>1.5</radius><length>0.01</length></cylinder></geometry>
+        <material><ambient>0.2 0.4 0.9 1</ambient><diffuse>0.2 0.4 0.9 1</diffuse></material></visual></link>
+    </model>
+    <model name="tree_0"><static>true</static><pose>-31.55 -3.61 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.44 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.89</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.93 0 0 0</pose><geometry><sphere><radius>1.56</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_1"><static>true</static><pose>-30.42 -6.99 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.19 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.38</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.24 0 0 0</pose><geometry><sphere><radius>1.29</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_2"><static>true</static><pose>-54.30 -6.73 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.22 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.44</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.32 0 0 0</pose><geometry><sphere><radius>1.32</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_3"><static>true</static><pose>-2.60 -33.88 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.98 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.96</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.66 0 0 0</pose><geometry><sphere><radius>1.06</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_4"><static>true</static><pose>-62.29 12.63 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.27 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.54</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.45 0 0 0</pose><geometry><sphere><radius>1.37</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_5"><static>true</static><pose>-66.44 23.84 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.47 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.95</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 4.01 0 0 0</pose><geometry><sphere><radius>1.59</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_6"><static>true</static><pose>-14.42 0.01 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.87 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.74</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.36 0 0 0</pose><geometry><sphere><radius>0.94</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_7"><static>true</static><pose>-68.72 -5.66 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.79 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.59</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.16 0 0 0</pose><geometry><sphere><radius>0.86</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_8"><static>true</static><pose>-53.83 -24.27 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.77 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.55</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.10 0 0 0</pose><geometry><sphere><radius>0.83</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_9"><static>true</static><pose>-15.58 -7.51 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.25 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.49</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.39 0 0 0</pose><geometry><sphere><radius>1.35</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_10"><static>true</static><pose>-31.13 -21.92 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.50 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>3.00</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 4.08 0 0 0</pose><geometry><sphere><radius>1.62</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_11"><static>true</static><pose>14.63 14.61 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.28 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.56</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.48 0 0 0</pose><geometry><sphere><radius>1.38</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_12"><static>true</static><pose>-43.20 -25.07 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.97 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.93</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.63 0 0 0</pose><geometry><sphere><radius>1.04</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_13"><static>true</static><pose>-64.03 9.81 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.05 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.10</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.86 0 0 0</pose><geometry><sphere><radius>1.13</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_14"><static>true</static><pose>1.96 -14.88 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.47 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.94</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.99 0 0 0</pose><geometry><sphere><radius>1.59</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_15"><static>true</static><pose>2.02 -39.96 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.91 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.81</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.47 0 0 0</pose><geometry><sphere><radius>0.98</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_16"><static>true</static><pose>7.37 -9.45 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.49 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.97</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 4.04 0 0 0</pose><geometry><sphere><radius>1.60</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_17"><static>true</static><pose>-36.22 -35.25 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.22 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.44</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.32 0 0 0</pose><geometry><sphere><radius>1.32</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_18"><static>true</static><pose>-3.83 -22.46 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.82 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.63</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.22 0 0 0</pose><geometry><sphere><radius>0.88</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_19"><static>true</static><pose>-41.73 22.66 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.32 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.64</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.59 0 0 0</pose><geometry><sphere><radius>1.42</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_20"><static>true</static><pose>-59.97 -23.98 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.83 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.65</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.25 0 0 0</pose><geometry><sphere><radius>0.89</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_21"><static>true</static><pose>-64.91 11.81 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.88 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.77</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.40 0 0 0</pose><geometry><sphere><radius>0.95</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_22"><static>true</static><pose>-22.46 -10.92 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.89 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.79</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.43 0 0 0</pose><geometry><sphere><radius>0.96</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_23"><static>true</static><pose>-7.79 -31.49 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.23 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.47</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.35 0 0 0</pose><geometry><sphere><radius>1.33</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_24"><static>true</static><pose>-60.10 -12.65 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 0.91 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>1.82</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 2.47 0 0 0</pose><geometry><sphere><radius>0.98</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <model name="tree_25"><static>true</static><pose>-47.07 23.11 0 0 0 0</pose>
+      <link name="l">
+        <visual name="trunk"><pose>0 0 1.35 0 0 0</pose><geometry><cylinder><radius>0.18</radius><length>2.71</length></cylinder></geometry>
+          <material><ambient>0.33 0.22 0.12 1</ambient><diffuse>0.33 0.22 0.12 1</diffuse></material></visual>
+        <visual name="crown"><pose>0 0 3.68 0 0 0</pose><geometry><sphere><radius>1.46</radius></sphere></geometry>
+          <material><ambient>0.16 0.33 0.12 1</ambient><diffuse>0.16 0.33 0.12 1</diffuse></material></visual>
+      </link></model>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+    </spherical_coordinates>
+  </world>
+</sdf>
