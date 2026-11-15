@@ -79,7 +79,7 @@ Rules that keep merges trivial:
 
 | Gate | Done when | Who |
 |---|---|---|
-| 0 | This plan and section 7 contracts committed; `claude/fire-spread-smoke` work pushed so Agent 2 can branch from it (needs the user's go-ahead: nothing is pushed yet) | Agent 1 |
+| 0 | Done: plan, contracts and firecast work pushed to `claude/fervent-clarke-m9qsko` (`9a061da`) | Agent 1 |
 | 1 | 3D branch merged into the integration branch, all checks green, Agent 2 rebased | Agent 1 |
 | 2 | UI shell redesign on fixtures; Agent 2 delivers stations + deterministic fleet + 3D routes for the Arganil replay into `web/public/generated/` | both |
 | 3 | Context.dev accuracy harness and golden set passing thresholds; exposures (people at risk) in the replay output | Agent 2 |
@@ -373,7 +373,8 @@ commands, so the bridge can be added without changing the UI.
 Paste into the other agent once Gate 0 is pushed:
 
 > Read AGENTS.md, docs/WORKPLAN.md and docs/CONTEXT_DEV_ACCURACY.md. You are
-> Agent 2. Branch from the Gate 0 commit. You write only the paths in the
+> Agent 2. Branch from `origin/claude/fervent-clarke-m9qsko` (Gate 0 = commit
+> `9a061da` or later). You write only the paths in the
 > "Agent 2" column of WORKPLAN section 2. Start with CONTEXT_DEV_ACCURACY.md, then
 > WORKPLAN 5.1 → 5.5 in order. Output replay data in the section 7 shapes to
 > `web/public/generated/`. Keep secrets server-side; never invent model IDs,
