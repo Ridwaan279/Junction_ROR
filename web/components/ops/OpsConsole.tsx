@@ -14,11 +14,13 @@ import SiteNav, { useLocale } from "./SiteNav";
 type Locale = "pt" | "en";
 type Mode = "live" | "replay";
 type LiveStatus = {
-  mode: "live"; checked_at: string;
+  mode: "live"; checked_at: string; origin?: "service" | "snapshot";
   state: "no_active_fires" | "active_fires" | "check_failed" | "partial";
   active: { id: string; place: string; position: [number, number] | null; status: string; url: string }[];
-  sources: { name: string; url: string }[];
+  sources: { name: string; url: string; error_code?: string | null }[];
 };
+const STALE_MS = 15 * 60_000;
+const fogosDetail = (id: string, fallback: string) => (/^\d+$/.test(id) ? `https://fogos.pt/pt/fogo/${id}/detalhe` : fallback);
 type Accuracy = { method: string; observed_source: { name: string; url: string }[]; rows: ValidationRow[] };
 
 const PORTUGAL = { center: [-8.05, 39.62] as [number, number], zoom: 6.35, pitch: 46, bearing: -8 };
@@ -34,7 +36,11 @@ const T = {
     live: "Ao vivo", replay: "Arganil 2025",
     noFires: "Sem incêndios ativos", activeFires: (n: number) => `${n} incêndio${n === 1 ? "" : "s"} ativo${n === 1 ? "" : "s"}`,
     checkFailed: "Não foi possível verificar", partial: "Verificação incompleta", checking: "A verificar…",
-    checkedAt: "Portugal continental · verificado às", area: "Área", spread: "Avanço", wind: "Vento", evacuated: "Evacuadas",
+    offline: "Sem ligação ao serviço ao vivo", savedCheck: (at: string, ago: string) => `Última verificação guardada: ${at} (${ago}). Nessa hora não havia incêndios.`,
+    listed: (n: number) => `${n} incêndio${n === 1 ? "" : "s"} na lista do Fogos.pt`, partialNote: "Verificação parcial: a lista pode estar incompleta.",
+    stale: "Verificação desatualizada.", failedNote: (c: string) => `Falha na verificação (${c}). Isto não significa que não haja incêndios.`,
+    ago: (m: number) => (m < 1 ? "agora mesmo" : m < 60 ? `há ${m} min` : `há ${Math.floor(m / 60)} h ${m % 60} min`), lisbonTime: "hora de Lisboa",
+    checkedAt: "Verificado", area: "Área", spread: "Avanço", wind: "Vento", evacuated: "Evacuadas",
     waiting: "A aguardar o primeiro alerta.", alert: "Alerta", drones: "drones", simulated: "simulado",
     sources: "Fontes", accuracy: "Precisão", dronesStat: "Drones", inAir: "no ar", launched: "drones lançados", legendPin: "Ocorrência",
     pinKinds: { event: "Evento", shelter: "Abrigo", road: "Estrada cortada", people: "Pessoas no local" }, source: "fonte",
@@ -61,7 +67,11 @@ const T = {
     live: "Live", replay: "Arganil 2025",
     noFires: "No active fires", activeFires: (n: number) => `${n} active fire${n === 1 ? "" : "s"}`,
     checkFailed: "Could not check", partial: "Check incomplete", checking: "Checking…",
-    checkedAt: "Mainland Portugal · checked at", area: "Area", spread: "Spread", wind: "Wind", evacuated: "Evacuated",
+    offline: "Live service not connected", savedCheck: (at: string, ago: string) => `Last saved check: ${at} (${ago}). There were no fires at that time.`,
+    listed: (n: number) => `${n} fire${n === 1 ? "" : "s"} on the Fogos.pt list`, partialNote: "Partial check: the list may be incomplete.",
+    stale: "This check is out of date.", failedNote: (c: string) => `Check failed (${c}). This does not mean there are no fires.`,
+    ago: (m: number) => (m < 1 ? "just now" : m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ${m % 60} min ago`), lisbonTime: "Lisbon time",
+    checkedAt: "Checked", area: "Area", spread: "Spread", wind: "Wind", evacuated: "Evacuated",
     waiting: "Waiting for the first alert.", alert: "Alert", drones: "drones", simulated: "simulated",
     sources: "Sources", accuracy: "Accuracy", dronesStat: "Drones", inAir: "airborne", launched: "drones launched", legendPin: "Nearby event",
     pinKinds: { event: "Event", shelter: "Shelter", road: "Road closed", people: "People on site" }, source: "source",
@@ -136,23 +146,33 @@ export default function OpsConsole() {
     return () => { cancelled = true; instance?.remove(); map.current = null; };
   }, []);
 
-  // Live status: the service endpoint when configured, otherwise the last real capture.
+  // Live status: the Rust service when configured (re-checked every minute; it caches 5 min),
+  // otherwise the last saved capture, which the card labels as old.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    const tick = () => setNow(Date.now());
+    const first = setTimeout(tick, 0), id = setInterval(tick, 30_000);
+    return () => { clearTimeout(first); clearInterval(id); };
+  }, []);
   useEffect(() => {
     let cancelled = false;
     const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-    (async () => {
+    const load = async () => {
       if (base) {
         try {
           const r = await fetch(base.replace(/\/$/, "") + "/api/live/status", { cache: "no-store" });
-          if (r.ok) { const v = (await r.json()) as LiveStatus; if (!cancelled) setLive(v); return; }
-        } catch { /* fall back to the last capture */ }
+          if (r.ok) { const v = (await r.json()) as LiveStatus; if (!cancelled) setLive({ ...v, origin: "service" }); return; }
+        } catch { /* fall back to the saved capture */ }
       }
       const r = await fetch("/fixtures/v2/live-status.json", { cache: "no-store" });
       if (!r.ok) throw new Error("no live status");
       const v = (await r.json()) as LiveStatus;
-      if (!cancelled) setLive(v);
-    })().catch(() => { if (!cancelled) setLive("failed"); });
-    return () => { cancelled = true; };
+      if (!cancelled) setLive({ ...v, origin: "snapshot" });
+    };
+    const run = () => { load().catch(() => { if (!cancelled) setLive("failed"); }); };
+    run();
+    const id = setInterval(run, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
   }, []);
 
   const loadFrame = useCallback(async (file: string) => {
@@ -380,20 +400,46 @@ export default function OpsConsole() {
         <section className={`${s.card} ${s.compact}`} aria-live="polite">
           {live === null ? (
             <p className={s.secondary}>{L.checking}</p>
-          ) : live === "failed" || live.state === "check_failed" || live.state === "partial" ? (
-            <h1 className={s.title}><i className={s.dotWarn} />{live !== "failed" && live.state === "partial" ? L.partial : L.checkFailed}</h1>
-          ) : (
-            <>
-              <h1 className={s.title}>
-                <i className={live.state === "no_active_fires" ? s.dotOk : s.dotFire} />
-                {live.state === "no_active_fires" ? L.noFires : L.activeFires(live.active.length)}
-              </h1>
-              <p className={s.secondary}>
-                {L.checkedAt} {lisbon(live.checked_at, locale)} ·{" "}
-                {live.sources.map((src) => <a key={src.url} href={src.url} target="_blank" rel="noreferrer">Fogos.pt</a>)}
-              </p>
-            </>
-          )}
+          ) : live === "failed" ? (
+            <h1 className={s.title}><i className={s.dotWarn} />{L.checkFailed}</h1>
+          ) : (() => {
+            const minutes = now ? Math.max(0, Math.round((now - Date.parse(live.checked_at)) / 60_000)) : 0;
+            const when = `${lisbon(live.checked_at, locale, true)} ${L.lisbonTime}`;
+            const stale = now != null && now - Date.parse(live.checked_at) > STALE_MS;
+            if (live.origin === "snapshot") return (
+              <>
+                <h1 className={s.title}><i className={s.dotWarn} />{L.offline}</h1>
+                <p className={s.secondary}>{L.savedCheck(when, L.ago(minutes))}</p>
+              </>
+            );
+            if (live.state === "check_failed") return (
+              <>
+                <h1 className={s.title}><i className={s.dotWarn} />{L.checkFailed}</h1>
+                <p className={s.secondary}>{L.failedNote(live.sources[0]?.error_code ?? "?")} {when} · {L.ago(minutes)}</p>
+              </>
+            );
+            return (
+              <>
+                <h1 className={s.title}>
+                  <i className={live.state === "no_active_fires" ? (stale ? s.dotWarn : s.dotOk) : s.dotFire} />
+                  {live.state === "no_active_fires" ? L.noFires : L.listed(live.active.length)}
+                </h1>
+                <p className={s.secondary}>
+                  {L.checkedAt} {when} · {L.ago(minutes)} ·{" "}
+                  {live.sources.map((src) => <a key={src.url} href={src.url} target="_blank" rel="noreferrer">Fogos.pt</a>)}
+                </p>
+                {live.active.length > 0 && (
+                  <ul className={s.activeList}>
+                    {live.active.map((f) => (
+                      <li key={f.id}><a href={fogosDetail(f.id, f.url)} target="_blank" rel="noreferrer"><strong>{f.place}</strong><span>{f.status}</span></a></li>
+                    ))}
+                  </ul>
+                )}
+                {live.state === "partial" && <p className={s.tertiary}>{L.partialNote}</p>}
+                {stale && <p className={s.tertiary}>{L.stale}</p>}
+              </>
+            );
+          })()}
         </section>
       )}
 
