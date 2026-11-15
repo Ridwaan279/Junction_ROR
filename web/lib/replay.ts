@@ -44,7 +44,7 @@ const empty: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: 
 const feature = (geometry: Geometry | null, properties: Record<string, unknown> = {}): GeoJSON.Feature[] =>
   geometry ? [{ type: "Feature", geometry, properties }] : [];
 
-export const FIRE = { p10: "#ffb547", p50: "#ff6a2b", p90: "#e3261f", envelope: "#ffd166", smoke: "#c7b9a8", drone: "#5ee0ff" };
+export const FIRE = { p10: "#ffb547", p50: "#ff6a2b", p90: "#e3261f", envelope: "#ffd166", smoke: "#c7b9a8", drone: "#64d2ff" };
 
 /** Native MapLibre layers drape onto the 3D terrain (deck.gl overlays would float). */
 export function addReplayLayers(map: LibreMap) {
@@ -60,27 +60,23 @@ export function addReplayLayers(map: LibreMap) {
     "fill-color": ["match", ["get", "band"], "p90", FIRE.p90, "p50", FIRE.p50, FIRE.p10],
     "fill-opacity": ["match", ["get", "band"], "p90", 0.62, "p50", 0.42, 0.24] } });
   map.addLayer({ id: "rp-fire-edge", type: "line", source: "rp-fire", filter: ["==", ["get", "band"], "p50"], paint: {
-    "line-color": "#ffd0a1", "line-width": 1.6, "line-blur": 0.6 } });
+    "line-color": "#ffd0a1", "line-width": 1 } });
   map.addLayer({ id: "rp-routes", type: "line", source: "rp-routes", layout: { "line-cap": "round" }, paint: {
-    "line-color": FIRE.drone, "line-width": 1.6, "line-opacity": 0.75, "line-dasharray": [1, 1.8] } });
+    "line-color": FIRE.drone, "line-width": 1.2, "line-opacity": 0.6 } });
   map.addLayer({ id: "rp-bases", type: "circle", source: "rp-bases", paint: {
-    "circle-radius": 4, "circle-color": "#0b1218", "circle-stroke-color": FIRE.drone, "circle-stroke-width": 1.6 } });
-  map.addLayer({ id: "rp-drones-glow", type: "circle", source: "rp-drones", paint: {
-    "circle-radius": 9, "circle-color": "rgba(94, 224, 255, 0.22)", "circle-blur": 0.6 } });
+    "circle-radius": 3, "circle-color": "rgba(0,0,0,0.5)", "circle-stroke-color": FIRE.drone, "circle-stroke-width": 1.2 } });
   map.addLayer({ id: "rp-drones", type: "circle", source: "rp-drones", paint: {
-    "circle-radius": 3.6, "circle-color": "#ffffff", "circle-stroke-color": FIRE.drone, "circle-stroke-width": 1.6 } });
+    "circle-radius": 3.5, "circle-color": FIRE.drone, "circle-stroke-color": "rgba(0,0,0,0.6)", "circle-stroke-width": 1 } });
   map.addLayer({ id: "rp-villages", type: "circle", source: "rp-villages", paint: {
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 3.5, 13, 7],
-    "circle-color": ["case", ["get", "evacuated"], "#ff4d4f", "#ffc53d"],
-    "circle-stroke-color": "#0b0f14", "circle-stroke-width": 1.5, "circle-opacity": 0.95 } });
+    "circle-color": ["case", ["get", "evacuated"], "#ff453a", "#ffd60a"],
+    "circle-stroke-color": "rgba(0,0,0,0.6)", "circle-stroke-width": 1, "circle-opacity": 0.95 } });
   map.addLayer({ id: "rp-village-labels", type: "symbol", source: "rp-villages", minzoom: 10.2, layout: {
     "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 11.5,
     "text-offset": [0, 1.1], "text-anchor": "top", "text-optional": true }, paint: {
     "text-color": "#ffffff", "text-halo-color": "rgba(5,8,12,0.9)", "text-halo-width": 1.4 } });
-  map.addLayer({ id: "rp-ignition-halo", type: "circle", source: "rp-ignition", paint: {
-    "circle-radius": 14, "circle-color": "rgba(255, 106, 43, 0.18)", "circle-stroke-color": "rgba(255, 106, 43, 0.7)", "circle-stroke-width": 1 } });
   map.addLayer({ id: "rp-ignition", type: "circle", source: "rp-ignition", paint: {
-    "circle-radius": 4.5, "circle-color": "#ffffff", "circle-stroke-color": "#ff6a2b", "circle-stroke-width": 2.5 } });
+    "circle-radius": 4, "circle-color": "#ffffff", "circle-stroke-color": "rgba(0,0,0,0.6)", "circle-stroke-width": 1 } });
 }
 
 export type Village = { name: string; position: [number, number]; evacuated: boolean; evidence: string[] };
@@ -119,7 +115,7 @@ export function showReplayFrame(map: LibreMap, frame: ReplayFrame, ignition: [nu
 }
 
 export function setReplayVisible(map: LibreMap, visible: boolean) {
-  for (const id of ["rp-smoke", "rp-forecast", "rp-fire-fill", "rp-fire-edge", "rp-routes", "rp-bases", "rp-drones-glow", "rp-drones", "rp-villages", "rp-village-labels", "rp-ignition-halo", "rp-ignition"])
+  for (const id of ["rp-smoke", "rp-forecast", "rp-fire-fill", "rp-fire-edge", "rp-routes", "rp-bases", "rp-drones", "rp-villages", "rp-village-labels", "rp-ignition"])
     if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
 }
 

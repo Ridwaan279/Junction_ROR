@@ -19,10 +19,15 @@ workspace is kept at `/workspace` and the 3D terrain explorer at `/terrain`.
 
 ## Screens
 
-| Mode | What is on screen |
+Minimalist by design (user decision): one panel material, system typography, no
+glow, no decorative badges, no zoom buttons (gestures), credits behind one (i).
+
+| Mode | On screen |
 |---|---|
-| Live | Portugal in 3D; status card (no active fires / N active fires / check failed), source and time of the last check, button to the replay |
-| Replay | Simulated drones (staging points, routes draped on the terrain, drones moving along them) from the first frame that has a drone plan; "Model accuracy" panel comparing each forecast with the next observed GWIS perimeter (overlap on total and on new growth, with the reasons it over- or under-predicts). Fire on 3D terrain: modelled burned area (10/50/90 %), 6 h and 12 h forecast envelopes, dense smoke (≥150 µg/m³), villages named in verified reports (red evacuated, amber other mentions), ignition point; situation card (Fogos.pt status, modelled area and spread, wind, temperature, humidity, gusts, automatic-response steps marked observed/simulated, evacuated villages, facts and sources); news pop-ups at key moments; timeline with play/pause; legend |
+| Both | Wordmark top left; one control group top right: Live / Arganil 2025, a 2D↔3D toggle, PT↔EN |
+| Live | One compact card: status line ("No active fires" with a green dot), then "Mainland Portugal · checked at HH:MM · Fogos.pt" |
+| Replay | Card: place, current replay time, Fogos.pt status; four numbers (area, spread, wind, evacuated villages); one line with alert time and simulated drone launch; the latest verified report (links to the article); a one-line legend; two links, Sources and Accuracy. Map: modelled fire, 6 h/12 h forecast, dense smoke, villages from verified reports, simulated drones. Bottom: play/pause and a thin timeline |
+| Panels | Sources (every verified fact public at the cursor, with link) and Accuracy (forecast vs. observed GWIS perimeters, with the stricter new-growth score) |
 
 Camera framing uses map padding, so the subject sits beside the panels on desktop and below them on phones. Rules the UI enforces: nothing is shown before it was public (frame = latest frame
 not after the cursor; facts and villages filtered by `known_at` to the minute);
