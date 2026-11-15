@@ -13,6 +13,17 @@ from the moment it was provably public.
 | Exact Context.dev request bodies and capture tools | `data/demo/arganil-early/capture/` |
 | Build script | `python3 -I data/demo/arganil-early/build.py` (offline; needs no key) |
 
+On branch `codex/agent-2-intelligence`, these paths are in the isolated worktree
+`.worktrees/agent-2-intelligence/` under the main project directory. Start with
+the replay `index.json` and its `frames/` directory to inspect the UI dataset;
+`data/historical/arganil-piodao-2025/dataset.json` holds the historical weather,
+terrain and perimeter inputs. Source reports and observations describe the real
+fire; predicted spread, drone routes and dispatch are simulations.
+
+Scope update, 15 November 2026: Gemini is removed. Future fleet/risk explanations
+are deterministic Rust outputs. Existing `fleet_check: null` and `sitreps: []`
+remain reserved empty fields; no advisor or fake model identifier is generated.
+
 ## Sources and what each contributes
 
 | Monitor | Provider | Contributes | Status in this capture |
@@ -91,7 +102,8 @@ event_gathering, people_present, shelter, infrastructure, other`.
 | `exposures[]` | Places named in known facts: `id (geonames-…), name, kind[] (evacuated, threatened, shelter, people_present, event, road_closure), position, people, people_basis, population_geonames, distance_from_ignition_km, events[], evidence[], in_modelled_burn_p50, in_forecast_6h, in_forecast_12h` |
 | `automation[]` | `{step, at, basis, detail, url, latency_s}`; `basis: "observed"` for Fogos.pt/news steps, `"simulated"` for EmberWatch's own actions |
 | `drones_legacy` | Simulated drones from the old heuristic (bases, routes) |
-| `fleet`, `sitreps`, `fleet_check` | `null` / `[]` until Agent 2 delivers WORKPLAN 5.2–5.5 |
+| `fleet` | `null` until Agent 2 delivers deterministic sizing/routes (WORKPLAN 5.2–5.3) |
+| `sitreps`, `fleet_check` | Reserved empty fields: `[]` / `null`; advisor integration removed |
 
 ## Limitations
 
