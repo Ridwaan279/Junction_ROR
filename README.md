@@ -123,5 +123,7 @@ coverage in the bounded Context probe. IPMA timestamps without a confirmed time
 basis are skipped. Agent A adds gated FIRMS/Open-Meteo adapters, scheduling,
 CSV/JSONL/point-GeoJSON uploads, replay persistence and operator authorization.
 Live upstream calls were not enabled for the merge tests. Historical assets,
-Gemini/voice and production deployment remain planned. See the intelligence/response/web
+Voice and production deployment remain planned outside the current phase.
+Explanations use Rust calculations and templates; no Gemini integration is planned.
+See the intelligence/response/web
 READMEs for exact implemented behavior and limitations.

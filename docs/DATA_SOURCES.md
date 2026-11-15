@@ -1,6 +1,12 @@
 # Portugal data-source research
 
 Last setup/probe check: **15 November 2026**. Initial research: 14 November 2026.
+Agent 2 plan checkpoint, 15 November 2026: branch `codex/agent-2-intelligence`
+starts at integration commit `21e03ce`. The user's subsequent instruction removes
+Gemini and authorizes the corresponding plan/README/demo-guide updates outside
+the routine Agent 2 ownership list. No application or UI code changes in this
+checkpoint. Validation: Markdown link targets checked and `git diff --check`
+passed; Rust/web tests are not applicable to these documentation-only edits.
 The original planning research is followed by the dated implementation probes
 below. A bounded Context.dev public-page scrape has now been executed; it did
 not establish complete incident extraction, ongoing reuse rights or production readiness.
