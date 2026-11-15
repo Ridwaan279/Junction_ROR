@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-test("fixture click-through, bilingual sources, seek and reset", async ({
+test("fixture click-through, English sources, seek and reset", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -8,14 +8,13 @@ test("fixture click-through, bilingual sources, seek and reset", async ({
     if (message.text().includes("Base map unavailable"))
       console.log(message.text());
   });
-  await page.goto("/");
+  await page.goto("/workspace");
   await expect(
-    page.getByText("Cenário sintético", { exact: true }).first(),
+    page.getByText("Synthetic scenario", { exact: true }).first(),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Sever do Vouga (training location)" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "EN", exact: true }).click();
   await expect(
     page.getByText(
       "Training data. These observations are invented; no live incident is asserted.",
@@ -47,12 +46,12 @@ test("fixture click-through, bilingual sources, seek and reset", async ({
 test("mobile stays usable with map tiles unavailable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/tile.openstreetmap.org/**", (route) => route.abort());
-  await page.goto("/");
+  await page.goto("/workspace");
   await expect(
     page.getByRole("heading", { name: "Sever do Vouga (training location)" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("slider", { name: "Hora da reprodução" }),
+    page.getByRole("slider", { name: "Replay time" }),
   ).toBeVisible();
   await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
   await page.screenshot({

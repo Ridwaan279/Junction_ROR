@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let listener = tokio::net::TcpListener::bind(&bind).await?;
     println!(
-        "EmberWatch: http://{bind}; Agent A /platform (storage: {platform_storage}); browser adapter /platform/ui"
+        "EmberWatch: http://{bind}; platform /platform (storage: {platform_storage}); browser adapter /platform/ui"
     );
     axum::serve(listener, app)
         .with_graceful_shutdown(async {

@@ -11,11 +11,14 @@ import heapq
 import math
 from dataclasses import dataclass
 
-from .hazard import Hazard, Point
+from .hazard import Circle, Hazard, Point
+
+Cell = tuple[int, int]
+NEIGHBOURS = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
 
 
 class PlanningError(ValueError):
-    pass
+    """A route cannot be planned with the supplied endpoints or grid bounds."""
 
 
 @dataclass
@@ -28,80 +31,101 @@ class PlanResult:
 
 
 def _shorten(path: list[Point], hazard: Hazard, margin: float) -> list[Point]:
-    out = [path[0]]
-    i = 0
-    while i < len(path) - 1:
-        j = len(path) - 1
-        while j > i + 1 and not hazard.segment_clear(path[i], path[j], margin):
-            j -= 1
-        out.append(path[j])
-        i = j
-    return out
+    """Keep the farthest visible waypoint from each retained point."""
+    shortened = [path[0]]
+    current = 0
+    while current < len(path) - 1:
+        candidate = len(path) - 1
+        while candidate > current + 1 and not hazard.segment_clear(
+            path[current], path[candidate], margin
+        ):
+            candidate -= 1
+        shortened.append(path[candidate])
+        current = candidate
+    return shortened
 
 
-def plan(start: Point, goal: Point, hazard: Hazard, margin: float, resolution: float = 0.5,
-         pad: float = 20.0, max_cells: int = 400_000) -> PlanResult | None:
+def plan(
+    start: Point,
+    goal: Point,
+    hazard: Hazard,
+    margin: float,
+    resolution: float = 0.5,
+    pad: float = 20.0,
+    max_cells: int = 400_000,
+) -> PlanResult | None:
+    """Find a direct route or search a bounded grid, preserving deterministic tie order."""
     if hazard.blocked(start, margin):
         raise PlanningError(f"start {start} is inside the (inflated) hazard")
     if hazard.blocked(goal, margin):
         raise PlanningError(f"goal {goal} is inside the (inflated) hazard")
-    direct_len = math.dist(start, goal)
+    direct_length = math.dist(start, goal)
     if hazard.segment_clear(start, goal, margin):
-        return PlanResult([start, goal], True, direct_len, direct_len, False)
+        return PlanResult(
+            waypoints=[start, goal],
+            direct_clear=True,
+            length_m=direct_length,
+            direct_length_m=direct_length,
+            detour=False,
+        )
 
     # Grid bounds cover start, goal and every hazard shape (+pad).
     xs, ys = [start[0], goal[0]], [start[1], goal[1]]
-    for s in hazard.shapes:
-        if hasattr(s, "r"):
-            xs += [s.cx - s.r, s.cx + s.r]
-            ys += [s.cy - s.r, s.cy + s.r]
+    for shape in hazard.shapes:
+        if isinstance(shape, Circle):
+            xs.extend((shape.cx - shape.r, shape.cx + shape.r))
+            ys.extend((shape.cy - shape.r, shape.cy + shape.r))
         else:
-            xs += [p[0] for p in s.pts]
-            ys += [p[1] for p in s.pts]
+            xs.extend(point[0] for point in shape.pts)
+            ys.extend(point[1] for point in shape.pts)
     x0, y0 = min(xs) - pad, min(ys) - pad
     nx = int(math.ceil((max(xs) + pad - x0) / resolution)) + 1
     ny = int(math.ceil((max(ys) + pad - y0) / resolution)) + 1
     if nx * ny > max_cells:
         raise PlanningError(f"planning area too large ({nx}x{ny} cells)")
 
-    def cell(p: Point) -> tuple[int, int]:
-        return round((p[0] - x0) / resolution), round((p[1] - y0) / resolution)
+    def to_cell(point: Point) -> Cell:
+        return round((point[0] - x0) / resolution), round((point[1] - y0) / resolution)
 
-    def pos(c: tuple[int, int]) -> Point:
-        return x0 + c[0] * resolution, y0 + c[1] * resolution
+    def to_position(cell: Cell) -> Point:
+        return x0 + cell[0] * resolution, y0 + cell[1] * resolution
 
-    free_cache: dict[tuple[int, int], bool] = {}
+    free_cache: dict[Cell, bool] = {}
 
-    def free(c: tuple[int, int]) -> bool:
-        v = free_cache.get(c)
-        if v is None:
-            v = not hazard.blocked(pos(c), margin)
-            free_cache[c] = v
-        return v
+    def is_free(cell: Cell) -> bool:
+        if cell not in free_cache:
+            free_cache[cell] = not hazard.blocked(to_position(cell), margin)
+        return free_cache[cell]
 
-    s, g = cell(start), cell(goal)
-    moves = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-    openq = [(0.0, s)]
-    came: dict[tuple[int, int], tuple[int, int]] = {}
-    cost = {s: 0.0}
-    while openq:
-        _, c = heapq.heappop(openq)
-        if c == g:
-            cells = [c]
-            while c in came:
-                c = came[c]
-                cells.append(c)
-            raw = [start] + [pos(k) for k in reversed(cells[1:-1])] + [goal]
-            wps = _shorten(raw, hazard, margin)
-            length = sum(math.dist(a, b) for a, b in zip(wps, wps[1:]))
-            return PlanResult(wps, False, length, direct_len, True)
-        for dx, dy in moves:
-            n = (c[0] + dx, c[1] + dy)
-            if not (0 <= n[0] < nx and 0 <= n[1] < ny) or not free(n):
+    start_cell, goal_cell = to_cell(start), to_cell(goal)
+    frontier = [(0.0, start_cell)]
+    came_from: dict[Cell, Cell] = {}
+    costs = {start_cell: 0.0}
+    while frontier:
+        _, current = heapq.heappop(frontier)
+        if current == goal_cell:
+            cells = [current]
+            while current in came_from:
+                current = came_from[current]
+                cells.append(current)
+            raw_path = [start] + [to_position(cell) for cell in reversed(cells[1:-1])] + [goal]
+            waypoints = _shorten(raw_path, hazard, margin)
+            length = sum(math.dist(a, b) for a, b in zip(waypoints, waypoints[1:]))
+            return PlanResult(
+                waypoints=waypoints,
+                direct_clear=False,
+                length_m=length,
+                direct_length_m=direct_length,
+                detour=True,
+            )
+        for dx, dy in NEIGHBOURS:
+            neighbour = (current[0] + dx, current[1] + dy)
+            if not (0 <= neighbour[0] < nx and 0 <= neighbour[1] < ny) or not is_free(neighbour):
                 continue
-            nc = cost[c] + math.hypot(dx, dy) * resolution
-            if nc < cost.get(n, math.inf):
-                cost[n] = nc
-                came[n] = c
-                heapq.heappush(openq, (nc + math.dist(pos(n), goal), n))
+            next_cost = costs[current] + math.hypot(dx, dy) * resolution
+            if next_cost < costs.get(neighbour, math.inf):
+                costs[neighbour] = next_cost
+                came_from[neighbour] = current
+                priority = next_cost + math.dist(to_position(neighbour), goal)
+                heapq.heappush(frontier, (priority, neighbour))
     return None

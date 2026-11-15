@@ -203,3 +203,25 @@ class Satellite:
         I = self.img
         return ((I[y0, x0] * (1 - fx) + I[y0, x0 + 1] * fx) * (1 - fy)
                 + (I[y0 + 1, x0] * (1 - fx) + I[y0 + 1, x0 + 1] * fx) * fy)
+
+
+class DgtOrtho:
+    """Bounded licensed 2018 WMS sample; geographic pixel centres -> map ENU."""
+    def __init__(self, tile_dir: str):
+        from pathlib import Path
+        folder=Path(tile_dir)
+        self.meta=json.loads((folder/'metadata.json').read_text())
+        self.bounds=self.meta['bounds_wsen']
+        self.img=np.asarray(Image.fromarray(np.concatenate([
+            np.concatenate([np.asarray(Image.open(folder/f'{r}_{c}.jpg').convert('RGB')) for c in range(2)],axis=1)
+            for r in range(2)],axis=0)))
+
+    def rgb_map(self,e,n):
+        lat,lon=map_to_ll(np.asarray(e,np.float64),np.asarray(n,np.float64))
+        w,s,ee,nn=self.bounds;h,ww=self.img.shape[:2]
+        x=(lon-w)/(ee-w)*ww-.5;y=(nn-lat)/(nn-s)*h-.5
+        if np.any((x<-.5)|(x>ww-.5)|(y<-.5)|(y>h-.5)):
+            raise ValueError('DGT sample outside cached geographic extent')
+        x0=np.clip(np.floor(x).astype(int),0,ww-2);y0=np.clip(np.floor(y).astype(int),0,h-2)
+        fx=np.clip(x-x0,0,1)[...,None];fy=np.clip(y-y0,0,1)[...,None]
+        return (self.img[y0,x0]*(1-fx)+self.img[y0,x0+1]*fx)*(1-fy)+(self.img[y0+1,x0]*(1-fx)+self.img[y0+1,x0+1]*fx)*fy

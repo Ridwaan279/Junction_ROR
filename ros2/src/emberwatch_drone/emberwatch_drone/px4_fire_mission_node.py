@@ -39,6 +39,7 @@ except ImportError as exc:  # pragma: no cover
 from . import gz_util as gz
 from .geo import geodetic_to_local_ned, yaw_enu_to_ned
 from .hazard import Hazard
+from .path_follow import PathFollower, YawLimiter
 from .planner import PlanningError, plan
 
 
@@ -56,6 +57,10 @@ class Px4FireMission(Node):
         p("max_drops", 2)
         p("marker_radius_m", 0.35)
         p("fire_state_timeout_s", 3.0)
+        p("smooth_follow", True)  # look-ahead setpoints along the route + rate-limited yaw
+        p("lookahead_m", 10.0)  # cruise legs
+        p("low_lookahead_m", 3.5)  # low-level legs (kept below the planner's 4 m obstacle margin)
+        p("max_yaw_rate_deg_s", 35.0)
         p("topic_local_position", "/fmu/out/vehicle_local_position_v1")
         p("topic_vehicle_status", "/fmu/out/vehicle_status_v1")
         gp = lambda n: self.get_parameter(n).value  # noqa: E731
@@ -69,6 +74,10 @@ class Px4FireMission(Node):
         self.max_drops = int(gp("max_drops"))
         self.marker_r = float(gp("marker_radius_m"))
         self.fs_timeout = float(gp("fire_state_timeout_s"))
+        self.smooth = bool(gp("smooth_follow"))
+        self.L_cruise, self.L_low = float(gp("lookahead_m")), float(gp("low_lookahead_m"))
+        self.yaw_lim = YawLimiter(math.radians(float(gp("max_yaw_rate_deg_s"))))
+        self.follower: PathFollower | None = None
         self.scenario_id = self.sc.get("scenario_id")
         self.alt = float(self.sc["cruise_alt_m"])
         self.zoff = None  # PX4 EKF origin altitude - scenario origin altitude
@@ -333,6 +342,14 @@ class Px4FireMission(Node):
             if self._at(self.start[0], self.start[1], self.route[0][2], self.r_arrive):
                 self.wp_i = 1
                 self._set_phase("FOLLOW_ROUTE", f"following planned route to safe point {self.sc['safe_point_enu']}")
+        elif self.phase == "FOLLOW_ROUTE" and self.smooth:
+            if self.follower is None:
+                self.follower = self._make_follower(self.route[self.wp_i - 1:])
+            sp, heading, remaining = self.follower.update(pos)
+            self._stream(self._ned(*sp), self._yaw(heading))
+            if remaining < 0.5 and self._at(*self.route[-1], self.r_arrive):
+                self.follower = None
+                self._start_drop()
         elif self.phase == "FOLLOW_ROUTE":
             x, y, z = self.route[self.wp_i]
             self._stream(self._ned(x, y, z))
@@ -346,10 +363,19 @@ class Px4FireMission(Node):
                     self.get_logger().info(f"-> waypoint {self.wp_i}: {self.route[self.wp_i]}")
         elif self.phase == "HOVER_DROP":
             sx, sy, sz = self.route[-1]
-            self._stream(self._ned(sx, sy, sz), yaw_enu_to_ned(math.atan2(fy - sy, fx - sx)))
+            self._stream(self._ned(sx, sy, sz), self._yaw(math.atan2(fy - sy, fx - sx)))
             if self._px4_s() - self.phase_sim_t0 >= self.drop_s:  # simulation seconds
                 self._water(False)
                 self._after_drop()
+        elif self.phase == "RETURN_ROUTE" and self.smooth:
+            if self.follower is None:
+                self.follower = self._make_follower(self.ret)
+            sp, heading, remaining = self.follower.update(pos)
+            self._stream(self._ned(*sp), self._yaw(heading))
+            if remaining < 0.5 and self._at(*self.ret[-1], self.r_arrive):
+                self.follower = None
+                self._command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
+                self._set_phase("LANDING", "over launch site; commanded PX4 land")
         elif self.phase == "RETURN_ROUTE":
             x, y, z = self.ret[self.wp_i]
             self._stream(self._ned(x, y, z))
@@ -362,6 +388,17 @@ class Px4FireMission(Node):
         elif self.phase == "LANDING":
             if not armed:
                 self._set_phase("DONE", self._final_note())
+
+    def _make_follower(self, pts) -> PathFollower:
+        low_z = self.sc.get("hover_alt_z")
+        if self.yaw_lim.yaw is None and self.lpos is not None and math.isfinite(self.lpos.heading):
+            self.yaw_lim.yaw = math.pi / 2 - float(self.lpos.heading)  # start from the current heading
+        return PathFollower(pts, self.L_cruise, self.L_low, None if low_z is None else float(low_z) + 5.0)
+
+    def _yaw(self, heading_enu: float | None) -> float:
+        """Rate-limited heading (ENU rad in) -> NED yaw for PX4 (NaN = keep current)."""
+        y = self.yaw_lim.step(heading_enu, 0.1)
+        return float("nan") if y is None else yaw_enu_to_ned(y)
 
     def _start_drop(self) -> None:
         self.drops += 1

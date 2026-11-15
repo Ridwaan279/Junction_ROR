@@ -20,12 +20,12 @@ import time
 
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import ExternalShutdownException
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 from std_msgs.msg import String
 
 from . import gz_util as gz
 from .fire_model import FireModel, FireModelConfig
-from .hazard import downwind_unit
 
 SMOKE_RISE_MPS = 1.2
 
@@ -61,8 +61,20 @@ class FireSim(Node):
         self.out_since: float | None = None
         self.spread = list(self.sc["fire"].get("spread", []))
         self.ignited: list[int] = []
+        # SIMULATED containment fleet: drones wet unburned fuel ahead of the front; wet points cannot
+        # ignite. Spread only proceeds from a burning parent point. No extinguishing is modelled.
+        self.fleet = self.sc.get("fleet")
+        self.wet_until = [-1.0] * len(self.spread)
+        self.blocked_events = 0
+        self.held_now = 0
+        self.waters: dict = {}  # drone id -> last active water message
+        self.handover = False
         self.t_start: float | None = None
         self.smoke_off = False
+        self.last_front = None
+        self.burned_front = None
+        self.marker_namespace = "emberwatch_fire_" + str(self.scenario_id or "unscoped")
+        self.visual_controller = None
 
         latched = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.pub = self.create_publisher(String, "/emberwatch/fire_state", latched)
@@ -79,34 +91,21 @@ class FireSim(Node):
     def _spawn_scene(self) -> None:
         fx, fy = self.fire
         w = self.sc["wind"]
-        if w["source"] == "unknown" or not w["speed_mps"]:
-            sdir, sspeed = (0.0, 0.0, 1.0), SMOKE_RISE_MPS
-        else:
-            ux, uy = downwind_unit(w["from_deg"])
-            ws = float(w["speed_mps"])
-            sdir, sspeed = (ux * ws, uy * ws, SMOKE_RISE_MPS), math.hypot(ws, SMOKE_RISE_MPS)
-        srpy = gz.direction_rpy(*sdir)
-        self.smoke_rpy, self.smoke_speed = srpy, sspeed
-        # Smoke particles live just long enough to drift the hazard plume length downwind, so
-        # the visual and the planning region describe the same (simplified) plume.
-        horiz = math.hypot(sdir[0], sdir[1])
+        wind_from = w.get("from_deg") if w["source"] != "unknown" else None
+        wind_speed = w.get("speed_mps") if w["source"] != "unknown" else None
         plume_len = float(self.sc["hazard"].get("plume_length_m", 25.0))
-        smoke_life = round(min(12.0, plume_len / horiz), 2) if horiz > 0.1 else 9.0
-        self.smoke_life = smoke_life
-        r = self.model.radius_m
-        flames = gz.emitter_sdf("flames", gz.pose(0, 0, 0.2, *gz.direction_rpy(0, 0, 1)), emitting=True, kind="box",
-                                size=(2 * r, 2 * r, 0.2), particle_size=0.7, lifetime=1.2, vmin=0.8, vmax=1.8,
-                                rate=self._flame_rate(), scale_rate=0.2, rgb=(1.0, 0.45, 0.05))
-        smoke = gz.emitter_sdf("smoke", gz.pose(0, 0, 1.5, *srpy), emitting=True, kind="box",
-                               size=(2.0, 2.0, 0.5), particle_size=1.4, lifetime=smoke_life,
-                               vmin=sspeed * 0.8, vmax=sspeed * 1.2, rate=14, scale_rate=0.7, rgb=(0.33, 0.33, 0.33))
-        fire_sdf = f"""<sdf version="1.9"><model name="sim_fire"><static>true</static><pose>{gz.pose(fx, fy, self.fire_z)}</pose>
-<link name="fire_link">
-<visual name="scorch"><pose>0 0 0.05 0 0 0</pose><geometry><cylinder><radius>{self.model.cfg.r_max_m}</radius><length>0.02</length></cylinder></geometry>
-<material><ambient>0.08 0.06 0.05 1</ambient><diffuse>0.08 0.06 0.05 1</diffuse></material></visual>
-{flames}
-{smoke}
-</link></model></sdf>"""
+        self.smoke_rpy, self.smoke_speed, self.smoke_life = gz.smoke_motion(wind_from, wind_speed, plume_len)
+        raster = self.sc.get("obstacle_raster")
+        if raster is None and self.sc.get("world_dir"):
+            from pathlib import Path
+            raster = str(Path(self.sc["world_dir"]) / "obstacles.npz")
+        self.visual_controller = gz.FireVisualController((*self.fire,self.fire_z),
+            terrain_npz=raster,spread_points=self.spread,max_radius_m=self.model.cfg.r_max_m,
+            wind_from_deg=wind_from,wind_speed_mps=wind_speed,plume_length_m=plume_len)
+        self.visual_controller.namespace = self.marker_namespace
+        # Compile the small native adapter once during startup, never in timer callbacks.
+        self.visual_controller.transport = gz.ensure_fire_transport()
+        fire_sdf = self.visual_controller.sdf(radius_m=self.model.radius_m,intensity=self.model.intensity)
         gz.spawn_sdf(self.world, fire_sdf, "sim_fire", wait=True)
 
         vis = []
@@ -125,50 +124,19 @@ class FireSim(Node):
         gz.spawn_sdf(self.world, hz_sdf, "smoke_hazard_zone", wait=True)
 
     def _spawn_spot(self, i: int, sp: dict) -> None:
-        self.get_logger().info(f"SIMULATED spread: point {i + 1}/{len(self.spread)} ignited at ({sp['x']}, {sp['y']})")
-        if not self.visuals:
-            return
-        flames = gz.emitter_sdf("flames", gz.pose(0, 0, 0.2, *gz.direction_rpy(0, 0, 1)), emitting=True, kind="box",
-                                size=(3.0, 3.0, 0.2), particle_size=0.7, lifetime=1.1, vmin=0.8, vmax=1.8, rate=45,
-                                scale_rate=0.2, rgb=(1.0, 0.42, 0.05))
-        smoke = ""
-        if i % 3 == 2:
-            smoke = gz.emitter_sdf("smoke", gz.pose(0, 0, 1.5, *self.smoke_rpy), emitting=True, kind="box",
-                                   size=(2.0, 2.0, 0.5), particle_size=1.4, lifetime=self.smoke_life,
-                                   vmin=self.smoke_speed * 0.8, vmax=self.smoke_speed * 1.2, rate=8, scale_rate=0.7,
-                                   rgb=(0.33, 0.33, 0.33))
-        gz.spawn_sdf(self.world, f"""<sdf version="1.9"><model name="sim_fire_spot_{i}"><static>true</static>
-<pose>{gz.pose(sp['x'], sp['y'], sp['z'])}</pose><link name="fire_link">
-<visual name="scorch"><pose>0 0 0.05 0 0 0</pose><geometry><cylinder><radius>2.6</radius><length>0.02</length></cylinder></geometry>
-<material><ambient>0.07 0.05 0.04 1</ambient><diffuse>0.07 0.05 0.04 1</diffuse></material></visual>
-{flames}{smoke}</link></model></sdf>""", f"sim_fire_spot_{i}")
-
-    def _flame_rate(self) -> int:
-        return int(10 + 70 * self.model.intensity) if self.model.active else 0
+        # Seed ignition remains a model event, but never creates a new visual emitter.
+        self.get_logger().info(f"SIMULATED spread: point {i + 1}/{len(self.spread)} joined the single front at ({sp['x']}, {sp['y']})")
 
     def _update_visuals(self) -> None:
-        if not self.visuals:
+        if not self.visuals or self.visual_controller is None:
             return
-        if self.model.active:
-            rate = self._flame_rate()
-            if self.last_rate is None or abs(rate - self.last_rate) >= 4:
-                d = 2 * self.model.radius_m
-                gz.emitter_cmd("sim_fire", "fire_link", "flames",
-                               f"rate: {{data: {rate}}} size: {{x: {d:.2f}, y: {d:.2f}, z: 0.2}}")
-                self.last_rate = rate
-        else:
-            if self.last_rate != 0:
-                gz.emitter_cmd("sim_fire", "fire_link", "flames", "emitting: {data: false}")
-                for i in self.ignited:  # the whole (illustrative) fire goes out together
-                    gz.emitter_cmd(f"sim_fire_spot_{i}", "fire_link", "flames", "emitting: {data: false}")
-                    if i % 3 == 2:
-                        gz.emitter_cmd(f"sim_fire_spot_{i}", "fire_link", "smoke", "emitting: {data: false}")
-                gz.emitter_cmd("sim_fire", "fire_link", "smoke", "rate: {data: 3}")
-                self.last_rate = 0
-            if not self.smoke_off and self.out_since and self._now() - self.out_since > 10.0:
-                gz.emitter_cmd("sim_fire", "fire_link", "smoke", "emitting: {data: false}")
-                gz.remove_model(self.world, "smoke_hazard_zone")  # visual only; planning used it already
-                self.smoke_off = True
+        smoke_expired = self.out_since is not None and self._now()-self.out_since > 10
+        self.visual_controller.update(radius_m=self.model.radius_m,intensity=self.model.intensity,
+            ignited=[self.spread[i] for i in self.ignited],active=self.model.active,world=self.world,
+            elapsed_s=self.model.elapsed_s,smoke_expired=smoke_expired)
+        if smoke_expired and not self.smoke_off:
+            gz.remove_model(self.world,"smoke_hazard_zone")
+            self.smoke_off = True
 
     def _on_water(self, msg: String) -> None:
         try:
@@ -179,29 +147,47 @@ class FireSim(Node):
         if d.get("scenario_id") != self.scenario_id:
             self.get_logger().warning(f"ignoring water_drop for other scenario {d.get('scenario_id')!r}")
             return
+        did = d.get("drone_id", 0)
         active = bool(d.get("active"))
         pos = d.get("pos_enu")
         if active and isinstance(pos, list) and len(pos) == 3:
-            self.water_in_range = math.dist(pos[:2], self.fire) <= self.range_m
-            if self.water is None and self.visuals:
+            target = d.get("target_enu") or list(self.fire)
+            first = did not in self.waters
+            self.waters[did] = d
+            if self.fleet:  # wet the fuel around the drop target (simulated)
+                now, r = self._now(), float(self.fleet["wet_radius_m"])
+                for i, sp in enumerate(self.spread):
+                    if i not in self.ignited and math.dist((sp["x"], sp["y"]), target[:2]) <= r:
+                        self.wet_until[i] = now + float(self.fleet["wet_duration_s"])
+            self.water_in_range = any(math.dist(w["pos_enu"][:2], self.fire) <= self.range_m for w in self.waters.values())
+            if first and self.visuals:
                 x, y, z = pos
-                dx, dy, dz = self.fire[0] - x, self.fire[1] - y, -max(z - 0.5 - self.fire_z, 0.5)
+                tz = self._ground_at(target)
+                dx, dy, dz = target[0] - x, target[1] - y, -max(z - 0.5 - tz, 0.5)
                 dist = math.sqrt(dx * dx + dy * dy + dz * dz)
-                em = gz.emitter_sdf("water", gz.pose(0, 0, 0, *gz.direction_rpy(dx, dy, dz)), emitting=True,
-                                    kind="cylinder", size=(0.5, 0.5, 0.2), particle_size=0.35,
-                                    lifetime=round(dist / 7.0, 2), vmin=6.5, vmax=7.5, rate=120, scale_rate=0.6,
-                                    rgb=(0.3, 0.6, 1.0))
-                gz.spawn_sdf(self.world, f'<sdf version="1.9"><model name="sim_water_drop"><static>true</static>'
+                # Visual-only styling; per-drone state, wetting and spawn lifecycle stay unchanged.
+                import runpy
+                from pathlib import Path
+                source = Path(gz.PUFF_TEXTURE).parent / "fire/crown_visuals.py"
+                if not source.is_file():
+                    source = Path(__file__).resolve().parent.parent / "worlds/media/fire/crown_visuals.py"
+                em = runpy.run_path(str(source))["water_emitter_sdf"]((dx, dy, dz), dist)
+                gz.spawn_sdf(self.world, f'<sdf version="1.9"><model name="sim_water_drop_{did}"><static>true</static>'
                                          f'<pose>{gz.pose(x, y, z - 0.5)}</pose><link name="l">{em}</link></model></sdf>',
-                             "sim_water_drop")
-            self.water = d
-            self.get_logger().info(f"SIMULATED water drop ON at {pos} (in effective range: {self.water_in_range})")
-        elif not active and self.water is not None:
-            self.water = None
-            self.water_in_range = False
+                             f"sim_water_drop_{did}")
+                self.get_logger().info(f"SIMULATED water drop ON (drone {did}) at {pos} -> target {target[:2]}")
+        elif not active and did in self.waters:
+            del self.waters[did]
+            self.water_in_range = any(math.dist(w["pos_enu"][:2], self.fire) <= self.range_m for w in self.waters.values())
             if self.visuals:
-                gz.remove_model(self.world, "sim_water_drop")
-            self.get_logger().info("SIMULATED water drop OFF")
+                gz.remove_model(self.world, f"sim_water_drop_{did}")
+            self.get_logger().info(f"SIMULATED water drop OFF (drone {did})")
+        self.water = next(iter(self.waters.values()), None)
+
+    def _ground_at(self, target) -> float:
+        best = min([(math.dist((sp["x"], sp["y"]), target[:2]), sp.get("canopy_z", sp["z"])) for sp in self.spread]
+                   or [(0.0, self.fire_z)])
+        return float(best[1]) if best[0] < 15 else self.fire_z
 
     # ------------------------------------------------------------------ model
     def _now(self) -> float:
@@ -212,15 +198,34 @@ class FireSim(Node):
         was_active = self.model.active
         if self.t_start is None and now > 0:
             self.t_start = now
-        if self.t_start is not None and self.model.active and self.model.intensity >= 0.25:
+        if self.fleet and not self.handover and self.t_start is not None and \
+                now - self.t_start >= float(self.fleet["firefighter_eta_s"]):
+            self.handover = True
+            self.get_logger().info("SIMULATED ground crews arrived (assumed ETA): spread model stopped, handover")
+        if self.t_start is not None and self.model.active and self.model.intensity >= 0.25 and not self.handover:
+            burning = set(self.ignited)
+            held = 0
             for i, sp in enumerate(self.spread):
-                if i not in self.ignited and now - self.t_start >= sp["t_ignite_s"]:
-                    self.ignited.append(i)
-                    self._spawn_spot(i, sp)
+                if i in burning or now - self.t_start < sp["t_ignite_s"]:
+                    continue
+                par = sp.get("parent")
+                if par is not None and par >= 0 and par not in burning:
+                    continue  # fire only spreads from a burning neighbour
+                if self.wet_until[i] > now:
+                    held += 1
+                    continue  # SIMULATED wetted fuel: held for now
+                self.ignited.append(i)
+                burning.add(i)
+                self._spawn_spot(i, sp)
+            if held > self.held_now:
+                self.blocked_events += held - self.held_now
+            self.held_now = held
         dt = now - self.t_prev
         if dt < 0 or dt > 5.0:  # clock jump / first /clock message: do not integrate
             dt = 0.0
-        self.model.step(dt, self.water is not None and self.water_in_range, math.sqrt(1 + len(self.ignited)))
+        # Fleet mode never claims extinguishing: water only holds the spread (wet fuel ahead of the front).
+        water_on_fire = (self.water is not None and self.water_in_range) and not self.fleet
+        self.model.step(dt, water_on_fire, math.sqrt(1 + len(self.ignited)))
         self.t_prev = now
         if was_active and not self.model.active:
             self.out_since = now
@@ -237,7 +242,17 @@ class FireSim(Node):
                    "water_in_effective_range": self.water_in_range, "wind": self.sc["wind"],
                    "incident_id": self.sc["mission"]["incident_id"], "scenario_id": self.scenario_id,
                    "spread_points_burning": len(self.ignited) if self.model.active else 0,
-                   "spread_points_total": len(self.spread)})
+                   "spread_points_total": len(self.spread), "ignited_idx": list(self.ignited),
+                   "drones_spraying": sorted(self.waters)})
+        if self.fleet:
+            now = self._now()
+            pending = [i for i in range(len(self.spread)) if i not in set(self.ignited)]
+            st.update({"containment": {"label": "SIMULATED containment (wet fuel holds the front); not extinguishing",
+                                       "wet_points": sum(1 for i in pending if self.wet_until[i] > now),
+                                       "held_now": self.held_now, "hold_events": self.blocked_events,
+                                       "unburned_points": len(pending), "handover": self.handover,
+                                       "firefighter_eta_s": self.fleet["firefighter_eta_s"],
+                                       "sim_s_since_ignition": round(now - self.t_start, 1) if self.t_start else 0.0}})
         self.pub.publish(String(data=json.dumps(st)))
 
 
@@ -246,9 +261,10 @@ def main() -> None:
     node = FireSim()
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
+        gz.close_fire_transport()
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
