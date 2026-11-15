@@ -11,6 +11,7 @@ import {
 import { distanceKm, droneTasks, FLEET, outerRing, planFleet, stagingPoint, type FleetPlan } from "@/lib/fleet";
 import s from "./ops.module.css";
 import SiteNav, { useLocale } from "./SiteNav";
+import Icon from "../Icon";
 
 type Locale = "pt" | "en";
 type Mode = "live" | "replay";
@@ -375,58 +376,37 @@ export default function OpsConsole() {
       )}
 
       {mode === "replay" && index && frame && (
-        <section className={s.card}>
-          <div className={s.head}>
-            <h1 className={s.title}>Piódão, Arganil</h1>
-            {frame.fogos_status && alertAt && <span className={s.tertiary}>{frame.fogos_status.status}</span>}
+        <section className={s.incidentCard} aria-label="Incident overview">
+          <div className={s.incidentTopline}>
+            <span className={s.replayLabel}><i />Historical replay</span>
+            <time dateTime={new Date(t).toISOString()}>{lisbon(new Date(t).toISOString(), locale, true)} <span>Lisbon</span></time>
           </div>
-          <p className={s.secondary}>{lisbon(new Date(t).toISOString(), locale, true)}</p>
-
-          {!alertAt ? (
-            <p className={s.waiting}>{L.waiting}</p>
-          ) : (
-            <>
-              <dl className={s.stats}>
-                <div><dt>{L.area}</dt><dd>{fmt(frame.model.area_ha_p50, locale)}<small>ha</small></dd></div>
-                {frame.weather && <div><dt>{L.wind}</dt><dd>{Math.round(frame.weather.wind_mps * 3.6)}<small>km/h {compassPoint(frame.weather.wind_from_deg, locale)}</small></dd></div>}
-                <div><dt>{L.evacuated}</dt><dd>{evacuated}</dd></div>
-                {(agent || plan) && (
-                  <div>
-                    <dt>{L.dronesStat}</dt>
-                    <dd><button className={s.statButton} onClick={() => setPanel(panel === "fleet" ? null : "fleet")}>{agent ? agent.count : plan!.total}</button><small>{agent ? agentAirborne : plan!.airborne} {L.inAir}</small></dd>
-                  </div>
-                )}
-              </dl>
-              <p className={s.tertiary}>
-                {L.alert} {lisbon(alertAt, locale)}
-                {agent && firstLaunch != null && <> · {L.launched} {lisbon(new Date(firstLaunch).toISOString(), locale)} ({L.simulated})</>}
-                {!agent && plan && !plan.grounded && <> · {L.launched} {lisbon(alertAt, locale)} ({L.simulated})</>}
-              </p>
-              {targets.length > 0 && (
-                <button className={s.sarLine} onClick={() => setPanel(panel === "sar" ? null : "sar")}>{L.sarLine(targets.length)} →</button>
-              )}
-              {latest && (
-                <a className={s.latest} href={latest.url} target="_blank" rel="noreferrer">
-                  <span>{lisbon(latest.known_at, locale)} · {latest.publisher}</span>
-                  {locale === "pt" ? latest.quote : latest.statement_en}
-                </a>
-              )}
-            </>
-          )}
-
-          <div className={s.foot}>
-            <ul className={s.legend} aria-label="Legenda">
-              <li><i style={{ background: FIRE.p50 }} />{L.legendArea}</li>
-              <li><i className={s.dash} />{L.legendForecast}</li>
-              <li><i className={s.round} style={{ background: "#ff453a" }} />{L.legendVillage}</li>
-              <li><i className={s.round} style={{ background: FIRE.drone }} />{L.legendDrone}</li>
-              <li><i className={s.pin} style={{ background: PIN_COLORS.event }} />{L.legendPin}</li>
-            </ul>
-            <div className={s.links}>
-              <button onClick={() => setPanel(panel === "sources" ? null : "sources")}>{L.sources}</button>
-              <button onClick={() => void (panel === "accuracy" ? setPanel(null) : openAccuracy())}>{L.accuracy}</button>
+          <div className={s.incidentHeading}>
+            <div className={s.incidentMark}><Icon name="flame" size={22} /></div>
+            <div><h1>Piódão</h1><p>Arganil · Central Portugal</p></div>
+            {frame.fogos_status && alertAt && <span className={s.incidentStatus}>{({"Em Curso":"Active","Em Resolução":"Resolving","Conclusão":"Concluded","Despacho":"Dispatched","Início":"Reported"} as Record<string,string>)[frame.fogos_status.status] ?? "Reported"}</span>}
+          </div>
+          {!alertAt ? <p className={s.incidentWaiting}>{L.waiting}</p> : <>
+            <dl className={s.metricTiles}>
+              <div><dt><Icon name="layers" size={14} />Modelled area</dt><dd>{fmt(frame.model.area_ha_p50,locale)}<small>ha</small></dd><span>Median model estimate</span></div>
+              <div><dt><Icon name="wind" size={14} />Wind</dt><dd>{frame.weather ? Math.round(frame.weather.wind_mps*3.6) : "—"}<small>km/h</small></dd><span>{frame.weather ? "From " + compassPoint(frame.weather.wind_from_deg,locale) + " · ERA5 reanalysis" : "Weather unavailable"}</span></div>
+              <div><dt><Icon name="pin" size={14} />Evacuated</dt><dd>{evacuated}<small>villages</small></dd><span>Named in verified reports</span></div>
+              <div className={s.fleetMetric}><dt><Icon name="plane" size={14} />Drone fleet <em>SIM</em></dt><dd><button aria-label="View drone fleet calculation" onClick={()=>setPanel(panel==="fleet"?null:"fleet")}>{agent ? agent.count : plan?.total ?? 0}<Icon name="arrow" size={15}/></button></dd><span>{agent ? agentAirborne : plan?.airborne ?? 0} planned airborne</span></div>
+            </dl>
+            <div className={s.incidentMilestones}>
+              <div><i/><span>First alert</span><time>{lisbon(alertAt,locale)}</time></div>
+              <div><i/><span>Fleet assigned <em>simulated</em></span><time>{agent && firstLaunch != null ? lisbon(new Date(firstLaunch).toISOString(),locale) : plan && !plan.grounded ? lisbon(alertAt,locale) : "Pending"}</time></div>
             </div>
+            {targets.length>0 && <button className={s.peopleAction} onClick={()=>setPanel(panel==="sar"?null:"sar")}><span className={s.peopleCount}>{targets.length}</span><span><strong>Locations with people</strong><small>View reports &amp; simulated response</small></span><Icon name="arrow" size={16}/></button>}
+            {latest && <details className={s.incidentUpdate}><summary><span>Latest source update</span><time>{lisbon(latest.known_at,locale)}</time></summary><a href={latest.url} target="_blank" rel="noreferrer"><span>{latest.publisher} <Icon name="external" size={11}/></span><p>{latest.statement_en}</p></a></details>}
+          </>}
+          <div className={s.incidentFooter}>
+            <button onClick={()=>setPanel(panel==="sources"?null:"sources")}><Icon name="layers" size={14}/>Sources<span>{known.length}</span></button>
+            <button onClick={()=>void(panel==="accuracy"?setPanel(null):openAccuracy())}>Forecast accuracy<Icon name="arrow" size={13}/></button>
           </div>
+          <details className={s.incidentLegend}><summary>Map legend</summary><ul>
+            <li><i style={{background:FIRE.p50}}/>Modelled fire</li><li><i style={{background:FIRE.envelope}}/>6-hour forecast</li><li><i style={{background:"#ff453a"}}/>Evacuated village</li><li><i style={{background:FIRE.drone}}/>Simulated drone</li><li><i style={{background:PIN_COLORS.event}}/>Nearby event</li>
+          </ul></details>
         </section>
       )}
 
