@@ -5,7 +5,7 @@ import { loadMapLibre } from "@/lib/terrain";
 import { loadOpsStyle, setThreeD } from "@/lib/ops-map";
 import {
   addReplayLayers, compassPoint, FIRE, frameAt, lisbon, REPLAY_BASE, setReplayVisible, showReplayFrame, showVillages, villagesAt,
-  showFleet, pinsAt, pinElement, PIN_COLORS, type ReplayFrame, type ReplayIndex, type ValidationRow,
+  showFleet, pinsAt, pinElement, rescueTargetsAt, PIN_COLORS, type ReplayFrame, type ReplayIndex, type ValidationRow,
 } from "@/lib/replay";
 import { distanceKm, droneTasks, FLEET, outerRing, planFleet, stagingPoint, type FleetPlan } from "@/lib/fleet";
 import s from "./ops.module.css";
@@ -37,7 +37,9 @@ const T = {
     checkedAt: "Portugal continental · verificado às", area: "Área", spread: "Avanço", wind: "Vento", evacuated: "Evacuadas",
     waiting: "A aguardar o primeiro alerta.", alert: "Alerta", drones: "drones", simulated: "simulado",
     sources: "Fontes", accuracy: "Precisão", dronesStat: "Drones", inAir: "no ar", launched: "drones lançados", legendPin: "Ocorrência",
-    pinKinds: { event: "Evento", shelter: "Abrigo", road: "Estrada cortada" }, source: "fonte",
+    pinKinds: { event: "Evento", shelter: "Abrigo", road: "Estrada cortada", people: "Pessoas no local" }, source: "fonte",
+    sarLine: (n: number) => `Context.dev: ${n} ${n === 1 ? "local com pessoas" : "locais com pessoas"} · enviar drone de busca e salvamento`,
+    sarTitle: "Busca e salvamento", sarNote: "Locais com pessoas que o Context.dev encontrou nas notícias, por distância ao fogo. Sugestão: enviar um drone de busca e salvamento a cada um (simulação).", sarAction: "Enviar drone de busca e salvamento", peopleN: (n: number) => `${n} pessoas`, km: "km do fogo",
     fleetTitle: "Quantos drones", fleetNote: "Cálculo simples com dados já públicos no momento. Drones e despacho são simulados; constantes de demonstração.",
     fleetRows: (p: FleetPlan) => [
       [`Frente ativa ${dec(p.front_km, 1)} km ÷ ${dec(p.segment_km, 1)} km por drone (passagem a cada ${FLEET.revisit_min} min)`, p.perimeter],
@@ -61,7 +63,9 @@ const T = {
     checkedAt: "Mainland Portugal · checked at", area: "Area", spread: "Spread", wind: "Wind", evacuated: "Evacuated",
     waiting: "Waiting for the first alert.", alert: "Alert", drones: "drones", simulated: "simulated",
     sources: "Sources", accuracy: "Accuracy", dronesStat: "Drones", inAir: "airborne", launched: "drones launched", legendPin: "Nearby event",
-    pinKinds: { event: "Event", shelter: "Shelter", road: "Road closed" }, source: "source",
+    pinKinds: { event: "Event", shelter: "Shelter", road: "Road closed", people: "People on site" }, source: "source",
+    sarLine: (n: number) => `Context.dev: ${n} ${n === 1 ? "place with people" : "places with people"} · send a search-and-rescue drone`,
+    sarTitle: "Search and rescue", sarNote: "Places with people that Context.dev found in the news, by distance from the fire. Suggestion: send a search-and-rescue drone to each (simulation).", sarAction: "Send search-and-rescue drone", peopleN: (n: number) => `${n} people`, km: "km from the fire",
     fleetTitle: "How many drones", fleetNote: "A simple calculation using only data public at the time. Drones and dispatch are simulated; demonstration constants.",
     fleetRows: (p: FleetPlan) => [
       [`Active front ${p.front_km.toFixed(1)} km ÷ ${p.segment_km.toFixed(1)} km per drone (each point seen every ${FLEET.revisit_min} min)`, p.perimeter],
@@ -91,7 +95,7 @@ export default function OpsConsole() {
   const [frame, setFrame] = useState<ReplayFrame | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [panel, setPanel] = useState<"sources" | "accuracy" | "fleet" | null>(null);
+  const [panel, setPanel] = useState<"sources" | "accuracy" | "fleet" | "sar" | null>(null);
   const [accuracy, setAccuracy] = useState<Accuracy | null>(null);
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
@@ -235,6 +239,7 @@ export default function OpsConsole() {
   const steps = useMemo(() => (index?.automation ?? []).filter((a) => Date.parse(a.at) <= cut), [index, cut]);
   const alertAt = steps.find((a) => a.step === "reported")?.at;
   const pins = useMemo(() => (index ? pinsAt(index, cut) : []), [index, cut]);
+  const targets = useMemo(() => (index ? rescueTargetsAt(index, cut) : []), [index, cut]);
   useEffect(() => { if (ready && map.current) showVillages(map.current, villages); }, [villages, ready]);
 
   // Drone fleet: sized from the front, the wind and nearby places, all as known at the minute on screen.
@@ -393,6 +398,9 @@ export default function OpsConsole() {
                 {L.alert} {lisbon(alertAt, locale)}
                 {plan && !plan.grounded && <> · {L.launched} {lisbon(alertAt, locale)} ({L.simulated})</>}
               </p>
+              {targets.length > 0 && (
+                <button className={s.sarLine} onClick={() => setPanel(panel === "sar" ? null : "sar")}>{L.sarLine(targets.length)} →</button>
+              )}
               {latest && (
                 <a className={s.latest} href={latest.url} target="_blank" rel="noreferrer">
                   <span>{lisbon(latest.known_at, locale)} · {latest.publisher}</span>
@@ -428,6 +436,28 @@ export default function OpsConsole() {
                   <span>{lisbon(e.known_at, locale, true)} · {e.publisher}</span>
                   {locale === "pt" ? e.quote : e.statement_en}
                 </a>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      )}
+
+      {mode === "replay" && panel === "sar" && (
+        <aside className={s.panel} aria-label={L.sarTitle}>
+          <PanelHead title={L.sarTitle} note={L.sarNote} close={L.close} onClose={() => setPanel(null)} />
+          <ol className={s.list}>
+            {targets.map((tg) => (
+              <li key={tg.id}>
+                <div className={s.target}>
+                  <button className={s.targetHead} onClick={() => map.current?.flyTo({ center: tg.position, zoom: 13, duration: 1600, essential: true })}>
+                    <i style={{ background: PIN_COLORS[tg.kind] }} />
+                    <strong>{L.pinKinds[tg.kind]} · {tg.place}</strong>
+                    <span>{tg.distance_km.toFixed(1).replace(".", locale === "pt" ? "," : ".")} {L.km}{tg.people != null ? ` · ${L.peopleN(tg.people)}` : ""}</span>
+                  </button>
+                  <p>{locale === "pt" ? tg.items[0].quote : tg.items[0].statement_en}</p>
+                  <a href={tg.items[0].url} target="_blank" rel="noreferrer">{lisbon(tg.items[0].known_at, locale, true)} · {tg.items[0].publisher}</a>
+                  <em className={s.sarAction}>→ {L.sarAction}</em>
+                </div>
               </li>
             ))}
           </ol>

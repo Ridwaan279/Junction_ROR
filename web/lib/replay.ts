@@ -79,7 +79,7 @@ export function addReplayLayers(map: LibreMap) {
     "circle-radius": 4, "circle-color": "#ffffff", "circle-stroke-color": "rgba(0,0,0,0.6)", "circle-stroke-width": 1 } });
 }
 
-export const PIN_COLORS = { event: "#bf5af2", shelter: "#30d158", road: "#ff9f0a" } as const;
+export const PIN_COLORS = { event: "#bf5af2", shelter: "#30d158", road: "#ff9f0a", people: "#0a84ff" } as const;
 export type PinKind = keyof typeof PIN_COLORS;
 
 /** Pin element for a MapLibre Marker (DOM markers stay visible when deep valleys hide map symbols in 3D). */
@@ -96,7 +96,7 @@ export type Pin = { id: string; kind: PinKind; place: string; position: [number,
   items: { quote: string; statement_en: string; url: string; publisher: string; known_at: string }[] };
 const SHELTER_WORDS = /abrig|acolhiment|casa do povo|centro social|encaminhad|\blares?\b|igreja/i;
 const EVENT_WORDS = /\b(festa|festas|feira|romaria|festival|arraial|procissão|concerto|evento)\b/i;
-const PIN_OFFSET: Record<PinKind, number> = { event: 0, shelter: 0.0045, road: -0.0045 };
+const PIN_OFFSET: Record<PinKind, number> = { event: 0, shelter: 0.0045, road: -0.0045, people: 0.0025 };
 
 /** Events, shelters and road closures named in verified reports already public at t. */
 export function pinsAt(index: ReplayIndex, t: number): Pin[] {
@@ -105,7 +105,8 @@ export function pinsAt(index: ReplayIndex, t: number): Pin[] {
     if (e.quality !== "verified" || Date.parse(e.known_at) > t) continue;
     const kind: PinKind | null = e.category === "event_gathering" && EVENT_WORDS.test(e.quote) ? "event"
       : e.category === "shelter" && SHELTER_WORDS.test(e.quote) ? "shelter"
-      : e.category === "road_closure" ? "road" : null;
+      : e.category === "road_closure" ? "road"
+      : e.category === "people_present" ? "people" : null;
     if (!kind) continue;
     for (const p of e.places) {
       if (!p.geonames || !p.position || MUNICIPALITIES.has(p.geonames)) continue;
@@ -193,3 +194,28 @@ export type ValidationRow = {
   observed_area_ha: number; predicted_area_ha_p10: number; predicted_area_ha_p50: number; predicted_area_ha_p90: number;
   dice_total: number; dice_growth: number; observed_growth_bearing_deg: number; predicted_growth_bearing_deg: number;
 };
+
+/** Search-and-rescue targets: places where verified reports put people (events, shelters, people still there). */
+export type RescueTarget = Pin & { latest: string; people: number | null; distance_km: number };
+export function rescueTargetsAt(index: ReplayIndex, t: number): RescueTarget[] {
+  const ig = index.ignition.position, k = Math.cos((ig[1] * Math.PI) / 180);
+  const people = new Map<string, number>();
+  for (const e of index.evidence) {
+    if (e.quality !== "verified" || e.category !== "people_present" || Date.parse(e.known_at) > t || e.number == null) continue;
+    const named = e.places.filter((p) => p.geonames && !MUNICIPALITIES.has(p.geonames));
+    if (named.length === 1 && /pessoa|habitante|morador|residente/i.test(e.unit ?? "")) people.set(named[0].geonames!, e.number);
+  }
+  const words: Record<string, RegExp> = { event: EVENT_WORDS, shelter: SHELTER_WORDS, people: /pessoa|habitante|morador|idos|residente|popula/i };
+  const at = (q: string, re: RegExp) => { const m = re.exec(q); return m ? m.index : 9999; };
+  return pinsAt(index, t)
+    .filter((p) => p.kind !== "road")
+    .map((p) => ({
+      ...p,
+      // Show the most on-topic report first: the one where the target's words appear earliest.
+      items: [...p.items].sort((a, b) => at(a.quote, words[p.kind]) - at(b.quote, words[p.kind])),
+      latest: p.items.reduce((a, b) => (b.known_at > a ? b.known_at : a), ""),
+      people: p.kind === "people" ? people.get(p.place) ?? null : null,
+      distance_km: Math.hypot((p.position[0] - ig[0]) * k, p.position[1] - ig[1]) * 111.32,
+    }))
+    .sort((a, b) => a.distance_km - b.distance_km);
+}

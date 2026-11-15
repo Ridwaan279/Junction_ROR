@@ -29,6 +29,7 @@ glow, no decorative badges, no zoom buttons (gestures), credits behind one (i).
 | Replay | Card: place, current replay time, Fogos.pt status; four numbers (area, spread, wind, evacuated villages); one line with alert time and simulated drone launch; the latest verified report (links to the article); a one-line legend; two links, Sources and Accuracy. Map: modelled fire, 6 h/12 h forecast, dense smoke, villages from verified reports, simulated drones. Bottom: play/pause and a thin timeline |
 | Drones | "Drones" figure = fleet size from `web/lib/fleet.ts`: ⌈front/4.5 km⌉ + (1 + ⌊wind/20 km/h⌋) + ⌈places within 15 km/3⌉ airborne, ÷ duty (60 min flight, 20 min recharge, 5.6 min transit), +20 % reserve; grounded above 50 km/h gusts. Tap it for the working. The map draws exactly the airborne drones from a staging point 5 km upwind; launch times follow the moment each drone became necessary |
 | Pins | Events (purple), shelters (green) and road closures (orange) from verified reports, as DOM markers so they stay visible in deep valleys in 3D; tap for the quote and source |
+| Search and rescue | Card line "Context.dev: N places with people · send a search-and-rescue drone" opens a list of places where verified reports put people (events, shelters, people still on site), nearest to the fire first, each with its best-matching quote, source and the suggestion to send a search-and-rescue drone (simulation; drones are not routed there). Blue pins mark people on site |
 | Tabs | Map · Data (`/data`: everything Context.dev pulled, monitors, pages, searches, live check, accuracy rules) · Methods (`/methods`: formulas for spread, crown fire, smoke, drones, accuracy; tech stack) |
 | Panels | Sources (every verified fact public at the cursor, with link) and Accuracy (forecast vs. observed GWIS perimeters, with the stricter new-growth score) |
 
@@ -70,6 +71,7 @@ live service offline.
 
 ## Next UI steps (pending the user's further input)
 
+- Agent 2's fleet is the agreed drone source (user decision): render its stations and 3D routes once `web/public/generated/arganil-early/` is pushed; the in-browser `lib/fleet.ts` plan is the fallback until then.
 - Swap the legacy drone plan for Agent 2's `fleet` (fixed stations, 3D smoke-avoiding routes with altitude) when delivered.
 - Point the live card at `GET /api/live/status` once the Rust service serves it.
 - Finer early frames (Agent 2, WORKPLAN 5.0b) will move "Drones launched" from 08:00 to minutes after the 05:08 report.

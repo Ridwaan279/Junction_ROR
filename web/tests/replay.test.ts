@@ -48,3 +48,20 @@ describe("nearby-event pins", () => {
     expect(pins.some((p) => p.kind === "road")).toBe(true);
   });
 });
+
+import { rescueTargetsAt } from "../lib/replay";
+describe("search-and-rescue targets", () => {
+  it("lists places with people, never road closures, sorted by distance", () => {
+    const tg = rescueTargetsAt(index, Date.parse(index.window.to));
+    expect(tg.length).toBeGreaterThan(2);
+    expect(tg.every((x) => x.kind !== "road")).toBe(true);
+    for (let i = 1; i < tg.length; i++) expect(tg[i].distance_km).toBeGreaterThanOrEqual(tg[i - 1].distance_km);
+    expect(tg.some((x) => x.kind === "event" && x.place === "Piódão")).toBe(true);
+  });
+  it("keeps a stated head count and reveals nothing early", () => {
+    const at = Date.parse("2025-08-13T22:46:00Z");
+    expect(rescueTargetsAt(index, at).find((x) => x.place === "Barroja")?.people).toBe(2);
+    expect(rescueTargetsAt(index, Date.parse("2025-08-13T22:44:00Z")).some((x) => x.place === "Barroja")).toBe(false);
+    for (const x of rescueTargetsAt(index, at)) for (const item of x.items) expect(Date.parse(item.known_at)).toBeLessThanOrEqual(at);
+  });
+});
