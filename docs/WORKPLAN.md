@@ -54,7 +54,7 @@ writes the proposal in its handoff and Agent 1 applies it at a gate.
 Rules that keep merges trivial:
 
 1. The JSON contracts in section 7 are frozen at Gate 0. Agent 1 builds against
-   hand-written fixtures in `web/public/fixtures/v2/`; Agent 2 makes the real
+   the real demo fixture in `web/public/fixtures/v2/` (DEMO_DATA.md); Agent 2 makes the real
    generator write the same shapes to `web/public/generated/`. Swapping fixture
    for generated output is a one-line URL change.
 2. A contract change is a request: proposed shape, consumers, fixture diff. The
@@ -166,6 +166,39 @@ Requirements:
 
 Agent 2's first task is the Context.dev accuracy work in
 [CONTEXT_DEV_ACCURACY.md](CONTEXT_DEV_ACCURACY.md). Then:
+
+### 5.0 What EmberWatch monitors around a fire
+
+Every monitor runs on a schedule per active incident, records request ID, credits
+and status, and feeds evidence with provenance. Real data only: demo and replay
+data must come from sources that were public at the time (see
+[DEMO_DATA.md](DEMO_DATA.md)); nothing is invented, and a capture that fails is a
+failure, not "nothing found".
+
+| Monitor | How | What it extracts |
+|---|---|---|
+| Official incident page | Context.dev scrape of the public Fogos.pt incident page (never the API, never `/gaia`) | Status changes with times, official coordinates, nature; current resource counts only while live |
+| News | Context.dev `web/search` + `web/scrape` with a schema; `news/search` only where its index covers the outlet (it does not cover Portuguese outlets, see DEMO_DATA.md) | Cause, spread direction, evacuations, shelters, threatened villages, resources over time |
+| Events and gatherings | Context.dev search + scrape of municipal agendas, parish and tourism pages, regional press | Festas, feiras, romarias, markets, campsites, summer camps: name, place, dates, stated attendance |
+| Anything else happening in the area | Context.dev search + scrape: civil protection, municipalities, GNR, roads, utilities | Road closures, evacuation and shelter notices, power/telecom outages, school/care-home moves, tourist presence |
+| Warnings and fire danger | IPMA API (current warnings, fire-risk index) plus dated reports of IPMA notices for history | Heat/wind warnings, fire danger level per municipality |
+| Weather | Open-Meteo forecast (live) or ERA5 archive (history), 9 points around the fire | Temperature, humidity, 10 m and 100–120 m wind speed and direction, gusts, cloud, radiation, rain, VPD; dead-fuel moisture derived from these |
+| Satellite | NASA FIRMS (needs `FIRMS_MAP_KEY`) | Hotspots for confirmation and growth |
+| Terrain and fuel | Terrarium DEM, OSM land cover (Overpass) | Slope, aspect, fuel class |
+
+Context.dev also cross-checks the numeric feeds: a report saying "ventos fortes"
+or "rajadas de 40 km/h" is compared with the weather feed for the same hour and
+flagged when they disagree.
+
+### 5.0b Demo data handover
+
+`data/demo/arganil-early/` and `web/public/fixtures/v2/arganil-early/` were created
+by Agent 1 before Agent 2 started (requested by the user). From now on Agent 2 owns
+`data/demo/**` and should (1) port the capture scripts to the Rust
+`probe_context` example, (2) produce 15–30 min frames for the first 3 hours,
+(3) fill `fleet`, `sitreps` and `fleet_check`, and write the result to
+`web/public/generated/arganil-early/` in the same format. Agent 1 keeps
+`web/public/fixtures/**`.
 
 ### 5.1 Drone stations (simulated)
 
@@ -317,10 +350,28 @@ type Route = { waypoints: { position: [number, number, number]; t_s: number }[];
   legs: { kind: "flight" | "ground_transfer"; from: number; to: number }[];
   duration_s: number; distance_m: number; straight_line_m: number;
   detour_reason: string | null; max_smoke_ugm3: number; reserve_pct_at_return: number };
-type ExposureSite = { id: string; name: string; kind: string; position: [number, number] | null;
-  start: string | null; end: string | null; people: number | null; people_basis: "stated" | "kind_default" | null;
-  p_fire_6h: number | null; priority: number | null; sources: Source[] };
+type ExposureSite = { id: string; name: string;
+  kind: ("evacuated" | "threatened" | "shelter" | "people_present" | "event" | "road_closure")[];
+  position: [number, number] | null; people: number | null; people_basis: string | null; // "stated: <evidence id>" or "kind_default"
+  population_geonames: number | null; distance_from_ignition_km: number;
+  events: { name: string | null; scheduled_start_text: string | null; scheduled_start_date: string | null;
+    scheduled_start_basis: string | null; status: "cancelled" | null; evidence: string }[];
+  evidence: string[]; in_modelled_burn_p50: boolean; in_forecast_6h: boolean; in_forecast_12h: boolean;
+  p_fire_6h?: number | null; priority?: number | null };
+type Evidence = { id: string; page: string; category: string; extracted_category: string; checks: string[];
+  statement_en: string; quote: string; places: { name: string; geonames: string | null; position: [number, number] | null }[];
+  time_text: string | null; number: number | null; unit: string | null; quality: "verified" | "unverified";
+  number_check: "in_quote" | "not_literal_in_quote" | null; known_at: string; url: string; publisher: string;
+  lineage: string | null; mode: "live" | "historical" };
+type Monitor = { id: string; category: string; provider: string; target: string;
+  status: "ok" | "coverage_gap" | "not_run" | "failed"; items: number; note: string };
 ```
+
+Revision 2.1 (after Gate 0, before any consumer shipped): `ExposureSite`,
+`Evidence`, `Monitor` and the frame layout follow the real demo data in
+[DEMO_DATA.md](DEMO_DATA.md), which is the reference fixture for both agents.
+`AutomationEvent` gains `basis: "observed" | "simulated"` and `url`. Frames list
+`evidence_ids`; the evidence itself lives once in `index.json`.
 
 ### 7.3 Advisor outputs
 

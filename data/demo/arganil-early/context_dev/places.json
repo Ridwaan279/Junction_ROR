@@ -1,0 +1,436 @@
+{
+ "Piódão": {
+  "geonames_id": 2736172,
+  "name": "Piódão",
+  "position": [
+   -7.82448,
+   40.22957
+  ],
+  "elevation_m": 705.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Piódão",
+  "population": null,
+  "distance_km": 0.4,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2736172",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Pi%C3%B3d%C3%A3o&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Pomares": {
+  "geonames_id": 2736101,
+  "name": "Pomares",
+  "position": [
+   -7.89044,
+   40.27144
+  ],
+  "elevation_m": 325.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Pomares",
+  "population": null,
+  "distance_km": 7.5,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2736101",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Pomares&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Porto Silvado": {
+  "geonames_id": 2735908,
+  "name": "Porto Silvado",
+  "position": [
+   -7.84546,
+   40.25774
+  ],
+  "elevation_m": 576.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Pomares",
+  "population": null,
+  "distance_km": 3.7,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2735908",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Porto+Silvado&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Gramaça": {
+  "geonames_id": 2738864,
+  "name": "Gramaça",
+  "position": [
+   -7.8409,
+   40.26328
+  ],
+  "elevation_m": 780.0,
+  "feature_code": "PPL",
+  "admin2": "Oliveira do Hospital",
+  "admin3": "Aldeia das Dez",
+  "population": null,
+  "distance_km": 4.0,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2738864",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Grama%C3%A7a&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Chãs de Égua": {
+  "geonames_id": 2740774,
+  "name": "Chãs de Égua",
+  "position": [
+   -7.79846,
+   40.23624
+  ],
+  "elevation_m": 737.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Piódão",
+  "population": null,
+  "distance_km": 1.9,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2740774",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Ch%C3%A3s+de+%C3%89gua&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Foz de Égua": null,
+ "Sobral Gordo": {
+  "geonames_id": 2733919,
+  "name": "Sobral Gordo",
+  "position": [
+   -7.87153,
+   40.23737
+  ],
+  "elevation_m": 664.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Pomares",
+  "population": null,
+  "distance_km": 4.5,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2733919",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Sobral+Gordo&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Sobral Magro": {
+  "geonames_id": 2733917,
+  "name": "Sobral Magro",
+  "position": [
+   -7.85654,
+   40.24831
+  ],
+  "elevation_m": 485.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Pomares",
+  "population": null,
+  "distance_km": 3.7,
+  "ambiguous": true,
+  "source_url": "https://www.geonames.org/2733917",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Sobral+Magro&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Vide": {
+  "geonames_id": 2732766,
+  "name": "Vide",
+  "position": [
+   -7.78401,
+   40.29528
+  ],
+  "elevation_m": 298.0,
+  "feature_code": "PPL",
+  "admin2": "Seia",
+  "admin3": "União das freguesias de Vide e Cabeça",
+  "population": 761,
+  "distance_km": 7.8,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2732766",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Vide&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Chão Sobral": {
+  "geonames_id": 2740785,
+  "name": "Chão Sobral",
+  "position": [
+   -7.82995,
+   40.28451
+  ],
+  "elevation_m": 618.0,
+  "feature_code": "PPL",
+  "admin2": "Oliveira do Hospital",
+  "admin3": "Aldeia das Dez",
+  "population": null,
+  "distance_km": 6.0,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2740785",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Ch%C3%A3o+Sobral&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Soito da Ruiva": null,
+ "Aldeia das Dez": {
+  "geonames_id": 2743186,
+  "name": "Aldeia das Dez",
+  "position": [
+   -7.86364,
+   40.2955
+  ],
+  "elevation_m": 393.0,
+  "feature_code": "PPL",
+  "admin2": "Oliveira do Hospital",
+  "admin3": "Aldeia das Dez",
+  "population": null,
+  "distance_km": 8.1,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2743186",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Aldeia+das+Dez&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Vale do Torno": {
+  "geonames_id": 2733044,
+  "name": "Vale do Torno",
+  "position": [
+   -7.85612,
+   40.26099
+  ],
+  "elevation_m": 466.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Pomares",
+  "population": null,
+  "distance_km": 4.6,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2733044",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Vale+do+Torno&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Casal do Monte": null,
+ "Fajoeira": null,
+ "Malhada Chã": {
+  "geonames_id": 2737998,
+  "name": "Malhada Chã",
+  "position": [
+   -7.80622,
+   40.205
+  ],
+  "elevation_m": 863.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Piódão",
+  "population": null,
+  "distance_km": 3.1,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2737998",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Malhada+Ch%C3%A3&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Mourísia": {
+  "geonames_id": 2737284,
+  "name": "Mourisia",
+  "position": [
+   -7.87751,
+   40.22103
+  ],
+  "elevation_m": 806.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "União das freguesias de Cerdeira e Moura da Serra",
+  "population": null,
+  "distance_km": 5.0,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2737284",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Mour%C3%ADsia&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Côja": {
+  "geonames_id": 11711028,
+  "name": "Coja",
+  "position": [
+   -7.97462,
+   40.27499
+  ],
+  "elevation_m": 231.0,
+  "feature_code": "AIRF",
+  "admin2": "Arganil",
+  "admin3": "União das freguesias de Côja e Barril de Alva",
+  "population": null,
+  "distance_km": 14.0,
+  "ambiguous": true,
+  "source_url": "https://www.geonames.org/11711028",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=C%C3%B4ja&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Cide": {
+  "geonames_id": 2740723,
+  "name": "Cide",
+  "position": [
+   -7.78979,
+   40.27282
+  ],
+  "elevation_m": 485.0,
+  "feature_code": "PPL",
+  "admin2": "Seia",
+  "admin3": "União das freguesias de Vide e Cabeça",
+  "population": null,
+  "distance_km": 5.3,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2740723",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Cide&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Barroja": {
+  "geonames_id": 2742342,
+  "name": "Barroja",
+  "position": [
+   -7.87086,
+   40.27096
+  ],
+  "elevation_m": 513.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Pomares",
+  "population": null,
+  "distance_km": 6.2,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2742342",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Barroja&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Agroal": {
+  "geonames_id": 2743329,
+  "name": "Agroal",
+  "position": [
+   -7.88549,
+   40.26391
+  ],
+  "elevation_m": 309.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Pomares",
+  "population": null,
+  "distance_km": 6.7,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2743329",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Agroal&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Casas Figueiras": {
+  "geonames_id": 2741092,
+  "name": "Casas Figueiras",
+  "position": [
+   -7.8059,
+   40.25857
+  ],
+  "elevation_m": 535.0,
+  "feature_code": "PPL",
+  "admin2": "Seia",
+  "admin3": "União das freguesias de Vide e Cabeça",
+  "population": null,
+  "distance_km": 3.3,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2741092",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Casas+Figueiras&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Gondufo": {
+  "geonames_id": 2738917,
+  "name": "Gondufo",
+  "position": [
+   -7.78039,
+   40.25631
+  ],
+  "elevation_m": 610.0,
+  "feature_code": "PPL",
+  "admin2": "Seia",
+  "admin3": "União das freguesias de Vide e Cabeça",
+  "population": null,
+  "distance_km": 4.4,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2738917",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Gondufo&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Vale de Maceira": null,
+ "Casal Cimeiro": null,
+ "Golinho": null,
+ "Parente": null,
+ "Pampilhosa da Serra": {
+  "geonames_id": 2736793,
+  "name": "Pampilhosa da Serra",
+  "position": [
+   -7.95182,
+   40.0462
+  ],
+  "elevation_m": 398.0,
+  "feature_code": "PPLA2",
+  "admin2": "Pampilhosa da Serra",
+  "admin3": "Pampilhosa da Serra",
+  "population": 1389,
+  "distance_km": 23.4,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2736793",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Pampilhosa+da+Serra&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Ponte das Três Entradas": {
+  "geonames_id": 10303562,
+  "name": "Ponte das Três Entradas",
+  "position": [
+   -7.87115,
+   40.30779
+  ],
+  "elevation_m": 234.0,
+  "feature_code": "PPL",
+  "admin2": "Oliveira do Hospital",
+  "admin3": "União das freguesias de Santa Ovaia e Vila Pouca da Beira",
+  "population": null,
+  "distance_km": 9.6,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/10303562",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Ponte+das+Tr%C3%AAs+Entradas&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Arganil": {
+  "geonames_id": 2742757,
+  "name": "Arganil",
+  "position": [
+   -8.05403,
+   40.21826
+  ],
+  "elevation_m": 175.0,
+  "feature_code": "PPLA2",
+  "admin2": "Arganil",
+  "admin3": "Arganil",
+  "population": 11596,
+  "distance_km": 19.9,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2742757",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Arganil&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Oliveira do Hospital": {
+  "geonames_id": 2737038,
+  "name": "Oliveira do Hospital",
+  "position": [
+   -7.86014,
+   40.3618
+  ],
+  "elevation_m": 508.0,
+  "feature_code": "PPLA2",
+  "admin2": "Oliveira do Hospital",
+  "admin3": "União das freguesias de Oliveira do Hospital e São Paio de Gramaços",
+  "population": 4704,
+  "distance_km": 15.0,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2737038",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Oliveira+do+Hospital&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Seia": {
+  "geonames_id": 2734215,
+  "name": "Seia",
+  "position": [
+   -7.70859,
+   40.4151
+  ],
+  "elevation_m": 551.0,
+  "feature_code": "PPLA2",
+  "admin2": "Seia",
+  "admin3": "Seia",
+  "population": 7082,
+  "distance_km": 22.6,
+  "ambiguous": true,
+  "source_url": "https://www.geonames.org/2734215",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Seia&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Monte Frio": {
+  "geonames_id": 2737446,
+  "name": "Monte Frio",
+  "position": [
+   -7.91179,
+   40.22764
+  ],
+  "elevation_m": 658.0,
+  "feature_code": "PPL",
+  "admin2": "Arganil",
+  "admin3": "Benfeita",
+  "population": null,
+  "distance_km": 7.8,
+  "ambiguous": false,
+  "source_url": "https://www.geonames.org/2737446",
+  "lookup_url": "https://geocoding-api.open-meteo.com/v1/search?name=Monte+Frio&count=10&language=pt&countryCode=PT&format=json"
+ },
+ "Benfeita": null
+}

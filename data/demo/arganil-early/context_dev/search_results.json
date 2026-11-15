@@ -1,0 +1,1080 @@
+[
+ {
+  "name": "news_country",
+  "endpoint": "POST /v1/news/search",
+  "request_id": "2ffd9309-e068-4b25-bcf1-1075cc9dd1a3",
+  "credits": 0,
+  "error": [
+   {
+    "code": "invalid_value",
+    "values": [
+     "ae",
+     "ar",
+     "au",
+     "ca",
+     "cg",
+     "ch",
+     "cl",
+     "cz",
+     "de",
+     "fi",
+     "fr",
+     "gb",
+     "hk",
+     "il",
+     "in",
+     "jp",
+     "kr",
+     "mx",
+     "ng",
+     "nl",
+     "pk",
+     "qa",
+     "sa",
+     "se",
+     "sg",
+     "us",
+     "za"
+    ],
+    "path": [
+     "filterBy",
+     "sourceCountry",
+     0
+    ],
+    "message": "Invalid option: expected one of \"ae\"|\"ar\"|\"au\"|\"ca\"|\"cg\"|\"ch\"|\"cl\"|\"cz\"|\"de\"|\"fi\"|\"fr\"|\"gb\"|\"hk\"|\"il\"|\"in\"|\"jp\"|\"kr\"|\"mx\"|\"ng\"|\"nl\"|\"pk\"|\"qa\"|\"sa\"|\"se\"|\"sg\"|\"us\"|\"za\""
+   }
+  ],
+  "results": []
+ },
+ {
+  "name": "news_domains",
+  "endpoint": "POST /v1/news/search",
+  "request_id": "59a3b05f-5227-4114-b055-b0469e6dd7b5",
+  "credits": 0,
+  "error": null,
+  "results": []
+ },
+ {
+  "name": "news_en",
+  "endpoint": "POST /v1/news/search",
+  "request_id": "0b4d2072-eb4d-4ca3-957a-fe374f7ab39d",
+  "credits": 2,
+  "error": null,
+  "results": [
+   {
+    "url": "https://bbc.com/news/articles/cwy5dqxd0z1o",
+    "title": "Wildfire threatens major Greek city as heatwave grips Europe",
+    "description": "Heatwave blanketing southern Europe are sparking blazes from Portugal to the Balkans with a major fire in Greece. EPA/Shutterstock In Portugal, 1,800 firefighters have been deployed against five major blazes The crisis comes as a heatwave blankets southern Europe, sparking blazes from Portugal to t…",
+    "published_at": "2025-08-13T16:18:47.000Z",
+    "relevance": null,
+    "source_domain": "bbc.com"
+   },
+   {
+    "url": "https://bbc.co.uk/news/articles/cwy5dqxd0z1o",
+    "title": "Wildfire threatens major Greek city as heatwave grips Europe",
+    "description": "Heatwave blanketing southern Europe are sparking blazes from Portugal to the Balkans with a major fire in Greece. Image source, EPA/Shutterstock Image caption, In Portugal, 1,800 firefighters have been deployed against five major blazes The crisis comes as a heatwave blankets southern Europe, spark…",
+    "published_at": "2025-08-13T20:17:00.000Z",
+    "relevance": null,
+    "source_domain": "bbc.co.uk"
+   },
+   {
+    "url": "https://theguardian.com/world/2025/aug/13/spain-wildfires-climate-crisis-heatwave",
+    "title": "Spain wildfires are ‘clear warning’ of climate emergency, minister says",
+    "description": "Environment minister says blazes that have killed two people are proof of country’s vulnerability to global heating A 35-year-old volunteer firefighter died on Tuesday in the north-western Spanish region of Castilla y León, where fires have prompted the evacuation of more than 8,000 residents, and …",
+    "published_at": "2025-08-13T12:12:42.000Z",
+    "relevance": null,
+    "source_domain": "theguardian.com"
+   },
+   {
+    "url": "https://africanews.com/2025/08/13/morocco-sends-two-canadair-planes-to-battle-wildfires-in-portugal",
+    "title": "Morocco sends two Canadair planes to battle wildfires in Portugal | Africanews",
+    "description": "The dry climate in the Mediterranean has always made the area prone to wildfires, but experts say that climate change is exasperating the issue with more frequent and bigger fires. 'Sad exit': Portugal fans mourn hinted end of Ronaldo era Football: Ronaldo leaves Portugal training camp amid reporte…",
+    "published_at": "2025-08-13T14:19:06.000Z",
+    "relevance": null,
+    "source_domain": "africanews.com"
+   },
+   {
+    "url": "https://timesofindia.indiatimes.com/world/europe/man-killed-in-spain-wildfire-as-heat-wave-rages-in-europe/articleshow/123270719.cms",
+    "title": "Man killed in Spain wildfire as heat wave rages in Europe - Times of India",
+    "description": "Europe News: Wildfires burned in parts of Europe on Tuesday as millions of people across the continent struggled to adapt to searing heat waves, with temperatures . Where else in Spain are there fires? Elsewhere in Spain, firefighters and nearly 1,000 soldiers were battling blazes in regions includ…",
+    "published_at": "2025-08-13T04:01:00.000Z",
+    "relevance": null,
+    "source_domain": "timesofindia.indiatimes.com"
+   },
+   {
+    "url": "https://bbc.co.uk/newsround/articles/c93d026z0neo",
+    "title": "Extreme heat causing wildfires across southern Europe",
+    "description": "Countries such as Spain, Portugal, Italy and Greece have seen highs of more than 40 degrees Celsius in recent days. Image source, Getty Images - Published 13 August 2025 Emergency services across many areas of southern Europe are tacking wildfires which are continuing to spread due to very high tem…",
+    "published_at": "2025-08-13T12:32:00.000Z",
+    "relevance": null,
+    "source_domain": "bbc.co.uk"
+   },
+   {
+    "url": "https://aljazeera.com/news/2025/8/13/wildfires-rage-across-europe-killing-several-and-upheaving-thousands",
+    "title": "Wildfires scorch Greece as heatwave grips parts of Europe",
+    "description": "Nearly 5,000 firefighters assisted by 33 aircraft deployed in Greece as flames stoked by winds and hot, dry conditions. “Today, it will be another very difficult day, as the wildfire risk for most of the country’s regions will be very high,” Vathrakogiannis said. Temperatures were forecast to reach…",
+    "published_at": "2025-08-13T09:47:00.000Z",
+    "relevance": null,
+    "source_domain": "aljazeera.com"
+   },
+   {
+    "url": "https://theguardian.com/commentisfree/2025/aug/14/spanish-people-deadly-heatwaves-annual-event-politicians-denial",
+    "title": "Spanish people know deadly heatwaves are now an annual event. So why are our politicians in denial? | María Ramírez",
+    "description": "We need everyday solutions like ‘cool banks’ and shaded areas, as well as serious policies on emissions, says María Ramírez, deputy managing editor of elDiario.es - Greece battles wildfires – in pictures ### Greece battles wildfires – in pictures - Two helicopters collide outside Athens as Greece b…",
+    "published_at": "2025-08-14T04:00:22.000Z",
+    "relevance": null,
+    "source_domain": "theguardian.com"
+   },
+   {
+    "url": "https://arabnews.com/node/2611684/world",
+    "title": "Wildfires scorch Greece for a second day, thousands evacuated",
+    "description": "PATRAS: Firefighters battled multiple wildfires across Greece on Wednesday, including blazes threatening villages and towns near the western city of Patras and on two tourist islands. Fires have burned houses, farms and factories and prompted the evacuation of thousands of residents and tourists si…",
+    "published_at": "2025-08-13T08:29:36.000Z",
+    "relevance": null,
+    "source_domain": "arabnews.com"
+   },
+   {
+    "url": "https://arabnews.com/world/wildfires-scorch-greece-for-a-second-day-thousands-evacuated-2611684",
+    "title": "Wildfires scorch Greece for a second day, thousands evacuated",
+    "description": "Wildfires scorch Greece for a second day, thousands evacuated Authorities ordered residents of a town of about 7,700 people near Patras to evacuate on Tuesday and issued new alerts on Wednesday, advising residents of two nearby villages to leave their homes. On the island of Chios, the coast guard …",
+    "published_at": "2025-08-13T05:25:45.000Z",
+    "relevance": null,
+    "source_domain": "arabnews.com"
+   },
+   {
+    "url": "https://insurancejournal.com/news/international/2025/08/13/835541.htm",
+    "title": "Thousands Flee Wildfires Across Greece as Heat Withers Crops",
+    "description": "Greek coastguard vessels evacuated tourists and locals, while a volunteer firefighter died in Spain as authorities struggled to quell blazes across the - Categories: International & Reinsurance NewsTopics: 2025 wildfires, Agriculture insurance, Climate Change, crop insurance, European heatwave, Gre…",
+    "published_at": "2025-08-13T11:47:50.000Z",
+    "relevance": null,
+    "source_domain": "insurancejournal.com"
+   },
+   {
+    "url": "https://thenationalnews.com/news/europe/2025/08/13/volunteer-firefighter-dies-from-burns-as-wildfires-continue-raging-across-spain",
+    "title": "Volunteer firefighter dies from burns as wildfires continue raging across Spain | The National",
+    "description": "Recruit trapped as he tried to cut breaks in Castile and Leon wildfire News Europe A firefighter moves to avoid intense heat during a battle against a wildfire near the village of Parafita in northwestern Spain on August 12. Reuters Show caption: A firefighter moves to avoid intense heat during a b…",
+    "published_at": "2025-08-13T09:49:22.000Z",
+    "relevance": null,
+    "source_domain": "thenationalnews.com"
+   },
+   {
+    "url": "https://timesofindia.indiatimes.com/world/rest-of-world/canada-wildfires-20000-on-standby-as-fire-threatens-port-alberni-smoke-spreads-to-us-europe/articleshow/123294280.cms",
+    "title": "Canada wildfires: 20,000 on standby as fire threatens Port Alberni; smoke spreads to US, Europe - Times of India",
+    "description": "Rest of World News: Western Canada faces a critical wildfire situation as a blaze near Port Alberni forces nearly 20,000 people on standby. Across the country, from Newfo Canada wildfires: 20,000 on standby as fire threatens Port Alberni; smoke spreads to US, Europe TOI World Desk / TIMESOFINDIA.CO…",
+    "published_at": "2025-08-14T04:32:00.000Z",
+    "relevance": null,
+    "source_domain": "timesofindia.indiatimes.com"
+   },
+   {
+    "url": "https://thehindu.com/sci-tech/energy-and-environment/europe-greece-turkiye-wildfire-deaths-august-13-2025/article69928148.ece",
+    "title": "At least three dead, thousands displaced as wildfires rage across southern Europe",
+    "description": "Wildfires rage across southern Europe, claiming lives in Greece, Spain, Turkiye, and Albania amid intense firefighting efforts. AP READ LATER SEE ALL Remove People watch as a wildfire burns in Achaia, Greece, on August 12, 2025. | Photo Credit: Reuters Wildfires intensified across southern Europe o…",
+    "published_at": "2025-08-13T10:34:30.000Z",
+    "relevance": null,
+    "source_domain": "thehindu.com"
+   },
+   {
+    "url": "https://timesofindia.indiatimes.com/world/middle-east/uae-president-sheikh-mohamed-bin-zayed-sends-firefighting-team-to-aid-albanias-wildfire-battle/articleshow/123275736.cms",
+    "title": "UAE President Sheikh Mohamed bin Zayed sends firefighting team to aid Albania’s wildfire battle | World News - Times of India",
+    "description": "Middle East News: In August 2025, UAE deploys firefighting experts and equipment to assist Albania in battling severe wildfires fueled by a heatwave, showcasing international solidarity. UAE President Sheikh Mohamed bin Zayed sends firefighting team to aid Albania’s wildfire battle TOI World Desk /…",
+    "published_at": "2025-08-13T19:02:00.000Z",
+    "relevance": null,
+    "source_domain": "timesofindia.indiatimes.com"
+   },
+   {
+    "url": "https://nbcnews.com/world/europe/wildfires-kill-least-3-displace-thousands-southern-europe-rcna224922",
+    "title": "Wildfires kill at least 3 and displace thousands across southern Europe",
+    "description": "ATHENS, Greece — Wildfires intensified across southern Europe on Wednesday with a round-the-clock battle to protect the perimeter of Greece’s third-largest city and at least three deaths reported in Spain, Turkey and Albania IE 11 is not supported. For an optimal experience visit our site on anothe…",
+    "published_at": "2025-08-14T01:57:21.000Z",
+    "relevance": null,
+    "source_domain": "nbcnews.com"
+   },
+   {
+    "url": "https://straitstimes.com/world/europe/greek-firefighters-make-progress-against-wildfires",
+    "title": "Greek firefighters make progress against wildfires",
+    "description": "Fires have prompted the evacuation of thousands of residents and tourists since Aug 12. Read more at straitstimes.com. The ambulance service said over 70 people, including several firefighters, had been treated for minor burns and respiratory problems, many of them in the Patras area. Many of the s…",
+    "published_at": "2025-08-14T07:05:00.000Z",
+    "relevance": null,
+    "source_domain": "straitstimes.com"
+   },
+   {
+    "url": "https://theguardian.com/food/2025/aug/13/ravinder-bhogal-plum-recipes-sweet-sour-pork-sticky-wings-poached",
+    "title": "Sweet-and-sour pork, sticky wings and poached for pudding: Ravinder Bhogal’s plum recipes",
+    "description": "Chinese-style sweet-and-sour pork with plums, chicken wings with plum ketchup and a chai creme caramel with tea-poached plums Explore more on these topics - Summer food and drink - Fruit - Food - Meat - Pork - Chicken - Dessert - recipes Share Reuse this content Most viewed - Three sisters who drow…",
+    "published_at": "2025-08-13T05:00:39.000Z",
+    "relevance": null,
+    "source_domain": "theguardian.com"
+   },
+   {
+    "url": "https://cnbc.com/2025/08/13/climate-temperature-records-in-europe-amid-extreme-heat-and-wildfires.html",
+    "title": "Temperature records smashed as extreme heat, wildfires grip parts of Europe",
+    "description": "A bout of record-breaking heat has swept across Europe in recent days. In Croatia, temperatures climbed to 39.5 degrees Celsius in the Adriatic coastal city of Sibenik and 38.9 degrees Celsius in the popular tourist destination of Dubrovnik earlier in the week. The temperature records come as scien…",
+    "published_at": "2025-08-13T08:18:06.000Z",
+    "relevance": null,
+    "source_domain": "cnbc.com"
+   },
+   {
+    "url": "https://bbc.co.uk/news/articles/c87eyv810jyo",
+    "title": "Cape Verde floods: State of emergency declared in São Vicente and Santo Antão",
+    "description": "The situation is being described as \"catastrophic\" after islands hit by vast amounts of rain. Image source, Reuters Image caption, Roads, homes and vehicles have been severely damaged ByNicholas Negoce BBC News - Published 13 August 2025 Cape Verde has declared a state of emergency on the islands o…",
+    "published_at": "2025-08-13T17:32:00.000Z",
+    "relevance": null,
+    "source_domain": "bbc.co.uk"
+   }
+  ]
+ },
+ {
+  "name": "news_incendio_arganil",
+  "endpoint": "POST /v1/news/search",
+  "request_id": "874575a2-f492-4522-aba3-6fdca491473e",
+  "credits": 2,
+  "error": null,
+  "results": [
+   {
+    "url": "https://dw.com/pt-br/ex-primeira-dama-da-coreia-do-sul-%C3%A9-presa-por-corrup%C3%A7%C3%A3o/a-73620353",
+    "title": "Ex-primeira-dama da Coreia do Sul é presa por corrupção – DW – 13/08/2025",
+    "description": "Kim Keon Hee, esposa do ex-presidente Yoon, é acusada de suborno, fraude em ações e tráfico de influência. Seu marido, que sofreu impeachment após tentativa de autogolpe, está preso desde julho. O segredo de Jonathan, a tartaruga-gigante de 194 anos O segredo de Jonathan, a tartaruga-gigante de 194…",
+    "published_at": "2025-08-13T11:03:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/eua-miram-mais-m%C3%A9dicos-e-revogam-vistos-de-brasileiros-ligados-ao-programa/a-73630467",
+    "title": "EUA revogam vistos de brasileiros ligados ao Mais Médicos – DW – 14/08/2025",
+    "description": "Sanções afetam atual secretário do Ministério da Saúde e o coordenador para a COP30, acusados pelo secretário de Estado americano de fomentarem \"esquema de trabalho forçado do regime cubano\". Foto: Fernando Frazão/Agência Brasil Alemanha já não pode mais bancar Estado social, diz premiê O chanceler…",
+    "published_at": "2025-08-13T23:17:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://bbc.com/portuguese/articles/c987e8znyg9o",
+    "title": "Eduardo Bolsonaro à BBC: 'Estou disposto a ir às últimas consequências' - BBC News Brasil",
+    "description": "Em entrevista à BBC News Brasil, deputado federal e filho de Jair Bolsonaro afirma que governo Trump tem mais sanções contra autoridades brasileiras na mesa e que presidentes da Câmara e do Senado também estão 'no radar' das autoridades dos EUA Eduardo Bolsonaro também não descartou sanções aos pre…",
+    "published_at": "2025-08-13T23:03:31.000Z",
+    "relevance": null,
+    "source_domain": "bbc.com"
+   },
+   {
+    "url": "https://bbc.com/portuguese/articles/cx2xx4eq408o",
+    "title": "'Um cara caiu em cima de mim no shopping e fiquei paralítica' - BBC News Brasil",
+    "description": "Grace Spence Green andava no térreo de um shopping center em Londres quando foi atingida por um homem que pulou da sacada do terceiro andar, mudando sua vida para sempre. - O que se sabe sobre os três incêndios que aconteceram na UFPE em oito dias e que serão investigados pela PF Fim do Mais lidas …",
+    "published_at": "2025-08-13T09:55:36.000Z",
+    "relevance": null,
+    "source_domain": "bbc.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/l%C3%ADderes-europeus-pressionam-trump-por-cessar-fogo-na-ucr%C3%A2nia/a-73629300",
+    "title": "Líderes europeus pressionam Trump por cessar-fogo na Ucrânia – DW – 13/08/2025",
+    "description": "Em videoconferência com Zelenski e o presidente americano, países pedem trégua imediata e rejeitam negociação territorial sem participação de Kiev. Cúpula EUA-Rússia acontece nesta sexta. 'Link externo — Compartilhar via Telegram') Link externo — Compartilhar via Reddit Link externo — Compartilhar …",
+    "published_at": "2025-08-13T18:32:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://bbc.com/portuguese/articles/c9qynn5e0e9o",
+    "title": "Adultização: 'Vídeo de Felca conseguiu unir de Érika Hilton a Nikolas Ferreira e pauta cobrança por responsabilização das redes' - BBC News Brasil",
+    "description": "Com 34 milhões de visualizações, vídeo do influenciador Felca denuncia produtores de conteúdo que exploram crianças e adolescentes nas redes sociais, além de cobrar as plataformas que monetizam este tipo de vídeo. - O que se sabe sobre os três incêndios que aconteceram na UFPE em oito dias e que se…",
+    "published_at": "2025-08-13T08:01:32.000Z",
+    "relevance": null,
+    "source_domain": "bbc.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/depois-do-cacau-mais-caro-avel%C3%A3-agora-ame%C3%A7a-aumentar-pre%C3%A7o-do-chocolate/a-73612220",
+    "title": "Depois do cacau, avelã ameça aumentar preço do chocolate – DW – 13/08/2025",
+    "description": "Uma geada devastou a colheita de avelãs na Turquia, o maior fornecedor mundial do fruto. Não bastasse o aumento do preço do cacau, mercado agora se prepara para impactos nos custos da Nutella e doces que usam avelãs. Link externo — Compartilhar via Whatsapp Link externo — Compartilhar via EMail Lin…",
+    "published_at": "2025-08-13T11:03:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/supens%C3%A3o-do-envio-de-armas-amea%C3%A7a-a-raz%C3%A3o-de-estado-alem%C3%A3-em-rela%C3%A7%C3%A3o-a-israel/a-73623843",
+    "title": "Suspensão do envio de armas ameaça relações Alemanha-Israel? – DW – 13/08/2025",
+    "description": "Chanceler federal Friedrich Merz quer parar de fornecer armas que possam ser usadas em Gaza. Embora críticos o acusem de abandonar Israel, interrupção provavelmente terá pouco impacto sobre contratos em andamento. Foto: picture-alliance/dpa/J. Hollander 1993: Primeiro Acordo de Oslo Negociações na …",
+    "published_at": "2025-08-13T20:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://arabnews.com/world/colombia-buries-assassinated-presidential-candidate-2611779",
+    "title": "Colombia buries assassinated presidential candidate",
+    "description": "Colombia buries assassinated presidential candidate LATEST NEWS/Middle East Houthi attacks are ‘a terrorist threat’ to the international community: Ex-CIA official video Colombia buries assassinated presidential candidate 0 seconds of 45 secondsVolume 0% Press shift question mark to access a list o…",
+    "published_at": "2025-08-14T02:05:14.000Z",
+    "relevance": null,
+    "source_domain": "arabnews.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/o-que-diz-o-plano-de-lula-para-socorrer-empresas-afetadas-pelo-tarifa%C3%A7o/a-73630296",
+    "title": "Lula lança plano para apoiar empresas afetadas por tarifaço – DW – 13/08/2025",
+    "description": "Medida provisória inclui linha de crédito, compras governamentais e retorno de tributos para exportadores prejudicados. Presidente cobra aprovação rápida no Congresso. Política05/10/20265 de outubro de 2026 Página 1 de 1 Pular a seção Outros temas em destaque Outros temas em destaque Dor é mais com…",
+    "published_at": "2025-08-13T20:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/como-s%C3%A3o-escolhidos-os-nomes-dos-medicamentos-no-brasil/a-73535217",
+    "title": "Como são escolhidos os nomes dos medicamentos no Brasil? – DW – 13/08/2025",
+    "description": "Nomenclatura de remédios segue regras específicas para evitar ambiguidades, associações indevidas e riscos à saúde da população. \"Em geral, ao trazer um medicamento do exterior, a empresa precisa adaptar o nome às regras da Anvisa, evitando termos proibidos e sem usar mais de 50% da DCB\", explica B…",
+    "published_at": "2025-08-13T16:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/depois-do-cacau-mais-caro-avel%C3%A3-agora-amea%C3%A7a-aumentar-pre%C3%A7o-do-chocolate/a-73612220",
+    "title": "Depois do cacau, avelã ameaça aumentar preço do chocolate – DW – 13/08/2025",
+    "description": "Uma geada devastou a colheita de avelãs na Turquia, o maior fornecedor mundial do fruto. Não bastasse o aumento do preço do cacau, mercado agora se prepara para impactos nos custos da Nutella e doces que usam avelãs. A estimativa mais recente sugere que a Turquia perdeu cerca de 167 mil toneladas d…",
+    "published_at": "2025-08-13T15:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/cinco-proibi%C3%A7%C3%B5es-ex%C3%B3ticas-que-vigoram-na-alemanha/a-73615241",
+    "title": "Cinco proibições exóticas que vigoram na Alemanha – DW – 13/08/2025",
+    "description": "Não dance durante um feriado de cunho religioso; não construa castelos de areia nas praias ou colha cogumelos de noite. Confira algumas regulamentações da Alemanha que podem causar estranhamento entre estrangeiros. Link externo — Compartilhar via Whatsapp Link externo — Compartilhar via EMail Link …",
+    "published_at": "2025-08-13T15:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/plano-contra-tarifa%C3%A7o-inclui-cr%C3%A9dito-de-r-30-bi-diz-lula/a-73617676",
+    "title": "Plano contra tarifaço inclui crédito de R$ 30 bi, diz Lula – DW – 13/08/2025",
+    "description": "Empresas afetadas pelas tarifas americanas poderão acessar recursos extraordinários. União também deve realizar compras governamentais para mitigar o impacto. Pacote será detalhado na quarta-feira. Mais sobre Economia no América Latina Como o petróleo reacendeu o conflito sobre as Ilhas Malvinas Co…",
+    "published_at": "2025-08-13T00:02:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://bbc.com/portuguese/articles/clyj0y5j9gzo",
+    "title": "Como os doces brasileiros ficaram tão… doces - BBC News Brasil",
+    "description": "Geralmente, as receitas brasileiras levam até 50% a mais de açúcar do que as versões parecidas disponíveis em outros países Como os doces brasileiros ficaram tão… doces Legenda do vídeo, Como os doces brasileiros ficaram tão… doces Published 13 agosto 2025 O morango do amor não está sozinho: nos úl…",
+    "published_at": "2025-08-13T19:10:21.000Z",
+    "relevance": null,
+    "source_domain": "bbc.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/coluna-quando-a-casa-branca-flerta-com-o-golpismo-no-brasil/a-73620767",
+    "title": "Quando a Casa Branca flerta com o golpismo no Brasil – DW – 13/08/2025",
+    "description": "De tarifas a ataques contra o STF, Trump repete no Brasil lógica autoritária que corrói instituições dos EUA — e que no passado sustentou golpes na América Latina. Receber lições de democracia de tal governo é um insulto O texto reflete a opinião do autor, não necessariamente a da DW. Pular a seção…",
+    "published_at": "2025-08-13T09:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://arabnews.com/art-culture/my-melbourne-saudi-student-leen-aseere-on-life-in-australia-2611784",
+    "title": "My Melbourne: Saudi student Leen Aseere on life in Australia",
+    "description": "My Melbourne: Saudi student Leen Aseere on life in Australia What’s the best time of year to visit, in terms of the weather? Winters are super-cold, summers are super-hot. I wouldn’t say as hot as Saudi, but it’s close. So, I’d say the best time of year would be the end of May into June. That’s bas…",
+    "published_at": "2025-08-14T06:00:20.000Z",
+    "relevance": null,
+    "source_domain": "arabnews.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/fraude-na-ci%C3%AAncia-vem-crescendo-com-aux%C3%ADlio-de-redes-maliciosas-alerta-estudo/a-73620175",
+    "title": "Fraude na ciência cresce com redes maliciosas, alerta estudo – DW – 13/08/2025",
+    "description": "Análise de 5 milhões de artigos revela que problemas de integridade são \"sistemáticos\", com autores e editores mal-intencionados colaborando nas sombras para promover pesquisas falsas. Estudos fraudulentos publicados nos periódicos podem incluir dados fabricados, resultados não verificados, pesquis…",
+    "published_at": "2025-08-13T11:03:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/o-que-%C3%A9-adultiza%C3%A7%C3%A3o-e-como-ela-entrou-na-pol%C3%ADtica-do-brasil/a-73623646",
+    "title": "O que é adultização e como ela entrou na política nacional – DW – 13/08/2025",
+    "description": "Canais na internet monetizam erotização precoce de crianças e adolescentes. Congresso Nacional se mobiliza para tentar combater prática nociva. Link externo — Compartilhar via Whatsapp Link externo — Compartilhar via EMail Link externo — Compartilhar via Flipboard Link externo — Compartilhar via Li…",
+    "published_at": "2025-08-13T15:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   },
+   {
+    "url": "https://dw.com/pt-br/migra%C3%A7%C3%A3o-gastos-e-cen%C3%A1rio-turbulento-os-cem-dias-de-friedrich-merz-no-poder/a-73603575",
+    "title": "Os cem dias de Friedrich Merz no poder na Alemanha – DW – 13/08/2025",
+    "description": "À frente do governo alemão, conservador Friedrich Merz aumenta protagonismo alemão no cenário internacional, aperta política migratória e aumenta gastos, mas vê reprovação entre eleitorado crescer. Foto: dpa/picture alliance CDU - DSU - Despertar Democrático - SPD e mais (1990) Após a queda do Muro…",
+    "published_at": "2025-08-13T09:47:00.000Z",
+    "relevance": null,
+    "source_domain": "dw.com"
+   }
+  ]
+ },
+ {
+  "name": "web_estradas",
+  "endpoint": "POST /v1/web/search",
+  "request_id": "c12e0279-c995-4849-8f7c-24b7fb797f6f",
+  "credits": 2,
+  "error": null,
+  "results": [
+   {
+    "url": "https://cm-seia.pt/ultimas-noticias/incendio-populacao-regressa-a-casa-e-circulacao-rodoviaria-reaberta-em-quase-toda-a-rede-viaria/",
+    "title": "Incêndio do Piódão – Frente III (Seia): atualização de ...",
+    "description": "A circulação rodoviária mantém-se condicionada, estando interditas a Estrada Nacional (EN) 230 entre Barriosa e Covilhã, a EN 231, entre as Pedras Lavradas e o ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/reacendimento-de-fogo-no-piodao-obliga-a-corte-da-a23-e-n18_n1678829",
+    "title": "Reacendimento de fogo no Piodão obriga a corte da A23 e ...",
+    "description": "O incêndio que atingiu o concelho do Fundão começou no dia 13 no Piódão, em Arganil, distrito de Coimbra. Ao longo de mais de uma semana, este ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.mundolusiada.com.br/oito-estradas-nacionais-cortadas-em-cinco-distritos-de-portugal/",
+    "title": "Oito estradas nacionais cortadas em cinco distritos de ...",
+    "description": "Os incêndios que atingem o Centro e Norte de Portugal obrigaram hoje ao corte de oito estradas nacionais, nos dois sentidos, nos distritos ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.tsf.pt/sociedade/artigo/sistema-de-combate-de-incendios-no-pais-faliu-diz-a-tsf-autarca-da-guarda-montenegro-cancela-ferias-chamas-causam-primeira-vitima-mortal/17963158",
+    "title": "\"Sistema de combate de incêndios no país faliu\", diz à ...",
+    "description": "O fogo de Arganil, que deflagrou na freguesia do Piódão na madrugada de quarta-feira, alegadamente provocado por uma descarga elétrica da ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.cmjornal.pt/portugal/detalhe/mais-de-2-300-operacionais-combatem-as-chamas-nos-fogos-de-arganil-sabugal-mirandela-e-montalegre",
+    "title": "Proteção Civil contabiliza 59 novos fogos. Há cinco mais ...",
+    "description": "O incêndio em Piódão, Arganil, é o que mais preocupa as autoridades, uma vez que o combate está \"extremamente difícil\", segundo a Proteção ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/portugal-em-alerta-a-evolucao-da-resposta-a-incendios-ao-minuto_e1676637",
+    "title": "Portugal em alerta. A evolução da resposta a incêndios ao ...",
+    "description": "O incêndio da Pampilhosa da Serra teve início no concelho vizinho de Arganil, na freguesia do Piódão, pelas 5h00 da passada quarta-feira.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.tsf.pt/sociedade/artigo/montenegro-fala-em-guerra-ps-exige-que-seja-declarada-situacao-de-calamidade-ha-quatro-incendios-de-grandes-dimensoes/17962993",
+    "title": "Montenegro fala em \"guerra\", PS exige que seja declarada ...",
+    "description": "Em Castelo Branco, a EN 230 está igualmente cortada nos dois sentidos, entre as localidades de Unhais da Serra e Pedras Lavradas.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.dn.pt/sociedade/inc%C3%AAndio-em-mirandela-faz-um-morto-fogo-de-arganil-%C3%A9-o-que-mobiliza-mais-meios",
+    "title": "Incêndio em Mirandela faz um morto. Fogo em Arganil ...",
+    "description": "Este incêndio, que começou na quarta-feira em Arganil, no distrito de Coimbra, já atingiu três concelhos do distrito de Castelo Branco (Castelo ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.dn.pt/sociedade/sexta-come%C3%A7a-com-mais-de-3500-operacionais-mobilizados-nos-inc%C3%AAndios",
+    "title": "No dia em que o fogo provoca a morte a ex-autarca ...",
+    "description": "A reportagem da Lusa no local constatou a destruição provocada pelo incêndio em terrenos rurais e florestais, ao longo de cinco quilómetros de ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.parlamento.pt/Parlamento/Documents/CTI/relatorio-CTI.pdf",
+    "title": "RELATÓRIO Avaliação dos incêndios de agosto de 2025 ...",
+    "description": "A Comissão Técnica Independente (CTI) para avaliação dos incêndios de agosto de 2025 foi criada pela Lei n.º 5/2026, com 12 elementos propostos.",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://segurancaecienciasforenses.com/",
+    "title": "Segurança e Ciências Forenses – Espaço de divulgação e ...",
+    "description": "O Código da Estrada define autoestrada como uma via pública destinada a trânsito ... O Press Center de 17 de agosto de 2025 destaca sobretudo acidentes ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.facebook.com/groups/230148024591806/",
+    "title": "Ocorrências Activas Nacionais e internacionais",
+    "description": "Ocorrências Activas Nacionais e internacionais · EM ATUALIZAÇÃO Um incêndio deflagrou num hotel/restaurante, em Nelas, na tarde desta sexta-feira (13 de novembro) ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.parlamento.pt/ArquivoDocumentacao/Documents/Incendios_Junho%202017_Relatorio.pdf",
+    "title": "ANÁLISE E APURAMENTO DOS FACTOS RELATIVOS ...",
+    "description": "(2022) Análise e apuramento dos factos relativos aos incêndios que ocorreram em Pedrógão Grande, Castanheira de Pera,. Ansião, Alvaiázere, ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.cm-celoricodabeira.pt/wp-content/uploads/2023/08/R02.Relatorio_PERU_Linhares_da_Beira-Final.pdf",
+    "title": "PERU_Linhares da Beira",
+    "description": "Em termos rodoviários destaca-se a estrada municipal que interliga o aglomerado à EN17, e a rua Direita que se apresenta como principal ligação da cota baixa ( ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.les-a-les.com/Events/View/PT_LAL_ONROAD",
+    "title": "Lés-a-Lés",
+    "description": "O Portugal de Lés-a-Lés é um evento anual mototurístico com o objectivo de cruzar Portugal de extremo a extremo contemplando paisagens e lugares de enorme ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   }
+  ]
+ },
+ {
+  "name": "web_evacuacao",
+  "endpoint": "POST /v1/web/search",
+  "request_id": "c674a3ef-e4ec-4e22-928c-4621719c19d0",
+  "credits": 2,
+  "error": null,
+  "results": [
+   {
+    "url": "https://www.noticiasdecoimbra.pt/casal-passa-ferias-no-piodao-e-encontra-o-inferno-chamas-estavam-mesmo-a-porta-da-nossa-casa/",
+    "title": "Casal passa férias no Piódão e encontra o inferno. ...",
+    "description": "O incêndio que deflagrou na madrugada de hoje , 13 de agosto, junto ao Piódão obrigou à evacuação de várias aldeias no concelho de Arganil.",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=mXajCFlMps8",
+    "title": "INCÊNDIO EM ARGANIL| MARIA DE FÁTIMA ...",
+    "description": "O incêndio que deflagrou na madrugada de hoje , 13 de agosto, junto ao Piódão obrigou à evacuação de várias aldeias no concelho de Arganil.",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/reel/DNTMwKwt3_U/",
+    "title": "Incêndio ameaça aldeia histórica do Piódão 🔥 Um violento ...",
+    "description": "Um violento incêndio deflagrou na madrugada desta quarta-feira (13) junto à aldeia de xisto do Piódão, em Arganil, obrigando à evacuação de ...",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://seiadigital.pt/2025/08/13/aldeias-das-freguesias-de-arganil-seia-e-oliveira-do-hospital-na-linha-de-fogo/",
+    "title": "Aldeias das freguesias de Arganil, Seia e Oliveira do ...",
+    "description": "O incêndio que começou na madrugada de hoje na freguesia de Piódão, estendeu-se à freguesia de Pomares, constituída por 12 aldeias, parte das ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/portugal-em-alerta-a-evolucao-da-resposta-a-incendios-ao-minuto_e1676063",
+    "title": "Portugal em alerta. A evolução da resposta a incêndios ao ...",
+    "description": "Incêndio obriga a evacuar aldeias no Piódão ... As chamas afetam o concelho de Arganil de forma descontrolada. As pessoas foram retiradas das ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.jn.pt/pais/artigo/frente-de-fogo-em-arganil-em-perigo-de-chegar-a-pampilhosa-da-serra/17858447",
+    "title": "Frente de fogo em Arganil pode chegar à Pampilhosa da ...",
+    "description": "Fogo obriga a evacuar pelo menos nove aldeias na freguesia de Piódão · Fogo em Pampilhosa da Serra obriga à evacuação da aldeia de Covanca ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.jn.pt/pais/artigo/fogo-obriga-a-evacuar-pelo-menos-nove-aldeias-em-piodao-/17858354",
+    "title": "Fogo obriga a evacuar pelo menos nove aldeias na ...",
+    "description": "Foram evacuadas, pelo menos, nove aldeias em Piódão, devido ao incêndio que lavra na região, segundo avança a SIC Notícias.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://radioboanova.sapo.pt/oliveira-do-hospital-ativa-plano-municipal-de-emergencia-e-protecao-civil/",
+    "title": "Chão Sobral e Gramaça \"evacuadas por precaução\". Oliveira ...",
+    "description": "Com efeitos a partir das 13h30 do dia 13 de agosto de 2025, o Plano foi ativado face ao incêndio que teve início no Piódão e que está a ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.publico.pt/2025/08/13/sociedade/noticia/incendios-ermidassado-dominado-vila-real-trancoso-continuam-activos-2143809",
+    "title": "Trancoso com frente de 6km. Mais de 2500 operacionais ...",
+    "description": "Um violento incêndio deflagrou na madrugada desta quarta-feira junto à aldeia de xisto do Piódão, concelho de Arganil, e está a ser combatido ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.parlamento.pt/Parlamento/Documents/CTI/relatorio-CTI.pdf",
+    "title": "RELATÓRIO Avaliação dos incêndios de agosto de 2025 ...",
+    "description": "Merece destaque natural o incêndio de origem natural com início junto ao Piódão (Arganil) na madrugada de 13 de agosto e que só deixou de ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.dn.pt/sociedade/reativa%C3%A7%C3%A3o-em-trancoso-por-causa-da-trovoada-obriga-a-refor%C3%A7ar-meios",
+    "title": "Acompanhe aqui tudo sobre os incêndios em Portugal",
+    "description": "Na madrugada desta quarta-feira, 13 de agosto, deflagrou um incêndio na região de Coimbra, mais concretamente em Piodão, no município de Arganil ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/portugal-em-alerta-a-evolucao-da-resposta-a-incendios-ao-minuto_e1677835",
+    "title": "Incêndios em Portugal. A evolução da resposta ...",
+    "description": "Fogo que começou em Arganil deverá ser o maior de sempre em Portugal, diz investigador. O incêndio que começou no Piódão, Arganil, no dia 13 ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.cmjornal.pt/portugal/detalhe/bombeiros-continuam-no-combate-as-chamas-fogos-em-trancoso-tabuaco-e-arganil-sao-os-que-mais-preocupam",
+    "title": "Incêndio em Vila Real entrou em fase de resolução. ...",
+    "description": "O incêndio que começou na madrugada de esta quarta-feira na freguesia de Piódão, estendeu-se à freguesia de Pomares, constituída por 12 aldeias, ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/portugal-em-alerta-a-evolucao-da-resposta-a-incendios-ao-minuto_e1676637",
+    "title": "Portugal em alerta. A evolução da resposta a incêndios ao ...",
+    "description": "O incêndio da Pampilhosa da Serra teve início no concelho vizinho de Arganil, na freguesia do Piódão, pelas 5h00 da passada quarta-feira. Terá ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://observador.pt/liveblogs/incendio-de-arganil-e-o-unico-grande-fogo-ativo-frentes-em-seia-mobilizam-meios/",
+    "title": "Mais de 900 bombeiros combatem fogos em Pedrógão ...",
+    "description": "O outro grande incêndio, o de Piódão, está a ser travado por mais de 1.300 operacionais, ajudados por 447 meios terrestres, indica o site da ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   }
+  ]
+ },
+ {
+  "name": "web_festas",
+  "endpoint": "POST /v1/web/search",
+  "request_id": "2fab21cc-262f-4132-9586-35b363278a36",
+  "credits": 2,
+  "error": null,
+  "results": [
+   {
+    "url": "https://www.facebook.com/piodaovivo/posts/-est%C3%A1-oficialmente-lan%C3%A7ado-o-cartaz-da-festa-de-ver%C3%A3o-do-pi%C3%B3d%C3%A3o-2025-de-15-a-17-/728858513472923/",
+    "title": "🎉✨ Está oficialmente lançado o cartaz da Festa de Verão ...",
+    "description": "Está oficialmente lançado o cartaz da Festa de Verão do Piódão 2025! ✨ De 15 a 17 de agosto ... 🎟️ Reservas: turismo.arganil@cm-arganil.pt.",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://observador.pt/2025/08/14/incendios-festa-de-verao-do-piodao-em-arganil-cancelada/",
+    "title": "Incêndios. Festa de Verão do Piódão em Arganil cancelada",
+    "description": "A Festa de Verão do Piódão, que deveria começar na sexta-feira na aldeia histórica do município de Arganil, foi cancelada devido ao incêndio que ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/reel/DNjJ1w8MklL/",
+    "title": "𝗡𝗼𝗶𝘁𝗲 𝗕𝗿𝗮𝗻𝗰𝗮 𝗲𝗺 𝗔𝗿𝗴𝗮𝗻𝗶𝗹 O dia mais mágico do ...",
+    "description": "✨ Noite Branca em Arganil. O dia mais mágico do ano já tem data marcada: 29 de agosto. Vista-se de branco, partilhe ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://correiodabeiraserra.com/incendio-leva-ao-cancelamento-da-festa-de-verao-do-piodao/",
+    "title": "Incêndio leva ao cancelamento da Festa de Verão do Piódão",
+    "description": "Organização alega constrangimentos logísticos e risco de reacendimentos. A Festa de Verão do Piódão, que deveria começar esta sexta-feira na ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.acomarcadearganil.pt/fornea-piodao-arganil/",
+    "title": "FÓRNEA (Piódão - Arganil)",
+    "description": "Arganil volta a estar em festa entre os dias 4 e 8 de setembro, com a realizaç ... Arganil · Góis · Tábua · Penacova · Lousã · Oliveira do ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/reel/DNVwZtUsYS_/",
+    "title": "Festa de Verão Piódão 2025 Caros piodenses ... - Instagram",
+    "description": "Ainda que não haja festa, queremos que o Piódão continue a ser um ponto de encontro! Já temos alguma comida e bebidas preparadas e não vamos ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.cm-arganil.pt/agenda-de-eventos/categoria/agenda-cultural-do-concelho/dia/2026-08-16/",
+    "title": "Agenda Cultural do Concelho - Município de Arganil",
+    "description": "Consulte contactos, documentos, eventos e outras informações atualizadas relacionadas com a atividade do Município de Arganil.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.cm-arganil.pt/agenda-de-eventos/categoria/turismo/lista/?tribe-bar-date=2026-09-08&eventDisplay=past",
+    "title": "Turismo",
+    "description": "A Aldeia Histórica de Piódão acolhe em setembro, nos dias 20 e 21, mais uma edição do evento Piano@Piódão, que desde 2023 tem trazido à sua ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://expresso.pt/boa-cama-boa-mesa/viagens-hoteis/destinos-portugal/2026-03-10-com-apenas-10-habitantes-conheca-mourisia-o-destino-da-primeira-visita-oficial-de-antonio-jose-seguro-53a2e079",
+    "title": "Com apenas 10 habitantes, conheça Mourísia, o destino ...",
+    "description": "No concelho de Arganil, a 12 km da famosa Piódão, a aldeia de Mourísia tem apenas 10 habitantes. Foi bastante afetada pelos fogos florestais ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.publico.pt/2025/08/21/sociedade/noticia/fogo-arganilpiodao-arde-semana-dia-conselho-ministros-2144525",
+    "title": "Quatro grandes incêndios continuam activos ao fim desta ...",
+    "description": "Entre as duas aldeias acarinhadas como jóias por população e visitantes, o fogo destruiu paisagem e conformou resistentes – pessoas que, sem ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://on-centro.pt/index.php/en/news/item/1343-piodao-revalida-titulo-de-aldeia-cinco-estrelas",
+    "title": "Arganil: Piódão revalida título de \"Aldeia Cinco Estrelas\"",
+    "description": "Arganil: Piódão revalida título de \"Aldeia Cinco Estrelas\". A distinção é resultado de uma votação online, que elegeu o que de melhor existe em cada ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/incendios-em-portugal-a-evolucao-da-resposta-do-dispositivo-ao-minuto_e1678426",
+    "title": "Incêndios em Portugal. A evolução da resposta do ...",
+    "description": "Ao longo de mais de uma semana, o fogo que começou no Piódão, em Arganil, no distrito de Coimbra estendeu-se ao concelho de Seia (distrito da ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://seiadigital.pt/2025/05/06/camaras-de-arganil-e-seia-estabelecem-parceria-para-reabilitar-estrada-entre-piodao-e-vide/",
+    "title": "Câmaras de Arganil e Seia estabelecem parceria para ...",
+    "description": "Os municípios de Arganil (distrito de Coimbra) e Seia (distrito da Guarda) estabeleceram um acordo de parceria para reabilitar a estrada ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.solidariedade.pt/site/detalhe/15119",
+    "title": "IPSS continuam a ser portos de abrigo apesar da ...",
+    "description": "Agosto de 2025 fica para a história dos incêndios rurais em Portugal, como o ano em que mais área de floresta, matos e zonas agrícolas ardeu ...",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.parlamento.pt/Parlamento/Documents/CTI/relatorio-CTI.pdf",
+    "title": "RELATÓRIO Avaliação dos incêndios de agosto de 2025 ...",
+    "description": "A Comissão Técnica Independente (CTI) para avaliação dos incêndios de agosto de 2025 foi criada pela Lei n.º 5/2026, com 12 elementos propostos.",
+    "published_at": null,
+    "relevance": "low",
+    "source_domain": null
+   }
+  ]
+ },
+ {
+  "name": "web_incendio",
+  "endpoint": "POST /v1/web/search",
+  "request_id": "3c8f7300-c200-4d8a-9bdf-af7b99222ef0",
+  "credits": 2,
+  "error": null,
+  "results": [
+   {
+    "url": "https://www.nowcanal.pt/ultimas/detalhe/2025-e-ja-o-pior-ano-da-decada-em-termos-de-area-ardida",
+    "title": "2025 é já o pior ano da década em termos de área ardida",
+    "description": "O incêndio que começou na aldeia do Piódão, em Arganil ... Começou no dia 13 de agosto após uma trovoada seca e já atravessou sete concelhos.",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.vozportucalense.pt/2025/08/13/incendios-continuam-varias-aldeias-evacuadas-nos-concelhos-de-arganil-e-de-fornos-de-algodres/",
+    "title": "Incêndios continuam: várias aldeias evacuadas nos ...",
+    "description": "Trovoada causou fogo em Arganil, próximo do Piódão. Durante a madrugada desta quarta-feira, um incêndio de grandes dimensões deflagrou junto ...",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://sicnoticias.pt/especiais/incendios-em-portugal/2025-08-13-video-incendio-em-arganil-teve-origem-numa-trovoada-seca-b393ef54",
+    "title": "Incêndio em Arganil teve origem numa trovoada seca",
+    "description": "Uma trovoada seca provocou um incêndio junto à aldeia histórica de Piódão, concelho de Arganil, na madrugada desta quarta-feira.",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.diariocoimbra.pt/2025/08/13/fogo-de-piodao-com-origem-em-descarga-de-trovoada/",
+    "title": "Fogo de Piódão com origem em descarga de trovoada",
+    "description": "O fogo que lavra nas freguesias de Piódão e Pomares, no concelho de Arganil, teve origem nas trovoadas que se sentiram durante a última noite.",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.dn.pt/sociedade/reativa%C3%A7%C3%A3o-em-trancoso-por-causa-da-trovoada-obriga-a-refor%C3%A7ar-meios",
+    "title": "Acompanhe aqui tudo sobre os incêndios em Portugal",
+    "description": "Na madrugada desta quarta-feira, 13 de agosto, deflagrou um incêndio na região de Coimbra, mais concretamente em Piodão, no município de Arganil ...",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/portugal-em-alerta-a-evolucao-da-resposta-a-incendios-ao-minuto_e1676063",
+    "title": "Portugal em alerta. A evolução da resposta a incêndios ao ...",
+    "description": "Uma trovoada seca estará na origem do incêndio que começou na última madrugada no município de Arganil, freguesia de Piódão. Arganil entrou na ...",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://correiodabeiraserra.com/trovoada-seca-podera-estar-na-origem-do-incendio-florestal-em-arganil/",
+    "title": "Trovoada seca poderá estar na origem do incêndio ...",
+    "description": "Uma trovoada seca terá estado na origem do incêndio florestal que deflagrou na madrugada de hoje no município de Arganil, freguesia de Piódão, ...",
+    "published_at": null,
+    "relevance": "high",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/reel/DNSU9AJi64a/",
+    "title": "Aldeia de Piodão, no Concelho de Arganil, está ...",
+    "description": "As chamas deflagram numa zona de difícil acesso devido à forte trovoada e desceram com grande intensidade em direção à Aldeia de Piodão. A ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://fogos.pt/pt/fogo/20251075979",
+    "title": "[13-11-2026 17:16] Incêndio em Coimbra, Arganil, Piódão ...",
+    "description": "Incêndio em Coimbra, Arganil, Piódão (Arganil). Estado: Vigilância. detalhes Início 05:08 13-08-2025 Natureza Mato Localização 40.23083, -7.81972 … atual: 10.7 ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.sabado.pt/portugal/detalhe/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-pioda",
+    "title": "Trovoada seca provocou fogo em Arganil junto à aldeia do ...",
+    "description": "Incêndio começou pelas 5h da manhã de quarta-feira. Uma trovoada seca estará na origem do incêndio florestal que deflagrou na madrugada ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.publico.pt/2025/08/13/sociedade/noticia/incendios-ermidassado-dominado-vila-real-trancoso-continuam-activos-2143809",
+    "title": "Trancoso com frente de 6km. Mais de 2500 operacionais ...",
+    "description": "Um violento incêndio deflagrou na madrugada desta quarta-feira junto à aldeia de xisto do Piódão, concelho de Arganil, e está a ser combatido ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://pt.euronews.com/2025/08/23/quatro-mortos-no-combate-a-incendios-fogo-em-arganil-e-o-unico-ativo-neste-momento-em-port",
+    "title": "Quatro mortos no combate a incêndios. Fogo em Arganil é ...",
+    "description": "A arder há onze dias, o incêndio de Arganil começou no Piodão, distrito de Coimbra, no dia 13 de agosto, e alastrou-se para os distritos ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://fuegoalerta.com/pt/grandes-incendios/arganil-piodao-2025/",
+    "title": "Incêndio de Arganil / Piódão (2025)",
+    "description": "Incêndio de Arganil / Piódão, Coimbra, 13 de agosto de 2025: 65 417 hectares ardidos, 1 mortos. Antes e depois por satélite, progressão dia a dia, ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://seiadigital.pt/2025/08/13/incendio-no-piodao-obriga-a-evacuar-aldeias/",
+    "title": "Incêndio no Piódão obriga a evacuar aldeias",
+    "description": "O incêndio que esta madrugada teve início no Piódão, concelho de Arganil, lavra com bastante intensidade, tendo obrigado já à evacuação de ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/incendio-obriga-a-evacuar-aldeias-no-piodao_v1676155",
+    "title": "Incêndio obriga a evacuar aldeias no Piódão",
+    "description": "A trovoada seca que caiu durante a noite provocou o incêndio que está por controlar devido às altas temperaturas e ao vento forte.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.ensino.eu/ensino-magazine/atualidade/2025/fogo-que-comecou-em-arganil-devera-ser-o-maior-de-sempre-em-portugal/",
+    "title": "Fogo que começou em Arganil deverá ser o maior de ...",
+    "description": "O incêndio que começou no Piódão, Arganil, no dia 13 e que continua ativo, será “muito provavelmente” o maior de sempre em Portugal, ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/p/DNvzug2xCss/",
+    "title": "O incêndio que deflagrou em Piódão, no concelho de ...",
+    "description": "O fogo em zona de mato teve início no dia 13 de agosto, pelas 05:08, em Piódão, tendo alastrado a vários concelhos vizinhos, atingindo os ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://observador.pt/2025/08/25/fogo-que-comecou-em-arganil-apresenta-a-maior-area-ardida-de-sempre-em-portugal/",
+    "title": "Fogo de Arganil teve a maior área ardida de sempre no país",
+    "description": "O incêndio que deflagrou em Arganil no dia 13 apresenta a maior área ardida de sempre em Portugal, com 64 mil hectares consumidos, segundo o ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.asbeiras.pt/incendios-varias-aldeias-na-linha-de-fogo-em-arganil-nas-freguesias-de-piodao-e-pomares/",
+    "title": "Incêndios: Várias aldeias na linha de fogo em Arganil nas ...",
+    "description": "O incêndio que começou na madrugada de hoje na freguesia de Piódão, estendeu-se à freguesia de Pomares, constituída por 12 aldeias, parte das ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://radioboanova.sapo.pt/incendio-que-teve-inicio-no-piodao-ja-entrou-no-concelho-de-oliveira-do-hospital/",
+    "title": "Incêndio que teve início no Piódão já entrou no concelho de ...",
+    "description": "O incêndio que deflagou, esta madrugada, no Piódão, concelho de Arganil, já se alastrou ao concelho de Oliveira do Hospital.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   }
+  ]
+ },
+ {
+  "name": "web_ipma",
+  "endpoint": "POST /v1/web/search",
+  "request_id": "6ce2e5d9-4533-4c4d-aff0-cd3ecdb1f6aa",
+  "credits": 2,
+  "error": null,
+  "results": [
+   {
+    "url": "https://beira.pt/portal/noticias/aviso-laranja-por-causa-do-calor-estendido-ate-quinta-feira-no-interior-do-pais/",
+    "title": "Aviso laranja por causa do calor estendido até quinta-feira ...",
+    "description": "dia 13 de agosto, devido ao risco de incêndio florestal. O IPMA prevê para hoje a continuação do tempo quente, com céu pouco nublado e poeiras ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.altominho.tv/site/2025/08/11/incendios-cerca-de-120-concelhos-em-risco-maximo/",
+    "title": "Incêndios: Cerca de 120 concelhos do interior Norte e ...",
+    "description": "Estão sob risco máximo de incêndio ... Portugal está em situação de alerta até quarta-feira (13 de agosto), devido ao risco de incêndio florestal.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.theportugalnews.com/br/noticias/2025-08-12/aviso-de-clima-quente-em-portugal-estendido-quando-as-temperaturas-atingem-44c/599824",
+    "title": "Aviso de clima quente em Portugal estendido",
+    "description": "O governo renovou o status de alerta no país até quarta-feira, 13 de agosto, devido ao risco de incêndios florestais. O IPMA (Instituto Nacional ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://expresso.pt/meteorologia/2025-08-11-doze-distritos-sob-aviso-laranja-por-causa-do-calor-temperaturas-podem-chegar-aos-43-da68e9f5",
+    "title": "Doze distritos sob aviso laranja por causa do calor ...",
+    "description": "O Governo renovou a situação de alerta no país até quarta-feira, dia 13 de agosto, devido ao risco de incêndio florestal. O IPMA prevê para hoje ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.rtp.pt/noticias/pais/portugal-em-alerta-devido-a-previsoes-de-calor-aguaceiros-e-trovoadas_n1759925",
+    "title": "Portugal em alerta devido a previsões de calor, aguaceiros ...",
+    "description": "Coimbra vão estar sob aviso laranja por causa do tempo quente. continuar até às 18h00 de terça-feira, estar entre os 27 graus Celsius em Aveiro ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/reel/DQ4NDJdCQo4/",
+    "title": "#MeteoredConnection 📲 ⛈️ Especialista Joana Campos ...",
+    "description": "IPMA emitiu aviso amarelo de chuva e Braga. Coimbra estão hoje e terça-feira sob aviso laranja devido à previsão de tempo quente, segundo o ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/reel/DaSHOEzNW73/",
+    "title": "As temperaturas elevadas e o risco acrescido de incêndio ...",
+    "description": "Grande parte de Portugal continental encontra-se sob perigo máximo ou muito elevado de incêndio rural, segundo o IPMA. As previsões apontam ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://on-centro.pt/index.php/pt/news/item/19955-19955",
+    "title": "Sete distritos sob aviso amarelo até terça-feira devido ao ...",
+    "description": "O Instituto Português do Mar e da Atmosfera (IPMA) colocou ainda em risco muito elevado e elevado quase todos os concelhos dos 18 distritos do continente.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.dn.pt/sociedade/reativa%C3%A7%C3%A3o-em-trancoso-por-causa-da-trovoada-obriga-a-refor%C3%A7ar-meios",
+    "title": "Acompanhe aqui tudo sobre os incêndios em Portugal",
+    "description": "Na madrugada desta quarta-feira, 13 de agosto, deflagrou um incêndio na região de Coimbra, mais concretamente em Piodão, no município de ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.ipma.pt/pt/",
+    "title": "IPMA",
+    "description": "Perigo de Incêndio. Avisos Meteorológicos condições meteorológicas e seguir as orientações da ANPC. Tempo Quente Tempo Quente",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://observador.pt/seccao/ciencia/terra-e-ceu/meteorologia-clima/aviso-laranja/",
+    "title": "Aviso laranja – notícias, opinião, rádio, fotos e podcasts",
+    "description": "O IPMA atualiza o sistema de avisos de trovoada, que passa a incluir precipitação intensa, rajadas e granizo. Norte do país sob aviso laranja por calor até ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://dw.com/pt-br/espanha-registra-onda-de-calor-mais-intensa-da-hist%C3%B3ria/a-73746081",
+    "title": "Espanha registra onda de calor mais intensa da história – DW – 24/08/2025",
+    "description": "Com 4,6 °C acima da média, período de 3 a 18 de agosto superou anomalia observada em julho de 2022. Temperaturas elevadas agravaram incêndios no país.",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.instagram.com/p/DNSgQA-MFWE/",
+    "title": "❗ Situação de Alerta em todo o território do continente até ...",
+    "description": "Nestes dias É PROIBIDO: Realizar queimas ou queimadas; Utilizar maquinaria em territórios agrícolas e florestais; Lançar foguetes ou ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://www.dnoticias.pt/2025/9/19/463403-cerca-de-80-concelhos-mantem-se-em-perigo-maximo/",
+    "title": "Cerca de 80 concelhos mantêm-se em perigo máximo",
+    "description": "O IPMA prevê para hoje no continente períodos de céu muito nublado com possibilidade de aguaceiros e trovoada, vento fraco, possibilidade de ...",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   },
+   {
+    "url": "https://prociv.gov.pt/pt/avisos-a-populacao/",
+    "title": "prociv.gov.pt — Avisos à População",
+    "description": "",
+    "published_at": null,
+    "relevance": "medium",
+    "source_domain": null
+   }
+  ]
+ }
+]

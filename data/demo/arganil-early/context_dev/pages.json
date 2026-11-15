@@ -1,0 +1,4569 @@
+[
+ {
+  "url": "https://rr.pt/noticia/pais/2025/08/13/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-piodao/436045/",
+  "final_url": null,
+  "publisher": "rr.pt",
+  "page_title": "Trovoada seca provocou fogo em Arganil junto à aldeia do Piódão - Renascença",
+  "headline": "Trovoada seca provocou fogo em Arganil junto à aldeia do Piódão",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "9cfc8f5b-6f69-42af-b3e7-68f7d547897d",
+  "captured_at": "2026-11-15T01:33:43Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T13:11:00Z",
+  "meta_modified": "2025-08-13T13:18:16Z",
+  "printed_published": "13 ago, 2025 - 14:11",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 18186,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm is believed to have caused the wildfire.",
+    "places": [
+     "Arganil",
+     "Piódão",
+     "Coimbra",
+     "serra do Açor"
+    ],
+    "time_text": "na madrugada desta quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Uma trovoada seca estará na origem do incêndio florestal que deflagrou na madrugada desta quarta-feira no município de Arganil, freguesia de Piódão, distrito de Coimbra, na serra do Açor, segundo os autarcas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire started on the hillside above the historic village at around 05:00.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "por volta das 05h00",
+    "number": 5,
+    "unit": "horas",
+    "quote": "Em declarações à agência Lusa, o presidente da junta de freguesia do Piódão, José Lopes, explicou que o incêndio começou na encosta acima da aldeia histórica, por volta das 05h00, com origem numa descarga elétrica da trovoada e que o alerta foi dado por um vigilante de uma unidade hoteleira.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "people_present",
+    "statement_en": "A hotel unit's security guard alerted the authorities to the fire.",
+    "places": [
+     "Inatel",
+     "Piódão"
+    ],
+    "time_text": "passados cinco ou dez minutos",
+    "number": 5,
+    "unit": "minutos",
+    "quote": "\"Eu estava a dormir, eram 10 minutos para as cinco da manhã, ouvi um grande estrondo, estava muito calor, até estava com a janela semiaberta, fui à janela e não vi nada. Deitei-me, novamente, e passados cinco ou dez minutos, um vigilante que estava no Inatel [unidade hoteleira localizada na encosta…",
+    "quote_verified": false,
+    "number_in_quote": false
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Some people were sheltering in the main church because of ash and smoke.",
+    "places": [
+     "Piódão",
+     "igreja matriz"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Segundo José Lopes, no caso concreto do Piódão há meios dos bombeiros dentro da aldeia e em zonas circundantes, e, de acordo com o estipulado no programa Aldeias Seguras, “por causa das cinzas e do fumo, algumas pessoas estão abrigadas na igreja matriz”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "About ten fire service vehicles were positioned around the village and near the Inatel tourist unit.",
+    "places": [
+     "Inatel"
+    ],
+    "time_text": "No total",
+    "number": 10,
+    "unit": "viaturas",
+    "quote": "No total, José Lopes contabilizou cerca de uma dezena de viaturas dos bombeiros distribuídas entre a praça principal da aldeia e zonas mais altas da povoação, bem como junto à unidade turística do Inatel.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The flames started in Piódão and spread into Pomares parish, driven by strong winds in mountainous terrain.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Também o presidente da Junta de Freguesia de Pomares, Amândio Dinis, frisou que as chamas começaram no Piódão “com uma faísca da trovoada” e estenderam-se ao território da freguesia, estando a evoluir, potenciadas pelo vento forte, em zona de montanha, com vertentes escarpadas e vales fundos, onde …",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "infrastructure",
+    "statement_en": "Arganil activated its Municipal Emergency and Civil Protection Plan because the fire was burning in Piódão and Pomares parishes.",
+    "places": [
+     "Piódão",
+     "Pomares",
+     "Arganil"
+    ],
+    "time_text": "entretanto",
+    "number": null,
+    "unit": null,
+    "quote": "Devido ao incêndio que lavra nas freguesias de Piódão e Pomares, o município de Arganil ativou, entretanto, o Plano Municipal de Emergência e Proteção Civil.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire had several highly complex fronts, worsened by the intensity of the wind.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“O fogo apresenta várias frentes de elevada complexidade, agravadas pela intensidade do vento que se faz sentir”",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 12:30, 431 personnel, 131 vehicles, and six aircraft were fighting the fire in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 12:30",
+    "number": 431,
+    "unit": "operacionais",
+    "quote": "De acordo com dados da Autoridade Nacional de Emergência e Proteção Civil, pelas 12:30 as chamas em Arganil estavam a ser combatidas por 431 operacionais, apoiados por 131 viaturas e seis meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 12:30, 131 vehicles supported firefighting in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 12:30",
+    "number": 131,
+    "unit": "viaturas",
+    "quote": "De acordo com dados da Autoridade Nacional de Emergência e Proteção Civil, pelas 12:30 as chamas em Arganil estavam a ser combatidas por 431 operacionais, apoiados por 131 viaturas e seis meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 12:30, six aircraft supported firefighting in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 12:30",
+    "number": 6,
+    "unit": "meios aéreos",
+    "quote": "De acordo com dados da Autoridade Nacional de Emergência e Proteção Civil, pelas 12:30 as chamas em Arganil estavam a ser combatidas por 431 operacionais, apoiados por 131 viaturas e seis meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "weather",
+    "statement_en": "José Lopes said it was very hot when he heard a loud bang.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "10 minutos para as cinco da manhã",
+    "number": 5,
+    "unit": "horas",
+    "quote": "\"Eu estava a dormir, eram 10 minutos para as cinco da manhã, ouvi um grande estrondo, estava muito calor, até estava com a janela semiaberta, fui à janela e não vi nada.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "weather",
+    "statement_en": "Strong winds were helping the fire spread.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Também o presidente da Junta de Freguesia de Pomares, Amândio Dinis, frisou que as chamas começaram no Piódão “com uma faísca da trovoada” e estenderam-se ao território da freguesia, estando a evoluir, potenciadas pelo vento forte, em zona de montanha, com vertentes escarpadas e vales fundos, onde …",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://seiadigital.pt/2025/08/13/incendio-no-piodao-obriga-a-evacuar-aldeias/",
+  "final_url": null,
+  "publisher": "seiadigital.pt",
+  "page_title": "Incêndio no Piódão obriga a evacuar aldeias - Seia Digital",
+  "headline": "Incêndio no Piódão obriga a evacuar aldeias",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "b1858d18-2aa5-42ed-bcd2-181513b536b3",
+  "captured_at": "2026-11-15T01:30:09Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T11:27:54+00:00",
+  "meta_modified": "2025-08-13T11:44:56+00:00",
+  "printed_published": "13 de Agosto de 2025",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 7295,
+  "facts": [
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began in Piódão during the early hours.",
+    "places": [
+     "Piódão",
+     "Arganil"
+    ],
+    "time_text": "esta madrugada",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que esta madrugada teve início no Piódão, concelho de Arganil, lavra com bastante intensidade, tendo obrigado já à evacuação de aldeias.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire is burning with considerable intensity and has forced the evacuation of villages.",
+    "places": [
+     "Piódão",
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que esta madrugada teve início no Piódão, concelho de Arganil, lavra com bastante intensidade, tendo obrigado já à evacuação de aldeias.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents of Porto Silvado, Chãs d’ Égua and Foz d’ Égua were removed from their homes as a precaution because of heavy smoke.",
+    "places": [
+     "Porto Silvado",
+     "Chãs d’ Égua",
+     "Foz d’ Égua"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Por precaução, devido ao muito fumo, foram retiradas de suas casas os habitantes de Porto Silvado, Chãs d’ Égua e Foz d’ Égua.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "The localities are very close to the territory of Seia municipality.",
+    "places": [
+     "Seia"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Refira-se que estas últimas localidades estão muito próximas do território do concelho de Seia, estando já todos os meios do Serviço Municipal de Proteção Civil de prevenção.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "All resources of Seia’s Municipal Civil Protection Service are on standby.",
+    "places": [
+     "Seia"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Refira-se que estas últimas localidades estão muito próximas do território do concelho de Seia, estando já todos os meios do Serviço Municipal de Proteção Civil de prevenção.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The fire originated from thunderstorms felt during the previous night.",
+    "places": [],
+    "time_text": "durante a última noite",
+    "number": null,
+    "unit": null,
+    "quote": "O fogo teve origem nas trovoadas que se sentiram durante a última noite.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm discharge caused the flames to start.",
+    "places": [],
+    "time_text": "durante a noite",
+    "number": null,
+    "unit": null,
+    "quote": "Segundo Luís Paulo Costa, presidente da Câmara de Arganil, durante a noite “verificou-se uma descarga de trovoada seca, que provocou a origem das chamas” que, com o forte vento que se fez sentir, numa zona que já é habitualmente ventosa, “originou diversas projeções de fogo”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "Strong wind in an area that is habitually windy caused multiple fire projections.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Segundo Luís Paulo Costa, presidente da Câmara de Arganil, durante a noite “verificou-se uma descarga de trovoada seca, que provocou a origem das chamas” que, com o forte vento que se fez sentir, numa zona que já é habitualmente ventosa, “originou diversas projeções de fogo”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "Very intense, erratic winds projected the fire to several places.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“Estava um vento muito intenso, com direções muito errantes, que projetou o fogo para vários sítios”",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire is uncontrolled, with several active fronts, and threatens several villages.",
+    "places": [],
+    "time_text": "nesta altura",
+    "number": null,
+    "unit": null,
+    "quote": "“descontrolado”, com “várias frentes ativas”, colocando em perigo várias aldeias.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "A total of 425 operational personnel are fighting the fire.",
+    "places": [],
+    "time_text": null,
+    "number": 425,
+    "unit": "operacionais",
+    "quote": "No combate às chamas encontram-se 425 operacionais apoiados por 125 viaturas e 10 meios aéreos, informa a Autoridade Nacional de Emergência e Proteção Civil (ANEPC).",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "A total of 125 vehicles are supporting firefighting efforts.",
+    "places": [],
+    "time_text": null,
+    "number": 125,
+    "unit": "viaturas",
+    "quote": "No combate às chamas encontram-se 425 operacionais apoiados por 125 viaturas e 10 meios aéreos, informa a Autoridade Nacional de Emergência e Proteção Civil (ANEPC).",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "Ten aerial resources are supporting firefighting efforts.",
+    "places": [],
+    "time_text": null,
+    "number": 10,
+    "unit": "meios aéreos",
+    "quote": "No combate às chamas encontram-se 425 operacionais apoiados por 125 viaturas e 10 meios aéreos, informa a Autoridade Nacional de Emergência e Proteção Civil (ANEPC).",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "other",
+    "statement_en": "The president of Arganil’s municipal council activated the Municipal Emergency and Civil Protection Plan.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Câmara de Arganil, Luís Paulo Costa, já ativou o Plano Municipal de Emergência e Proteção Civil, assegurando uma coordenação eficaz entre bombeiros, forças de segurança e serviços de saúde.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "other",
+    "statement_en": "The situation is expected to worsen in the coming hours, and residents are urged to take measures to protect themselves and their property.",
+    "places": [],
+    "time_text": "nas próximas horas",
+    "number": null,
+    "unit": null,
+    "quote": "“A situação nas próximas horas tenderá a agravar-se, pelo que os propósitos da Declaração da Situação de Alerta é uma obrigação de todos sem exceção, apelando-se às populações para adotarem todas as medidas possíveis para a sua segurança e a salvaguarda dos seus bens”",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://radioboanova.sapo.pt/oliveira-do-hospital-ativa-plano-municipal-de-emergencia-e-protecao-civil/",
+  "final_url": null,
+  "publisher": "radioboanova.sapo.pt",
+  "page_title": "Chão Sobral e Gramaça &#8220;evacuadas por precaução&#8221;. Oliveira do Hospital ativa Plano Municipal de Emergência e Pro",
+  "headline": "Chão Sobral e Gramaça “evacuadas por precaução”. Oliveira do Hospital ativa Plano Municipal de Emergência e Proteção Civil",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "9b6fd2ec-495a-4de9-bbd8-682c219977b7",
+  "captured_at": "2026-11-15T01:31:20Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T14:32:52+01:00",
+  "meta_modified": "2025-08-13T15:22:32+01:00",
+  "printed_published": "13 de Agosto, 2025",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 25338,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "The fire began in Piódão.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Com efeitos a partir das 13h30 do dia 13 de agosto de 2025, o Plano foi ativado face ao incêndio que teve início no Piódão e que está a decorrer no território do concelho oliveirense, nomeadamente na freguesia de Aldeia das Dez.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The emergency plan took effect at 13h30 on 13 August 2025.",
+    "places": [],
+    "time_text": "13h30 do dia 13 de agosto de 2025",
+    "number": null,
+    "unit": null,
+    "quote": "Com efeitos a partir das 13h30 do dia 13 de agosto de 2025, o Plano foi ativado face ao incêndio que teve início no Piódão e que está a decorrer no território do concelho oliveirense, nomeadamente na freguesia de Aldeia das Dez.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was burning in Aldeia das Dez parish and had spread across Monte do Colcurinho.",
+    "places": [
+     "Aldeia das Dez",
+     "Monte do Colcurinho"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Com efeitos a partir das 13h30 do dia 13 de agosto de 2025, o Plano foi ativado face ao incêndio que teve início no Piódão e que está a decorrer no território do concelho oliveirense, nomeadamente na freguesia de Aldeia das Dez. O fogo alastrou-se pelo Monte do Colcurinho.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "The firefighting effort involved 570 personnel, 170 vehicles and 4 aircraft.",
+    "places": [],
+    "time_text": null,
+    "number": 570,
+    "unit": "operacionais",
+    "quote": "No combate às chamas estão 570 operacionais, apoiados por 170 viaturas e 4 meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "The firefighting effort involved 570 personnel, 170 vehicles and 4 aircraft.",
+    "places": [],
+    "time_text": null,
+    "number": 170,
+    "unit": "viaturas",
+    "quote": "No combate às chamas estão 570 operacionais, apoiados por 170 viaturas e 4 meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "The firefighting effort involved 570 personnel, 170 vehicles and 4 aircraft.",
+    "places": [],
+    "time_text": null,
+    "number": 4,
+    "unit": "meios aéreos",
+    "quote": "No combate às chamas estão 570 operacionais, apoiados por 170 viaturas e 4 meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Nineteen people were evacuated from Chão Sobral and nine from Gramaça to Escola Básica Integrada da Ponte das Três Entradas.",
+    "places": [
+     "Chão Sobral",
+     "Gramaça",
+     "Escola Básica Integrada da Ponte das Três Entradas"
+    ],
+    "time_text": null,
+    "number": 19,
+    "unit": "pessoas",
+    "quote": "Segundo o autarca, “foram evacuadas 19 pessoas do Chão Sobral e nove pessoas da aldeia da Gramaça, que foram encaminhadas para a Escola Básica Integrada da Ponte das Três Entradas”.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Nineteen people were evacuated from Chão Sobral and nine from Gramaça to Escola Básica Integrada da Ponte das Três Entradas.",
+    "places": [
+     "Chão Sobral",
+     "Gramaça",
+     "Escola Básica Integrada da Ponte das Três Entradas"
+    ],
+    "time_text": null,
+    "number": 9,
+    "unit": "pessoas",
+    "quote": "Segundo o autarca, “foram evacuadas 19 pessoas do Chão Sobral e nove pessoas da aldeia da Gramaça, que foram encaminhadas para a Escola Básica Integrada da Ponte das Três Entradas”.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire was near Porto Silvado and moving slowly down the slope toward Chão Sobral after Monte do Colcurinho.",
+    "places": [
+     "Porto Silvado",
+     "Arganil",
+     "Oliveira do Hospital",
+     "Monte Colcurinho",
+     "Chão Sobral"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Segundo Francisco Rolo, a decisão foi tomada “claramente por precaução”, já que o fogo “está na zona do Porto Silvado, mais acima, junto à fronteira de Arganil com Oliveira do Hospital” e também “a deslizar lentamente na encosta, depois do Monte Colcurinho, em direção a Chão Sobral”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "other",
+    "statement_en": "The priority was to protect villages and create firebreaks using heavy machinery, including tracked machines.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O autarca salientou que a prioridade tem sido “proteger as aldeias e criar linhas de corta-fogo com maquinaria pesada, incluindo máquinas de rastos”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Vale de Maceira, Casal Cimeiro, Golinho and Parente were under close surveillance as localities at risk.",
+    "places": [
+     "Vale de Maceira",
+     "Casal Cimeiro",
+     "Golinho",
+     "Parente"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "De acordo com o presidente, há uma “vigilância apertada” a outras localidades em risco, como Vale de Maceira, Casal Cimeiro, Golinho e Parente.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "A change in the wind during the afternoon could worsen the situation and alter the fire’s trajectory.",
+    "places": [],
+    "time_text": "durante a tarde",
+    "number": null,
+    "unit": null,
+    "quote": "O autarca alertou ainda para a possibilidade de agravamento da situação com a mudança do vento durante a tarde: “Estes são os riscos que estão associados a este tipo de incêndios, as alterações meteorológicas que podem mudar a trajetória do fogo”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire affected a high-mountain area and villages with difficult access.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio afeta uma zona de alta montanha e aldeias com acessos difíceis, o que leva o autarca a reforçar a importância dos meios aéreos:",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://correiodabeiraserra.com/trovoada-seca-podera-estar-na-origem-do-incendio-florestal-em-arganil/",
+  "final_url": null,
+  "publisher": "correiodabeiraserra.com",
+  "page_title": null,
+  "headline": null,
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "2b9c605c-a071-4030-a5d7-df07c3952a21",
+  "captured_at": "2026-11-15T01:29:38Z",
+  "credits": 0,
+  "markdown_success": false,
+  "json_success": false,
+  "error_code": "WEBSITE_BLOCKED",
+  "is_partial": null,
+  "meta_published": null,
+  "meta_modified": null,
+  "printed_published": null,
+  "printed_published_in_page": false,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 0,
+  "facts": []
+ },
+ {
+  "url": "https://correiodabeiraserra.com/incendio-leva-ao-cancelamento-da-festa-de-verao-do-piodao/",
+  "final_url": null,
+  "publisher": "correiodabeiraserra.com",
+  "page_title": null,
+  "headline": null,
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "722740e6-267c-4a38-86a0-564001d25fe8",
+  "captured_at": "2026-11-15T01:31:59Z",
+  "credits": 0,
+  "markdown_success": false,
+  "json_success": false,
+  "error_code": "WEBSITE_BLOCKED",
+  "is_partial": null,
+  "meta_published": null,
+  "meta_modified": null,
+  "printed_published": null,
+  "printed_published_in_page": false,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 0,
+  "facts": []
+ },
+ {
+  "url": "https://www.diariocoimbra.pt/2025/08/13/fogo-de-piodao-com-origem-em-descarga-de-trovoada/",
+  "final_url": null,
+  "publisher": "diariocoimbra.pt",
+  "page_title": "Fogo de Piódão com origem em descarga de trovoada",
+  "headline": "Fogo de Piódão com origem em descarga de trovoada",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "1b768998-f013-42cd-a70f-22431354df88",
+  "captured_at": "2026-11-15T01:29:12Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T10:36:51+00:00",
+  "meta_modified": "2025-08-13T10:46:06+00:00",
+  "printed_published": "Agosto 13, 2025 . 11:36",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 12672,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "The wildfire originated in dry thunderstorms during the previous night.",
+    "places": [
+     "Piódão",
+     "Pomares",
+     "Arganil"
+    ],
+    "time_text": "durante a última noite",
+    "number": null,
+    "unit": null,
+    "quote": "O fogo que lavra nas freguesias de Piódão e Pomares, no concelho de Arganil, teve origem nas trovoadas que se sentiram durante a última noite.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm discharge caused the flames to start.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "durante a noite",
+    "number": null,
+    "unit": null,
+    "quote": "Segundo Luís Paulo Costa, presidente da Câmara de Arganil, durante a noite verificou-se uma descarga de trovoada seca, que provocou a origem das chamas que, com o forte vento que se fez sentir, numa zona que já é habitualmente ventosa, originou diversas projeções de fogo.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "Intense, erratic winds projected the fire to several places.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "«Estava um vento muito intenso, com direções muito errantes, que projetou o fogo para vários sítios».",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was uncontrolled and had several active fronts at the time of the report.",
+    "places": [],
+    "time_text": "nesta altura",
+    "number": null,
+    "unit": null,
+    "quote": "Segundo Luís Paulo Costa, o incêndio está, nesta altura, «descontrolado» e com «várias frentes ativas».",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "The flames had come near Piódão, and some villages were threatened.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "As chamas já andaram perto da aldeia de Piódão, mas o dispositivo de combate no local conseguiu impedir a sua progressão, no entanto, de acordo com Luís Paulo Costa, «há algumas aldeias ameaçadas».",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "More than four hundred firefighters were fighting the fire.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": 400,
+    "unit": "operacionais",
+    "quote": "No combate às chamas estão mais de quatro centenas de operacionais das várias corporações de bombeiros da região, apoiados por mais de 120 viaturas, com nove meios aéreos envolvidos.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "resources",
+    "statement_en": "More than 120 vehicles supported firefighting efforts.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": 120,
+    "unit": "viaturas",
+    "quote": "No combate às chamas estão mais de quatro centenas de operacionais das várias corporações de bombeiros da região, apoiados por mais de 120 viaturas, com nove meios aéreos envolvidos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "Nine aircraft were involved in firefighting efforts.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": 9,
+    "unit": "meios aéreos",
+    "quote": "No combate às chamas estão mais de quatro centenas de operacionais das várias corporações de bombeiros da região, apoiados por mais de 120 viaturas, com nove meios aéreos envolvidos.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire alert was issued at 5:08.",
+    "places": [],
+    "time_text": "5h08",
+    "number": 5.08,
+    "unit": "hora",
+    "quote": "O alerta para o incêndio, de acordo com o Comando Sub Regional de Emergência a Proteção Civil, foi dado às 5h08.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was consuming a brushland area in Piódão and Pomares.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O fogo está a consumir uma zona de mato nas freguesias de Piódão e Pomares.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "other",
+    "statement_en": "The mayor activated the Municipal Emergency and Civil Protection Plan because of the wildfire.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Câmara de Arganil, Luís Paulo Costa, já ativou o Plano Municipal de Emergência e Proteção Civil, devido ao incêndio rural que lavra com grande intensidade e ameaça populações.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "other",
+    "statement_en": "The plan had been active since 9:00 that day.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "desde as 9h00 de hoje",
+    "number": 9,
+    "unit": "hora",
+    "quote": "O plano está ativo desde as 9h00 de hoje.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "The wildfire was threatening populations.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Câmara de Arganil, Luís Paulo Costa, já ativou o Plano Municipal de Emergência e Proteção Civil, devido ao incêndio rural que lavra com grande intensidade e ameaça populações.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The situation was expected to worsen in the coming hours.",
+    "places": [],
+    "time_text": "nas próximas horas",
+    "number": null,
+    "unit": null,
+    "quote": "«A situação nas próximas horas tenderá a agravar-se, pelo que os propósitos da Declaração da Situação de Alerta é uma obrigação de todos sem exceção, apelando-se às populações para adotarem todas as medidas possíveis para a sua segurança e a salvaguarda dos seus bens».",
+    "quote_verified": false,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://www.rtp.pt/noticias/pais/incendio-obriga-a-evacuar-aldeias-no-piodao_v1676155",
+  "final_url": null,
+  "publisher": "rtp.pt",
+  "page_title": "Incêndio obriga a evacuar aldeias no Piódão",
+  "headline": "Incêndio obriga a evacuar aldeias no Piódão",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "be64445c-db2f-46f4-9c91-ad11798cad02",
+  "captured_at": "2026-11-15T01:33:06Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": null,
+  "meta_modified": null,
+  "printed_published": "RTP / atualizado 13 Agosto 2025, 13:25",
+  "printed_published_in_page": true,
+  "printed_updated": "atualizado 13 Agosto 2025, 13:25",
+  "mentions_lusa": false,
+  "markdown_chars": 14571,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm during the night caused the fire.",
+    "places": [],
+    "time_text": "durante a noite",
+    "number": null,
+    "unit": null,
+    "quote": "A trovoada seca que caiu durante a noite provocou o incêndio que está por controlar devido às altas temperaturas e ao vento forte.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire remains uncontrolled due to high temperatures and strong wind.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "A trovoada seca que caiu durante a noite provocou o incêndio que está por controlar devido às altas temperaturas e ao vento forte.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "High temperatures and strong wind are mentioned.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "A trovoada seca que caiu durante a noite provocou o incêndio que está por controlar devido às altas temperaturas e ao vento forte.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "People were removed from the villages of Chãs de Égua and Foz de Égua.",
+    "places": [
+     "Chãs de Égua",
+     "Foz de Égua"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "As pessoas foram retiradas das aldeias de Chãs de Égua e Foz de Égua.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Residents were advised to leave their homes as a precaution and directed to care homes and churches.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Os habitantes foram aconselhados a sair de casa, por precaução, e encaminhados para lares e igrejas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "The flames are affecting the municipality of Arganil in an uncontrolled manner.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "As chamas afetam o concelho de Arganil de forma descontrolada.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Authorities describe the risk as extreme.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "As autoridades falam em \"risco extremo\".",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://sicnoticias.pt/especiais/incendios-em-portugal/2025-08-13-video-incendio-em-arganil-teve-origem-numa-trovoada-seca-b393ef54",
+  "final_url": null,
+  "publisher": "sicnoticias.pt",
+  "page_title": "Incêndio em Arganil teve origem numa trovoada seca",
+  "headline": "Incêndio em Arganil teve origem numa trovoada seca",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "dbf18d35-40a5-4db6-a5ca-8394b54759b4",
+  "captured_at": "2026-11-15T01:29:23Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": null,
+  "meta_modified": null,
+  "printed_published": null,
+  "printed_published_in_page": false,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 42153,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm caused the fire near the historic village of Piódão.",
+    "places": [
+     "Piódão",
+     "Arganil"
+    ],
+    "time_text": "na madrugada desta quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Uma trovoada seca provocou um incêndio junto à aldeia histórica de Piódão, concelho de Arganil, na madrugada desta quarta-feira.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire had several fronts in the municipalities of Arganil and Oliveira do Hospital.",
+    "places": [
+     "Arganil",
+     "Oliveira do Hospital"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O fogo tem tido várias frentes nos concelhos de Arganil e Oliveira do Hospital, o que obrigou a GNR a deslocar a população de uma dezena de aldeias da Serra do Açor.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "The GNR moved people from around ten villages in the Serra do Açor.",
+    "places": [
+     "Serra do Açor"
+    ],
+    "time_text": null,
+    "number": 10,
+    "unit": "aldeias",
+    "quote": "O fogo tem tido várias frentes nos concelhos de Arganil e Oliveira do Hospital, o que obrigou a GNR a deslocar a população de uma dezena de aldeias da Serra do Açor.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "At 16:00, the fire's uncontrollable scale in Serra do Açor was apparent.",
+    "places": [
+     "Serra do Açor"
+    ],
+    "time_text": "Às 16:00",
+    "number": 16,
+    "unit": "horas",
+    "quote": "Às 16:00, era percetível a incontrolável dimensão do incêndio na Serra do Açor, isto porque uma trovoada seca no verão tórrido lançou a faísca que foi o gatilho do fogo.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm during a torrid summer sparked the fire.",
+    "places": [
+     "Serra do Açor"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Às 16:00, era percetível a incontrolável dimensão do incêndio na Serra do Açor, isto porque uma trovoada seca no verão tórrido lançou a faísca que foi o gatilho do fogo.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "Five hundred firefighters, nearly two hundred vehicles, and eight aircraft fought the fire throughout the day.",
+    "places": [],
+    "time_text": "Ao longo do dia",
+    "number": 500,
+    "unit": "operacionais",
+    "quote": "Ao longo do dia, cinco centenas de operacionais, quase duas centenas de viaturas e oito meios aéreos lutaram contra os efeitos rápidos do vento e contra o impenetrável fumo denso, que não permitiu aos aviões descerem ao vale ou sequer aproximarem-se das colunas de pinheiros que ardiam nas encostas.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "weather",
+    "statement_en": "Fast winds and dense smoke hindered firefighting aircraft.",
+    "places": [],
+    "time_text": "Ao longo do dia",
+    "number": null,
+    "unit": null,
+    "quote": "Ao longo do dia, cinco centenas de operacionais, quase duas centenas de viaturas e oito meios aéreos lutaram contra os efeitos rápidos do vento e contra o impenetrável fumo denso, que não permitiu aos aviões descerem ao vale ou sequer aproximarem-se das colunas de pinheiros que ardiam nas encostas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "The Canadairs dropped 5,000 litres of water, which helped control the flames in areas where the atmosphere was not opaque.",
+    "places": [],
+    "time_text": null,
+    "number": 5000,
+    "unit": "litros de água",
+    "quote": "Nas áreas onde as chamas não tornavam a atmosfera opaca, os 5.000 litros de água despejada pelos ‘canadair’ ajudaram a controlar o ímpeto das chamas.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Thirty residents from the fire front had to leave and were moved to Vide, which escaped the flames.",
+    "places": [
+     "Vide"
+    ],
+    "time_text": null,
+    "number": 30,
+    "unit": "moradores",
+    "quote": "Três dezenas de moradores da frente de fogo tiveram de sair só com a roupa do corpo, tendo sido deslocados para a aldeia de Vide, que escapou à rota das chamas.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "people_present",
+    "statement_en": "Three residents in villages in Serra do Açor could not escape in time and sheltered inside a water tank.",
+    "places": [
+     "Serra do Açor"
+    ],
+    "time_text": null,
+    "number": 3,
+    "unit": "habitantes",
+    "quote": "Nas aldeias da Serra do Açor, houve três habitantes que não conseguiram fugir a tempo. Agora, têm mais do que os outros para contar, já que tiveram de se colocar dentro de um tanque de água para se conseguirem salvar.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Three residents sheltered inside a water tank to save themselves.",
+    "places": [
+     "Serra do Açor"
+    ],
+    "time_text": null,
+    "number": 3,
+    "unit": "habitantes",
+    "quote": "Nas aldeias da Serra do Açor, houve três habitantes que não conseguiram fugir a tempo. Agora, têm mais do que os outros para contar, já que tiveram de se colocar dentro de um tanque de água para se conseguirem salvar.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "other",
+    "statement_en": "GNR patrols searched continuously for people left behind as villages and scattered homes in Serra do Açor were temporarily cut off.",
+    "places": [
+     "Serra do Açor"
+    ],
+    "time_text": "Ao longo da manhã",
+    "number": null,
+    "unit": null,
+    "quote": "Ao longo da manhã, diversas aldeias da Serra do Açor e casas dispersas iam ficando momentaneamente fora do mapa. As patrulhas da GNR andaram em permanência à procura de quem tivesse ficado para trás.",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://www.jn.pt/pais/artigo/fogo-obriga-a-evacuar-pelo-menos-nove-aldeias-em-piodao-/17858354",
+  "final_url": null,
+  "publisher": "jn.pt",
+  "page_title": "Fogo obriga a evacuar pelo menos nove aldeias na freguesia de Piódão",
+  "headline": "Fogo obriga a evacuar pelo menos nove aldeias na freguesia de Piódão",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "6665ebde-a81d-49d1-a047-b4db4df18983",
+  "captured_at": "2026-11-15T01:29:56Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T14:07:00+01:00",
+  "meta_modified": "2025-08-13T14:07:00+01:00",
+  "printed_published": "13 de agosto, 2025 às 14:07",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 12507,
+  "facts": [
+   {
+    "category": "evacuation",
+    "statement_en": "At least nine villages in Piódão were evacuated because of the fire.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": 9,
+    "unit": "aldeias",
+    "quote": "Foram evacuadas, pelo menos, nove aldeias em Piódão, devido ao incêndio que lavra na região, segundo avança a SIC Notícias.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began during the early morning in the parish of Piódão.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "na madrugada de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na madrugada de hoje na freguesia de Piódão estendeu-se à freguesia de Pomares, constituída por 12 aldeias, parte das quais está diretamente na linha de fogo, embora existam meios dos bombeiros nessas localidades.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire spread from Piódão to the slopes near Porto Silvado and Sobral Magro.",
+    "places": [
+     "Piódão",
+     "Porto Silvado",
+     "Sobral Magro"
+    ],
+    "time_text": "pelas 13.30 horas",
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Junta de Freguesia de Pomares, Amândio Dinis, disse à agência Lusa, pelas 13.30 horas, que uma das frentes de chamas evoluiu do Piódão para as encostas junto das localidades de Porto Silvado e Sobral Magro: \"Estão lá muitos bombeiros e essa parte [da defesa das povoações] está contr…",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The defense of the settlements near Porto Silvado and Sobral Magro was reported as under control, though there was a lot of smoke.",
+    "places": [
+     "Porto Silvado",
+     "Sobral Magro"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Estão lá muitos bombeiros e essa parte [da defesa das povoações] está controlada, há é muito fumo. Em Sobral Magro ardeu tudo à volta, mas a aldeia está salvaguardada",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents of Porto Silvado and Vale do Torno were removed from their homes as a precaution, mainly because of smoke.",
+    "places": [
+     "Porto Silvado",
+     "Vale do Torno"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O autarca disse ainda que, por precaução e devido principalmente ao fumo, foram retirados de casa moradores das localidades de Porto Silvado e Vale do Torno.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Soito da Ruiva, Gramaça, and Sobral Gordo were apparently safe from the flames.",
+    "places": [
+     "Soito da Ruiva",
+     "Gramaça",
+     "Sobral Gordo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Na freguesia, na zona do incêndio, existem mais povoações - Soito da Ruiva, Gramaça e Sobral Gordo, entre outras - que se encontram, aparentemente, a salvo das chamas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "In Sobral Gordo, the fire was burning slowly up on the slope, while smoke was the main problem.",
+    "places": [
+     "Sobral Gordo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No Sobral Gordo o incêndio está a arder lá em cima [na encosta] mas devagarinho. O problema maior é o fumo, é muito fumo e muitas das pessoas são idosas, e têm sido retiradas por causa do fumo",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "Smoke in the valleys of the Serra do Açor hindered or prevented aircraft operations.",
+    "places": [
+     "serra do Açor"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Por outro lado, Amândio Dinis notou que o fumo, nas zonas de vales encaixados entre encostas escarpadas da serra do Açor, tem dificultado ou mesmo impedido a atuação dos meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began around 5 o'clock today on the slope above the historic village of Piódão.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "por volta das 5 horas de hoje",
+    "number": 5,
+    "unit": "horas",
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 5 horas de hoje - com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra - estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e …",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The fire allegedly started because of an electrical discharge from a thunderstorm.",
+    "places": [
+     "interior do distrito de Coimbra"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 5 horas de hoje - com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra - estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e …",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire spread to the forest area near Chãs de Égua and Foz de Égua, where people were also removed from their homes.",
+    "places": [
+     "Chãs de Égua",
+     "Foz de Égua"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 5 horas de hoje - com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra - estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e …",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents were moved to the social center of Vide in Seia municipality, Guarda district.",
+    "places": [
+     "Vide",
+     "Seia",
+     "Guarda",
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": 10,
+    "unit": "quilómetros",
+    "quote": "O presidente da Junta de Freguesia do Piódão, José Lopes, explicou que estes moradores foram deslocalizados para o centro social de Vide, já no concelho de Seia, distrito da Guarda, localidade situada a nordeste, a cerca de 10 quilómetros, por estrada, do Piódão.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Some people were sheltered in the main church because of ash and smoke.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No caso concreto do Piódão, e ainda segundo José Lopes, há meios dos bombeiros dentro da aldeia histórica e em zonas circundantes, e, por causa das cinzas e do fumo, algumas pessoas foram abrigadas na igreja matriz.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00, 492 firefighters were fighting the flames in Arganil, supported by 153 vehicles and five aircraft.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 14:00",
+    "number": 492,
+    "unit": "operacionais",
+    "quote": "Segundo a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 14:00 as chamas em Arganil estavam a ser combatidas por 492 operacionais, apoiados por 153 viaturas e cinco meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00, the firefighting operation in Arganil was supported by 153 vehicles.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 14:00",
+    "number": 153,
+    "unit": "viaturas",
+    "quote": "Segundo a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 14:00 as chamas em Arganil estavam a ser combatidas por 492 operacionais, apoiados por 153 viaturas e cinco meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00, the firefighting operation in Arganil was supported by five aircraft.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 14:00",
+    "number": 5,
+    "unit": "meios aéreos",
+    "quote": "Segundo a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 14:00 as chamas em Arganil estavam a ser combatidas por 492 operacionais, apoiados por 153 viaturas e cinco meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   }
+  ]
+ },
+ {
+  "url": "https://www.publico.pt/2025/08/13/sociedade/noticia/incendios-ermidassado-dominado-vila-real-trancoso-continuam-activos-2143809",
+  "final_url": null,
+  "publisher": "publico.pt",
+  "page_title": "Fogo de Trancoso com frente activa de seis quilómetros. Mais de 2500 operacionais combatem 22 incêndios",
+  "headline": "Fogo de Trancoso com frente activa de seis quilómetros. Mais de 2500 operacionais combatem 22 incêndios",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "7c13f802-4006-4c37-a4c0-cf1639ef98c2",
+  "captured_at": "2026-11-15T01:33:02Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T06:59:26Z",
+  "meta_modified": null,
+  "printed_published": "13 de Agosto de 2025, 7:59",
+  "printed_published_in_page": true,
+  "printed_updated": "actualizado a 13 de Agosto de 2025, 23:00",
+  "mentions_lusa": true,
+  "markdown_chars": 34122,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "A thunderstorm caused a rekindling of the Trancoso fire.",
+    "places": [
+     "Trancoso"
+    ],
+    "time_text": "durante a madrugada",
+    "number": null,
+    "unit": null,
+    "quote": "A trovoada que atingiu durante a madrugada o distrito da Guarda também originou um reacendimento no incêndio de Trancoso, que fez agravar as condições adversas no terreno e obrigou a Protecção Civil a fazer um reforço de meios na manhã desta quarta-feira.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The Trancoso fire had an active front about six kilometres long that night.",
+    "places": [
+     "Trancoso"
+    ],
+    "time_text": "esta noite",
+    "number": 6,
+    "unit": "quilómetros",
+    "quote": "O fogo que lavra em Trancoso desde sábado tem, esta noite, uma frente activa com cerca de seis quilómetros e “muito trabalho” pela frente para os operacionais, de acordo com a Protecção Civil.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "other",
+    "statement_en": "Operational commander Carlos Silva said the fire still required much work after a difficult day.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“Foi um dia muito difícil, ao fim do qual temos uma frente activa com cerca de seis quilómetros. Ainda temos muito trabalho pela frente”, disse à agência Lusa o comandante operacional Carlos Silva.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "During the day, flames approached several localities in the municipalities of Trancoso and Fornos de Algodres and entered neighboring municipalities.",
+    "places": [
+     "Trancoso",
+     "Fornos de Algodres",
+     "Celorico da Beira",
+     "Aguiar da Beira"
+    ],
+    "time_text": "Durante o dia",
+    "number": null,
+    "unit": null,
+    "quote": "Durante o dia as chamas rondaram várias localidades dos concelhos de Trancoso e de Fornos de Algodres, tendo entrado nos municípios vizinhos de Celorico da Beira, durante a tarde, e de Aguiar da Beira (concelhos do distrito da Guarda) ao final do dia.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "The president said Friday, August 15, would be the most concerning day based on available meteorological data.",
+    "places": [],
+    "time_text": "sexta-feira, 15 de Agosto",
+    "number": null,
+    "unit": null,
+    "quote": "Marcelo Rebelo de Sousa, Presidente da República, diz que a próxima sexta-feira, 15 de Agosto, será o dia mais preocupante, tendo em conta os dados meteorológicos disponíveis.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "The president warned of meteorological and physical conditions conducive to the persistence or worsening of forest fires.",
+    "places": [],
+    "time_text": "fim-de-semana",
+    "number": null,
+    "unit": null,
+    "quote": "“É um dia particularmente preocupante porque há uma convergência de condições objectivas meteorológicos e físicas que aponta para uma situação muito propícia de permanência ou agravamento dos fogos florestais”, alerta o chefe de Estado, dizendo que o período de alerta se estende para o fim-de-seman…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The Piódão fire began in the early hours of Wednesday and was being fought by firefighters, vehicles, and aircraft around 16:00.",
+    "places": [
+     "Piódão",
+     "Arganil"
+    ],
+    "time_text": "na madrugada desta quarta-feira",
+    "number": 625,
+    "unit": "bombeiros",
+    "quote": "Um violento incêndio deflagrou na madrugada desta quarta-feira junto à aldeia de xisto do Piódão, concelho de Arganil, e está a ser combatido por 625 bombeiros, 190 viaturas terrestres e sete aeronaves por volta das 16h.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The Piódão fire was thought to have started because of a thunderstorm overnight.",
+    "places": [
+     "Centro"
+    ],
+    "time_text": "durante a noite",
+    "number": null,
+    "unit": null,
+    "quote": "O fogo terá começado devido à trovoada que se abateu sobre o Centro do país durante a noite.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "About 55 people were moved from the municipalities of Seia and Arganil, with no damage to homes.",
+    "places": [
+     "Seia",
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": 55,
+    "unit": "pessoas",
+    "quote": "O incêndio florestal que eclodiu na serra do Açor, no município de Arganil, distrito de Coimbra, estendeu-se a Seia (Guarda), obrigando à deslocação de cerca de 55 pessoas dos dois municípios, mas sem danos nas habitações, disse fonte oficial.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "shelter",
+    "statement_en": "About 55 people from some settlements in Seia and Arganil were gathered at Casa do Povo de Vide after an evacuation order.",
+    "places": [
+     "Casa do Povo de Vide",
+     "Seia",
+     "Arganil"
+    ],
+    "time_text": "ao início da tarde",
+    "number": 55,
+    "unit": "pessoas",
+    "quote": "Segundo o presidente da Câmara de Seia, Luciano Ribeiro, “logo que foi dada a ordem de evacuação ao início da tarde”, foram concentradas na Casa do Povo de Vide, “cerca de 55 pessoas” de “algumas povoações do concelho de Seia, mas também do concelho de Arganil”.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "people_present",
+    "statement_en": "At least three firefighters were slightly injured in the morning.",
+    "places": [],
+    "time_text": "da parte da manhã",
+    "number": 3,
+    "unit": "bombeiros",
+    "quote": "Há confirmação de pelo menos três bombeiros feridos, da parte da manhã, mas sem gravidade.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "weather",
+    "statement_en": "Intense winds with erratic directions made firefighting difficult.",
+    "places": [],
+    "time_text": "ao final da manhã",
+    "number": null,
+    "unit": null,
+    "quote": "Luís Paulo Costa, presidente da Câmara de Arganil, disse à SIC Notícias, ao final da manhã, que os “ventos intensos, com direcções errantes, têm dificultado o trabalho dos bombeiros” e que não conseguia precisar quantas frentes tinha o incêndio.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire had developed a new front and had entered the municipality of Seia.",
+    "places": [
+     "Seia"
+    ],
+    "time_text": "Ao final da tarde",
+    "number": null,
+    "unit": null,
+    "quote": "Ao final da tarde, desta feita à CNN Portugal, o autarca adiantou que a situação tinha piorado. “As projecções colocaram o fogo com uma nova frente”, adiantou Luís Paulo Costa, confirmando que as chamas já tinha entrado no concelho de Seia.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Two villages in the Piódão parish were evacuated at 11:00, and residents of seven more villages were removed early that afternoon.",
+    "places": [
+     "Piódão",
+     "Foz d’Égua",
+     "Chãs d'Égua"
+    ],
+    "time_text": "pelas 11h",
+    "number": 7,
+    "unit": "aldeias",
+    "quote": "Duas aldeias da freguesia de Piódão, Foz d’Égua e Chãs d'Égua, foram evacuadas pelas 11h e, com o piorar da situação, a população de outras sete aldeias também teve que ser retirada ao início da tarde desta quarta-feira, segundo o canal.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Residents evacuated from villages were taken to the social centre of Vide.",
+    "places": [
+     "Piódão",
+     "Vide",
+     "Seia",
+     "Guarda"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Junta de Freguesia do Piódão, José Lopes, explicou que estes moradores foram levados para o centro social de Vide, já no concelho de Seia, distrito da Guarda, a cerca de dez quilómetros de Piódão.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Some people sheltered in the main church because of ash and smoke.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Há meios dos bombeiros dentro da aldeia histórica e em zonas circundantes e, por causa das cinzas e do fumo, algumas pessoas foram abrigadas na igreja matriz.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire spread to the neighboring parish of Pomares, which comprises 12 villages.",
+    "places": [
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": 12,
+    "unit": "aldeias",
+    "quote": "O incêndio já se estendeu à freguesia vizinha de Pomares, constituída por 12 aldeias, parte das quais está directamente na linha de fogo.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "A fire front moved from Piódão toward Porto Silvado and Sobral Magro on the slopes of the Açor mountain range.",
+    "places": [
+     "Piódão",
+     "serra do Açor",
+     "Porto Silvado",
+     "Sobral Magro"
+    ],
+    "time_text": "ao início da tarde",
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da junta, Amândio Dinis, disse à Lusa ao início da tarde que uma das frentes de chamas evoluiu do Piódão para as encostas da serra do Açor junto das localidades de Porto Silvado e Sobral Magro: “Estão lá muitos bombeiros e essa parte está controlada, há é muito fumo. Em Sobral Magro ar…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "More than 2,150 responders were fighting the six largest active fires in mainland Portugal at 17:00, supported by vehicles and aircraft.",
+    "places": [
+     "Portugal continental"
+    ],
+    "time_text": "pelas 17h",
+    "number": 2150,
+    "unit": "operacionais",
+    "quote": "Mais de 2150 operacionais combatiam pelas 17h os seis maiores incêndios activos em Portugal continental, apoiados por 682 viaturas e 23 aeronaves, segundo a Autoridade Nacional de Emergência e Protecção Civil (ANEPC).",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "The Piódão fire had 640 responders, 195 ground units, and ten aircraft at 17:00.",
+    "places": [
+     "Piódão",
+     "Arganil",
+     "Coimbra"
+    ],
+    "time_text": "cerca das 5h",
+    "number": 640,
+    "unit": "operacionais",
+    "quote": "De acordo com a informação disponível na página da Internet da ANEPC às 17h, o fogo que mobilizava mais meios era o que deflagrou cerca das 5h em Piódão, no concelho de Arganil, distrito de Coimbra, com 640 operacionais, 195 meios terrestres e dez aeronaves.",
+    "quote_verified": true,
+    "number_in_quote": true
+   }
+  ]
+ },
+ {
+  "url": "https://fogos.pt/pt/fogo/20251075979",
+  "final_url": null,
+  "publisher": "fogos.pt",
+  "page_title": "[14-11-2026 18:35] Incêndio em Coimbra, Arganil, Piódão (Arganil) — Vigilância | Fogos.pt",
+  "headline": "Incêndio em Coimbra, Arganil, Piódão (Arganil) — Vigilância",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "6ee242b0-7a40-4652-8188-b5057e77ed3a",
+  "captured_at": "2026-11-15T01:32:42Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": null,
+  "meta_modified": null,
+  "printed_published": null,
+  "printed_published_in_page": false,
+  "printed_updated": "Última atualização 14:00 19-03-2026",
+  "mentions_lusa": false,
+  "markdown_chars": 3693,
+  "facts": [
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire started at 05:08 on 13-08-2025.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "05:08 13-08-2025",
+    "number": null,
+    "unit": null,
+    "quote": "05:08 13-08-2025",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was in vigilance status at 13-09-2025 17:16.",
+    "places": [],
+    "time_text": "13-09-2025 17:16",
+    "number": null,
+    "unit": null,
+    "quote": "13-09-2025 17:16 Vigilância",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was in vigilance status at 26-08-2025 21:08.",
+    "places": [],
+    "time_text": "26-08-2025 21:08",
+    "number": null,
+    "unit": null,
+    "quote": "26-08-2025 21:08 Vigilância",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was concluded at 25-08-2025 20:16.",
+    "places": [],
+    "time_text": "25-08-2025 20:16",
+    "number": null,
+    "unit": null,
+    "quote": "25-08-2025 20:16 Conclusão",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was under resolution at 24-08-2025 12:05.",
+    "places": [],
+    "time_text": "24-08-2025 12:05",
+    "number": null,
+    "unit": null,
+    "quote": "24-08-2025 12:05 Em Resolução",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was ongoing at 13-08-2025 06:16.",
+    "places": [],
+    "time_text": "13-08-2025 06:16",
+    "number": null,
+    "unit": null,
+    "quote": "13-08-2025 06:16 Em Curso",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "The page reports 0 operational personnel, 0 ground resources and 0 air resources.",
+    "places": [],
+    "time_text": null,
+    "number": 0,
+    "unit": "operacionais",
+    "quote": "0 0 0",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "The A23 between Lardosa and Fundão was reopened.",
+    "places": [
+     "A23",
+     "Lardosa",
+     "Fundão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Reaberto: ✅ A23, entre Lardosa ao Fundão",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "The EN18 between Lardosa and Fundão was reopened.",
+    "places": [
+     "EN18",
+     "Lardosa",
+     "Fundão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "✅ EN18, entre Lardosa ao Fundão",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "The current temperature was 12.2ºC.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 12.2,
+    "unit": "°C",
+    "quote": "Temperatura atual: 12.2ºC",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "Humidity was 87%.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 87,
+    "unit": null,
+    "quote": "Humidade: 87%",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "Wind speed was 16.2 km/h.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 16.2,
+    "unit": "km/h",
+    "quote": "Velocidade do Vento: 16.2 km/h",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "Accumulated precipitation was 0 mm.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 0,
+    "unit": "mm",
+    "quote": "Precipitação acumulada: 0 mm",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "other",
+    "statement_en": "The weather data station was Pampilhosa da Serra, Fajão, 13.1 km away.",
+    "places": [
+     "Pampilhosa da Serra",
+     "Fajão"
+    ],
+    "time_text": "14/11/2026 17:00",
+    "number": 13.1,
+    "unit": "km",
+    "quote": "📍 Estação: Pampilhosa da Serra, Fajão (13.1 km)",
+    "quote_verified": true,
+    "number_in_quote": true
+   }
+  ],
+  "fogos": {
+   "occurrence_id": "20251075979",
+   "place_text": "Coimbra, Arganil, Piódão - Piódão",
+   "start_text": "05:08 13-08-2025",
+   "nature": "Mato",
+   "position": [
+    -7.81972,
+    40.23083
+   ],
+   "status_history_local": [
+    {
+     "time_local": "13-09-2025 17:16",
+     "status": "Vigilância"
+    },
+    {
+     "time_local": "13-09-2025 03:08",
+     "status": "Chegada ao TO"
+    },
+    {
+     "time_local": "26-08-2025 21:08",
+     "status": "Vigilância"
+    },
+    {
+     "time_local": "25-08-2025 20:16",
+     "status": "Conclusão"
+    },
+    {
+     "time_local": "24-08-2025 12:05",
+     "status": "Em Resolução"
+    },
+    {
+     "time_local": "13-08-2025 06:16",
+     "status": "Em Curso"
+    },
+    {
+     "time_local": "13-08-2025 05:20",
+     "status": "Despacho de 1º Alerta"
+    },
+    {
+     "time_local": "13-08-2025 05:14",
+     "status": "Despacho"
+    },
+    {
+     "time_local": "13-08-2025 05:08",
+     "status": "Início"
+    }
+   ],
+   "excluded": [
+    "Meteo block: current station reading dated 14/11/2026 17:00, not the fire period.",
+    "Meios '0 0 0': present-day value after the incident closed, not the historical deployment."
+   ]
+  }
+ },
+ {
+  "url": "https://www.noticiasdecoimbra.pt/casal-passa-ferias-no-piodao-e-encontra-o-inferno-chamas-estavam-mesmo-a-porta-da-nossa-casa/",
+  "final_url": null,
+  "publisher": "noticiasdecoimbra.pt",
+  "page_title": "Casal passa férias no Piódão e encontra o inferno. Chamas “estavam mesmo à porta da nossa casa”",
+  "headline": "Casal passa férias no Piódão e encontra o inferno. Chamas “estavam mesmo à porta da nossa casa”",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "fdfb5e0f-992e-41f6-afc5-db3afd00c031",
+  "captured_at": "2026-11-15T01:32:07Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T14:47:17+01:00",
+  "meta_modified": "2025-08-13T14:57:52+01:00",
+  "printed_published": "13-08-2025",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 9248,
+  "facts": [
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire broke out at dawn on 13 August near Piódão.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "na madrugada de hoje , 13 de agosto",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que deflagrou na madrugada de hoje , 13 de agosto, junto ao Piódão obrigou à evacuação de várias aldeias no concelho de Arganil.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Several villages in the municipality of Arganil were evacuated.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que deflagrou na madrugada de hoje , 13 de agosto, junto ao Piódão obrigou à evacuação de várias aldeias no concelho de Arganil.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "Around 15 or 16 people were evacuated from the village and taken to the reception point.",
+    "places": [],
+    "time_text": null,
+    "number": 15,
+    "unit": "pessoas",
+    "quote": "Ao todo, “foram à roda de 15 ou 16 pessoas” retiradas da aldeia e encaminhadas para o ponto de acolhimento.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Cidália was taken to the community hall, where elderly people and children gathered in the safest place.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "A nossa casa é pertinho do largo. Fizeram com que eu viesse para a casa do povo… não queria vir, mas acabei por aceitar. Estávamos ali todos juntos, os velhotes e as crianças, no sítio mais seguro.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was calm and burned only surrounding brush, with no houses burned.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Já está tudo calmo. Não ardeu casa nenhuma, só o mato à volta",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "The fire threatened homes in Gramaça and Aldeia das Dez, in Oliveira do Hospital.",
+    "places": [
+     "Gramaça",
+     "Aldeia das Dez",
+     "Oliveira do Hospital"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Ainda assim, mantém-se a preocupação com aldeias vizinhas, como Gramaça e Aldeia das Dez, em Oliveira do Hospital, onde o fogo também ameaçou habitações.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Several localities, including Porto Silvado, were evacuated on Wednesday, 13 August.",
+    "places": [
+     "Arganil",
+     "Porto Silvado"
+    ],
+    "time_text": "esta quarta-feira, 13 de agosto",
+    "number": null,
+    "unit": null,
+    "quote": "O avanço das chamas no concelho de Arganil levou esta quarta-feira, 13 de agosto, à evacuação de várias localidades, entre elas Porto Silvado.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "People evacuated from risk areas were in Pomares.",
+    "places": [
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Na aldeia de Pomares, encontram-se algumas das pessoas retiradas das zonas de risco, como Maria de Fátima Gonçalves, que estava a passar férias quando foi surpreendida pelo fogo.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Children, older people, and people with reduced mobility were evacuated; young people, the GNR, firefighters, and civil protection remained to guard homes.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“As chamas já estavam mesmo na aldeia. Tivemos mesmo que ser evacuados: crianças, idosos, pessoas com mobilidade reduzida, tivemos de ser todos evacuados. Só ficaram lá a malta jovem, a GNR, bombeiros e proteção civil para guardar as habitações”.",
+    "quote_verified": false,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://www.sabado.pt/portugal/detalhe/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-pioda",
+  "final_url": null,
+  "publisher": "sabado.pt",
+  "page_title": "Trovoada seca provocou fogo em Arganil junto à aldeia do Piódão",
+  "headline": "Trovoada seca provocou fogo em Arganil junto à aldeia do Piódão",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "06b4ad8b-1a0d-46ea-a63c-8a09618c730b",
+  "captured_at": "2026-11-15T01:33:29Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13",
+  "meta_modified": null,
+  "printed_published": "13 de agosto de 2025 às 13:23",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 15522,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm and an electrical discharge were reported as the cause of the fire.",
+    "places": [
+     "Arganil",
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Uma trovoada seca estará na origem do incêndio florestal que deflagrou na madrugada desta quarta-feira no município de Arganil, freguesia de Piódão, distrito de Coimbra, na serra do Açor, disseram autarcas locais.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began around 05:00 on Wednesday.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "por volta das 05h00 desta quarta-feira",
+    "number": 5,
+    "unit": "horas",
+    "quote": "Em declarações à agência Lusa, o presidente da junta de freguesia do Piódão, José Lopes, explicou que o incêndio começou na encosta acima da aldeia histórica, por volta das 05h00 desta quarta-feira, com origem numa descarga elétrica da trovoada e que o alerta foi dado por um vigilante de uma unidad…",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "people_present",
+    "statement_en": "A hotel-unit watchman reported the fire after it began.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Em declarações à agência Lusa, o presidente da junta de freguesia do Piódão, José Lopes, explicou que o incêndio começou na encosta acima da aldeia histórica, por volta das 05h00 desta quarta-feira, com origem numa descarga elétrica da trovoada e que o alerta foi dado por um vigilante de uma unidad…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "event_gathering",
+    "statement_en": "The parish council president, other executive members and staff went to the village square as firefighters began arriving.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "em seguida",
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Junta de Freguesia e outros elementos do executivo e funcionários dirigiram-se, em seguida, para o largo da aldeia: “entretanto os bombeiros começaram a chegar e tem-se feito aquilo que se pode”, notou.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Some people were sheltering in the main church because of ash and smoke.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Segundo José Lopes, no caso concreto do Piódão há meios dos bombeiros dentro da aldeia e em zonas circundantes, e, de acordo com o estipulado no programa Aldeias Seguras, “por causa das cinzas e do fumo, algumas pessoas estão abrigadas na igreja matriz”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "About ten firefighting vehicles were distributed around the village and near the Inatel tourist unit.",
+    "places": [
+     "Piódão",
+     "Inatel"
+    ],
+    "time_text": null,
+    "number": 10,
+    "unit": "viaturas",
+    "quote": "No total, José Lopes contabilizou cerca de uma dezena de viaturas dos bombeiros distribuídas entre a praça principal da aldeia e zonas mais altas da povoação, bem como junto à unidade turística do Inatel.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire spread from Piódão into Pomares parish and was progressing in mountainous terrain, boosted by strong winds.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Também o presidente da Junta de Freguesia de Pomares, Amândio Dinis, frisou que as chamas começaram no Piódão “com uma faísca da trovoada” e estenderam-se ao território da freguesia, estando a evoluir, potenciadas pelo vento forte, em zona de montanha, com vertentes escarpadas e vales fundos, onde …",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The municipality activated its Municipal Emergency and Civil Protection Plan because of the fire in Piódão and Pomares parishes.",
+    "places": [
+     "Arganil",
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": "entretanto",
+    "number": null,
+    "unit": null,
+    "quote": "Devido ao incêndio que lavra nas freguesias de Piódão e Pomares, o município de Arganil ativou, entretanto, o Plano Municipal de Emergência e Proteção Civil.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire had several highly complex fronts, worsened by the strong wind.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“O fogo apresenta várias frentes de elevada complexidade, agravadas pela intensidade do vento que se faz sentir”, adiantou.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 12:30, 431 personnel were fighting the fire in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 12:30",
+    "number": 431,
+    "unit": "operacionais",
+    "quote": "De acordo com dados da Autoridade Nacional de Emergência e Proteção Civil, pelas 12:30 as chamas em Arganil estavam a ser combatidas por 431 operacionais, apoiados por 131 viaturas e seis meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 12:30, 131 vehicles supported firefighting in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 12:30",
+    "number": 131,
+    "unit": "viaturas",
+    "quote": "De acordo com dados da Autoridade Nacional de Emergência e Proteção Civil, pelas 12:30 as chamas em Arganil estavam a ser combatidas por 431 operacionais, apoiados por 131 viaturas e seis meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 12:30, six aircraft supported firefighting in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 12:30",
+    "number": 6,
+    "unit": "meios aéreos",
+    "quote": "De acordo com dados da Autoridade Nacional de Emergência e Proteção Civil, pelas 12:30 as chamas em Arganil estavam a ser combatidas por 431 operacionais, apoiados por 131 viaturas e seis meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": false
+   }
+  ]
+ },
+ {
+  "url": "https://www.asbeiras.pt/incendios-varias-aldeias-na-linha-de-fogo-em-arganil-nas-freguesias-de-piodao-e-pomares/",
+  "final_url": null,
+  "publisher": "asbeiras.pt",
+  "page_title": "Incêndios: Várias aldeias na linha de fogo em Arganil nas freguesias de Piódão e Pomares",
+  "headline": "Incêndios: Várias aldeias na linha de fogo em Arganil nas freguesias de Piódão e Pomares",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "0bafad02-e820-47dd-a628-88f8a97c2b45",
+  "captured_at": "2026-11-15T01:30:47Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T13:31:10+00:00",
+  "meta_modified": "2025-08-13T13:31:10+00:00",
+  "printed_published": "13 de agosto de 2025 às 13 h31",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 14771,
+  "facts": [
+   {
+    "category": "fire_status",
+    "statement_en": "The wildfire in Serra do Açor, in Arganil municipality, threatened several villages in the fire line, and residents were moved to safer areas.",
+    "places": [
+     "serra do Açor",
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio florestal que lavra na serra do Açor, no município de Arganil, distrito de Coimbra, ameaça várias aldeias que estão na linha de fogo, tendo os moradores sido retirados para zonas mais seguras, disseram autarcas locais.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began in the early morning in the parish of Piódão.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "na madrugada de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na madrugada de hoje na freguesia de Piódão, estendeu-se à freguesia de Pomares, constituída por 12 aldeias, parte das quais está diretamente na linha de fogo, embora existam meios dos bombeiros nessas localidades.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "A fire front advanced from Piódão to slopes near Porto Silvado and Sobral Magro.",
+    "places": [
+     "Piódão",
+     "Porto Silvado",
+     "Sobral Magro"
+    ],
+    "time_text": "pelas 13:30",
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Junta de Freguesia de Pomares, Amândio Dinis, disse à agência Lusa, pelas 13:30, que uma das frentes de chamas evoluiu do Piódão para as encostas junto das localidades de Porto Silvado e Sobral Magro: “Estão lá muitos bombeiros e essa parte [da defesa das povoações] está controlada,…",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire burned everything around Sobral Magro, but the village was protected.",
+    "places": [
+     "Sobral Magro"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Em Sobral Magro ardeu tudo à volta, mas a aldeia está salvaguardada",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents of Porto Silvado and Vale do Torno were evacuated from their homes as a precaution, mainly because of smoke.",
+    "places": [
+     "Porto Silvado",
+     "Vale do Torno"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O autarca disse ainda que, por precaução e devido principalmente ao fumo, foram retirados de casa moradores das localidades de Porto Silvado e Vale do Torno.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Soito da Ruiva, Gramaça and Sobral Gordo were apparently safe from the flames.",
+    "places": [
+     "Soito da Ruiva",
+     "Gramaça",
+     "Sobral Gordo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Na freguesia, na zona do incêndio, existem mais povoações – Soito da Ruiva, Gramaça e Sobral Gordo, entre outras – que se encontram, aparentemente, a salvo das chamas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "At Sobral Gordo, the fire was burning slowly up on the slope and smoke was the main problem.",
+    "places": [
+     "Sobral Gordo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“No Sobral Gordo o incêndio está a arder lá em cima [na encosta] mas devagarinho. O problema maior é o fumo, é muito fumo e muitas das pessoas são idosas, e têm sido retiradas por causa do fumo”",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "Smoke in the valleys between the steep slopes of Serra do Açor hampered or prevented aircraft operations.",
+    "places": [
+     "serra do Açor"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Por outro lado, Amândio Dinis notou que o fumo, nas zonas de vales encaixados entre encostas escarpadas da serra do Açor, tem dificultado ou mesmo impedido a atuação dos meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began on the slope above the historic village of Piódão at around 05:00 that day, allegedly caused by an electrical discharge from a thunderstorm.",
+    "places": [
+     "Piódão",
+     "Coimbra"
+    ],
+    "time_text": "por volta das 05:00 de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 05:00 de hoje – com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra – estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e Fo…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The fire allegedly began because of an electrical discharge from a thunderstorm in the interior of Coimbra district.",
+    "places": [
+     "Coimbra"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 05:00 de hoje – com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra – estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e Fo…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire also spread into forest areas near Chãs de Égua and Foz de Égua, where residents were removed from their homes.",
+    "places": [
+     "Chãs de Égua",
+     "Foz de Égua"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 05:00 de hoje – com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra – estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e Fo…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents evacuated from Chãs de Égua and Foz de Égua were moved to the social centre of Vide in Seia municipality, Guarda district.",
+    "places": [
+     "Chãs de Égua",
+     "Foz de Égua",
+     "Vide",
+     "Seia",
+     "Guarda",
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Junta de Freguesia do Piódão, José Lopes, explicou que estes moradores foram deslocalizados para o centro social de Vide, já no concelho de Seia, distrito da Guarda, localidade situada a nordeste, a cerca de 10 quilómetros, por estrada, do Piódão.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "The evacuated residents were older and more vulnerable people.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“São pessoas mais idosas e mais debilitadas, que foram retiradas para as salvaguardar”",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Some people took shelter in the parish church because of ash and smoke.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No caso concreto do Piódão, e ainda segundo José Lopes, há meios dos bombeiros dentro da aldeia histórica e em zonas circundantes, e, por causa das cinzas e do fumo, algumas pessoas foram abrigadas na igreja matriz.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "Firefighters were present in the historic village of Piódão and surrounding areas.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No caso concreto do Piódão, e ainda segundo José Lopes, há meios dos bombeiros dentro da aldeia histórica e em zonas circundantes, e, por causa das cinzas e do fumo, algumas pessoas foram abrigadas na igreja matriz.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was expected to burn all the forest, while a safety strip around the village might protect houses and heritage.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“A faixa de segurança em redor da aldeia que andámos a fazer é que talvez ajude a salvaguardar as casas e o património. De resto, em termos florestais, vai ficar tudo queimado”",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00, 492 personnel, 153 vehicles and five aircraft were fighting the fire in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 14:00",
+    "number": 492,
+    "unit": "operacionais",
+    "quote": "Segundo a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 14:00 as chamas em Arganil estavam a ser combatidas por 492 operacionais, apoiados por 153 viaturas e cinco meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00, firefighting operations were supported by 153 vehicles.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 14:00",
+    "number": 153,
+    "unit": "viaturas",
+    "quote": "Segundo a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 14:00 as chamas em Arganil estavam a ser combatidas por 492 operacionais, apoiados por 153 viaturas e cinco meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00, firefighting operations were supported by five aircraft.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 14:00",
+    "number": 5,
+    "unit": "meios aéreos",
+    "quote": "Segundo a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 14:00 as chamas em Arganil estavam a ser combatidas por 492 operacionais, apoiados por 153 viaturas e cinco meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   }
+  ]
+ },
+ {
+  "url": "https://observador.pt/2025/08/13/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-piodao/",
+  "final_url": null,
+  "publisher": "observador.pt",
+  "page_title": "Trovoada seca provocou fogo em Arganil junto à aldeia do Piódão",
+  "headline": "Trovoada seca provocou fogo em Arganil junto à aldeia do Piódão",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "2744c14e-17dc-436b-a156-600deba81f53",
+  "captured_at": "2026-11-15T01:33:50Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T14:56:28+01:00",
+  "meta_modified": null,
+  "printed_published": "13 ago. 2025, 14:56",
+  "printed_published_in_page": true,
+  "printed_updated": "2025-08-14T01:04:20+01:00",
+  "mentions_lusa": true,
+  "markdown_chars": 24421,
+  "facts": [
+   {
+    "category": "ignition_cause",
+    "statement_en": "A dry thunderstorm and its electrical discharge were said to have caused the fire.",
+    "places": [
+     "Arganil",
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Uma trovoada seca estará na origem do incêndio florestal que deflagrou na madrugada desta quarta-feira no município de Arganil, freguesia de Piódão, distrito de Coimbra, na serra do Açor, disseram autarcas locais.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began at around 05:00 on Wednesday.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "por volta das 05h00 desta quarta",
+    "number": 5,
+    "unit": "hora",
+    "quote": "o incêndio começou na encosta acima da aldeia histórica, por volta das 05h00 desta quarta, com origem numa descarga elétrica da trovoada",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The flames began in Piódão and spread into the territory of the Pomares parish, driven by strong wind.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "as chamas começaram no Piódão “com uma faísca da trovoada” e estenderam-se ao território da freguesia, estando a evoluir, potenciadas pelo vento forte, em zona de montanha, com vertentes escarpadas e vales fundos, onde existem diversas aldeias.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Some people took shelter in the main church because of ash and smoke.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "por causa das cinzas e do fumo, algumas pessoas estão abrigadas na igreja matriz",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Some people were sheltered in the main church.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "por causa das cinzas e do fumo, algumas pessoas estão abrigadas na igreja matriz",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "About ten fire-service vehicles were distributed in the village and near the Inatel tourist unit.",
+    "places": [
+     "Inatel"
+    ],
+    "time_text": null,
+    "number": 10,
+    "unit": "viaturas",
+    "quote": "No total, José Lopes contabilizou cerca de uma dezena de viaturas dos bombeiros distribuídas entre a praça principal da aldeia e zonas mais altas da povoação, bem como junto à unidade turística do Inatel.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "At 14:50, 585 personnel, 177 vehicles and four aircraft were fighting the flames in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 14h50",
+    "number": 585,
+    "unit": "operacionais",
+    "quote": "De acordo com dados da Autoridade Nacional de Emergência e Proteção Civil, pelas 14h50 as chamas em Arganil estavam a ser combatidas por 585 operacionais, apoiados por 177 viaturas e quatro meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "The road accessing the historic village of Piódão was closed because of the fire.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "A página de Facebook das Aldeias Históricas de Portugal avisa os visitantes de que a estrada de acesso à aldeia histórica de Piódão está cortada devido ao incêndio.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "Strong wind was intensifying the fire and complicating its fronts.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O fogo apresenta várias frentes de elevada complexidade, agravadas pela intensidade do vento que se faz sentir",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://www.jn.pt/pais/artigo/frente-de-fogo-em-arganil-em-perigo-de-chegar-a-pampilhosa-da-serra/17858447",
+  "final_url": null,
+  "publisher": "jn.pt",
+  "page_title": "Frente de fogo em Arganil pode chegar à Pampilhosa da Serra",
+  "headline": "Frente de fogo em Arganil pode chegar à Pampilhosa da Serra",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "e6577db0-07cc-491b-b828-ab0a43a554fb",
+  "captured_at": "2026-11-15T01:31:35Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T23:45:00+01:00",
+  "meta_modified": "2025-08-13T23:45:00+01:00",
+  "printed_published": "13 de agosto, 2025 às 23:45",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 12424,
+  "facts": [
+   {
+    "category": "spread_direction",
+    "statement_en": "A fire front could move southwest from Arganil toward the neighboring municipality of Pampilhosa da Serra.",
+    "places": [
+     "Arganil",
+     "Pampilhosa da Serra"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Uma das frentes de fogo ativas no município de Arganil, no distrito de Coimbra, poderá evoluir para o concelho da Pampilhosa da Serra, com a prevista mudança da direção do vento durante a noite, disse fonte autárquica.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire front opened during the afternoon toward Porto Castanheiro.",
+    "places": [
+     "Porto Castanheiro"
+    ],
+    "time_text": "durante a tarde de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "\"É uma frente que abriu durante a tarde de hoje em direção à localidade de Porto Castanheiro [perto do troço de Arganil do Rali de Portugal].",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "A new wind shift and strengthening were forecast.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Com a previsão de uma nova rotação e intensificação do vento, se isso acontecer, vai dar muito que fazer",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "Fire fronts advanced north and northwest toward Oliveira do Hospital, while another advanced northeast into Seia.",
+    "places": [
+     "Arganil",
+     "Piódão",
+     "Oliveira do Hospital",
+     "Seia",
+     "Guarda"
+    ],
+    "time_text": "Ao longo do dia",
+    "number": null,
+    "unit": null,
+    "quote": "Ao longo do dia, as frentes de fogo no concelho de Arganil, a partir do Piódão, avançaram para norte e noroeste, em direção ao município vizinho de Oliveira do Hospital e outra para nordeste, que entrou no concelho de Seia, já no distrito da Guarda, potenciadas por vento forte e pelos declives abru…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "There was still a lot of active fire in the municipality.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Luís Paulo Costa avisou, no entanto, que ainda existe muito fogo ativo dentro do concelho: \"Ainda não estamos nada tranquilos\", reconheceu.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "A fire front passed through Vale do Torno, Porto Silvado, and Gramaça without causing casualties or damage to homes.",
+    "places": [
+     "Vale do Torno",
+     "Porto Silvado",
+     "Arganil",
+     "Gramaça",
+     "Oliveira do Hospital"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Outra situação que preocupa o autarca decorre de uma das frentes que evoluiu para noroeste, passando com grande violência pelas povoações de Vale do Torno e Porto Silvado , ainda em Arganil, e por Gramaça , em Oliveira do Hospital, mas sem provocar vítimas ou danos em habitações.",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The left flank was active on a hillside in Pomares, toward Barroja.",
+    "places": [
+     "Pomares",
+     "Barroja"
+    ],
+    "time_text": "ao início da noite de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O flanco esquerdo desta frente estava ao início da noite de hoje ativa numa das encostas da freguesia de Pomares , em direção à aldeia de Barroja .",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "Two foreign nationals lived in Barroja, and about ten people were expected to be there during the summer.",
+    "places": [
+     "Barroja"
+    ],
+    "time_text": "devido à época de verão",
+    "number": 2,
+    "unit": "pessoas",
+    "quote": "Já o presidente da junta de freguesia de Pomares, Amândio Dinis, adiantou que na aldeia de Barroja residem apenas duas pessoas, de nacionalidade estrangeira, mas devido à época de verão estarão na aldeia cerca de uma dezena de pessoas.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "Flames remained on the hillside and continued moving uphill, still far from Agroal and Pomares.",
+    "places": [
+     "Agroal",
+     "Pomares"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O autarca acrescentou que as chamas se mantinham na encosta e a evoluir no sentido ascendente, ainda longe das povoações de Agroal e da própria sede de freguesia, Pomares, que ficam numa zona de vale.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "Fire near Sobral Magro, Sobral Gordo, and Soito da Ruiva was controlled by firefighters, although surrounding forest burned.",
+    "places": [
+     "Sobral Magro",
+     "Sobral Gordo",
+     "Soito da Ruiva"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Noutras localidades da freguesia que viram as chamas por perto, como Sobral Magro, Sobral Gordo ou Soito da Ruiva, a situação foi controlada pelos bombeiros, embora a floresta em redor tenha ardido, indicou.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 22.50, 854 personnel and 273 vehicles were fighting the Arganil fire.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 22.50 horas",
+    "number": 854,
+    "unit": "operacionais",
+    "quote": "De acordo com a página de internet da Autoridade Nacional de Emergência e Proteção Civil (ANEPC), pelas 22.50 horas o incêndio de Arganil estava a ser combatido por 854 operacionais, apoiados por 273 viaturas.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "The response was supported by 273 vehicles.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 22.50 horas",
+    "number": 273,
+    "unit": "viaturas",
+    "quote": "De acordo com a página de internet da Autoridade Nacional de Emergência e Proteção Civil (ANEPC), pelas 22.50 horas o incêndio de Arganil estava a ser combatido por 854 operacionais, apoiados por 273 viaturas.",
+    "quote_verified": true,
+    "number_in_quote": true
+   }
+  ]
+ },
+ {
+  "url": "https://www.theportugalnews.com/br/noticias/2025-08-12/aviso-de-clima-quente-em-portugal-estendido-quando-as-temperaturas-atingem-44c/599824",
+  "final_url": null,
+  "publisher": "theportugalnews.com",
+  "page_title": "The Portugal News - View News",
+  "headline": null,
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "423edd76-5aed-4cdc-88fc-711530941e16",
+  "captured_at": "2026-11-15T01:32:11Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": null,
+  "meta_modified": null,
+  "printed_published": null,
+  "printed_published_in_page": false,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 1723,
+  "facts": []
+ },
+ {
+  "url": "https://observador.pt/2025/08/14/incendios-festa-de-verao-do-piodao-em-arganil-cancelada/",
+  "final_url": null,
+  "publisher": "observador.pt",
+  "page_title": "Incêndios. Festa de Verão do Piódão em Arganil cancelada",
+  "headline": "Incêndios. Festa de Verão do Piódão em Arganil cancelada",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "9517a52e-0559-47cc-a9c1-d60ad32effeb",
+  "captured_at": "2026-11-15T01:31:44Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-14T18:03:38+01:00",
+  "meta_modified": null,
+  "printed_published": "14 ago. 2025, 18:03",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 21170,
+  "facts": [
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was burning in Arganil and was active in other parts of the municipality and neighboring municipalities.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "A Festa de Verão do Piódão, que deveria começar na sexta-feira na aldeia histórica do município de Arganil, foi cancelada devido ao incêndio que lavra naquele concelho do distrito de Coimbra, disse fonte da organização.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The flames began in the parish of Piódão at dawn on Wednesday and remained active in other parts of Arganil and neighboring municipalities.",
+    "places": [
+     "freguesia do Piódão",
+     "Arganil"
+    ],
+    "time_text": "na madrugada de quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Apesar das chamas que começaram, precisamente, na freguesia do Piódão na madrugada de quarta-feira, se manterem ativas noutros pontos de Arganil e em municípios vizinhos, a responsável disse terem existido “várias opiniões” da população, umas pela manutenção da festa, outras pelo seu cancelamento,",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "event_gathering",
+    "statement_en": "The Festa de Verão do Piódão was canceled because of the fire.",
+    "places": [
+     "Piódão",
+     "Arganil",
+     "Coimbra"
+    ],
+    "time_text": "sexta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "A Festa de Verão do Piódão, que deveria começar na sexta-feira na aldeia histórica do município de Arganil, foi cancelada devido ao incêndio que lavra naquele concelho do distrito de Coimbra, disse fonte da organização.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "Road closures prevented service providers and visitors from traveling, and concerns about the fire reigniting contributed to the cancellation.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No entanto, os constrangimentos logísticos, com prestadores de serviços e visitantes impedidos de se deslocarem pelas estradas cortadas ou o receio de reacendimentos do incêndio, levaram os promotores a decidirem-se pelo cancelamento.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Some people had left, others canceled their visit, and many roads were closed.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Podia ser uma forma das pessoas se divertirem um pouco e esquecerem esta tragédia, que devastou o património florestal da nossa freguesia. Mas percebo que não se faça, porque os constrangimentos são muitos, há pessoas que foram embora, outras que cancelaram a vinda e muitas estradas cortadas para c…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "Travelers could not pass via Vide, Aldeia das Dez, or Coja, where the fire was still burning in Mourísia.",
+    "places": [
+     "Vide (Seia, Guarda)",
+     "Aldeia das Dez (Oliveira do Hospital)",
+     "Coja (Arganil)",
+     "Mourísia"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "As pessoas querem vir por Vide (Seia, Guarda), não podem passar, da Aldeia das Dez (Oliveira do Hospital) não podem passar, de Coja (Arganil) ainda anda o fogo na Mourísia e também não passam, não é fácil",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The forest landscape of Piódão was almost entirely burned, and active flames remained near Malhada Chã.",
+    "places": [
+     "Piódão",
+     "Malhada Chã",
+     "Arganil",
+     "Pampilhosa da Serra (Coimbra)",
+     "Covilhã (Castelo Branco)"
+    ],
+    "time_text": null,
+    "number": 98,
+    "unit": null,
+    "quote": "José Lopes revelou ainda que a paisagem florestal do Piódão está praticamente toda ardida, “cerca de 98%” pintada de negro, subsistindo ainda chamas ativas junto da aldeia de Malhada Chã, num vale profundo no limite leste da freguesia e do concelho de Arganil, que faz fronteira com o concelho da Pa…",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 16h15, 855 personnel were fighting the Arganil fire, supported by 288 vehicles and four aircraft.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 16h15",
+    "number": 855,
+    "unit": "operacionais",
+    "quote": "De acordo com a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 16h15 o incêndio de Arganil estava a ser combatido por 855 operacionais, apoiados por 288 viaturas e quatro meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 16h15, 288 vehicles supported crews fighting the Arganil fire.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 16h15",
+    "number": 288,
+    "unit": "viaturas",
+    "quote": "De acordo com a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 16h15 o incêndio de Arganil estava a ser combatido por 855 operacionais, apoiados por 288 viaturas e quatro meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 16h15, four aircraft supported crews fighting the Arganil fire.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": "pelas 16h15",
+    "number": 4,
+    "unit": "meios aéreos",
+    "quote": "De acordo com a página de internet da Autoridade Nacional de Emergência e Proteção Civil, pelas 16h15 o incêndio de Arganil estava a ser combatido por 855 operacionais, apoiados por 288 viaturas e quatro meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": false
+   }
+  ]
+ },
+ {
+  "url": "https://fogos.pt/fogo/20251075979/detalhe",
+  "final_url": null,
+  "publisher": "fogos.pt",
+  "page_title": "[14-11-2026 18:35] Incêndio em Coimbra, Arganil, Piódão (Arganil) — Vigilância | Fogos.pt",
+  "headline": "[14-11-2026 18:35] Incêndio em Coimbra, Arganil, Piódão (Arganil) — Vigilância | Fogos.pt",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "b74b8e68-b9b0-4850-aaa0-a77c3ca8acc0",
+  "captured_at": "2026-11-15T01:34:45Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": null,
+  "meta_modified": null,
+  "printed_published": null,
+  "printed_published_in_page": false,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 2810,
+  "facts": [
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire started at 05:08 on 13-08-2025.",
+    "places": [
+     "Coimbra",
+     "Arganil",
+     "Piódão",
+     "Piódão"
+    ],
+    "time_text": "05:08 13-08-2025",
+    "number": null,
+    "unit": null,
+    "quote": "05:08 13-08-2025",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was under surveillance at 13-09-2025 17:16.",
+    "places": [],
+    "time_text": "13-09-2025 17:16",
+    "number": null,
+    "unit": null,
+    "quote": "13-09-2025 17:16 Vigilância",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "other",
+    "statement_en": "The fire was vegetation (brush).",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Mato",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "The current temperature was 12.2ºC.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 12.2,
+    "unit": "°C",
+    "quote": "Temperatura atual: 12.2ºC",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "Humidity was 87%.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 87,
+    "unit": null,
+    "quote": "Humidade: 87%",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "Wind speed was 16.2 km/h.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 16.2,
+    "unit": "km/h",
+    "quote": "Velocidade do Vento: 16.2 km/h",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "Wind direction was W.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": null,
+    "unit": null,
+    "quote": "Direção do Vento: W",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "Accumulated precipitation was 0 mm.",
+    "places": [],
+    "time_text": "14/11/2026 17:00",
+    "number": 0,
+    "unit": "mm",
+    "quote": "Precipitação acumulada: 0 mm",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "The weather station was Pampilhosa da Serra, Fajão, 13.1 km away.",
+    "places": [
+     "Pampilhosa da Serra",
+     "Fajão"
+    ],
+    "time_text": "13.1 km",
+    "number": 13.1,
+    "unit": "km",
+    "quote": "📍 Estação: Pampilhosa da Serra, Fajão (13.1 km)",
+    "quote_verified": true,
+    "number_in_quote": true
+   }
+  ],
+  "fogos": {
+   "occurrence_id": "20251075979",
+   "place_text": null,
+   "start_text": null,
+   "nature": null,
+   "position": null,
+   "status_history_local": [
+    {
+     "time_local": "13-09-2025 17:16",
+     "status": "Vigilância"
+    },
+    {
+     "time_local": "13-09-2025 03:08",
+     "status": "Chegada ao TO"
+    },
+    {
+     "time_local": "26-08-2025 21:08",
+     "status": "Vigilância"
+    },
+    {
+     "time_local": "25-08-2025 20:16",
+     "status": "Conclusão"
+    },
+    {
+     "time_local": "24-08-2025 12:05",
+     "status": "Em Resolução"
+    },
+    {
+     "time_local": "13-08-2025 06:16",
+     "status": "Em Curso"
+    },
+    {
+     "time_local": "13-08-2025 05:20",
+     "status": "Despacho de 1º Alerta"
+    },
+    {
+     "time_local": "13-08-2025 05:14",
+     "status": "Despacho"
+    },
+    {
+     "time_local": "13-08-2025 05:08",
+     "status": "Início"
+    }
+   ],
+   "excluded": [
+    "Meteo block: current station reading dated 14/11/2026 17:00, not the fire period.",
+    "Meios '0 0 0': present-day value after the incident closed, not the historical deployment."
+   ]
+  }
+ },
+ {
+  "url": "https://www.altominho.tv/site/2025/08/11/incendios-cerca-de-120-concelhos-em-risco-maximo/",
+  "final_url": null,
+  "publisher": "altominho.tv",
+  "page_title": "Incêndios: Cerca de 120 concelhos do interior Norte e Centro e Algarve em risco máximo",
+  "headline": "Incêndios: Cerca de 120 concelhos do interior Norte e Centro e Algarve em risco máximo",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "3d86174f-1f56-4997-8096-f9ca62af6b03",
+  "captured_at": "2026-11-15T01:32:25Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-11T08:01:58+00:00",
+  "meta_modified": "2025-08-11T08:02:00+00:00",
+  "printed_published": "11 Agosto, 2025",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 19963,
+  "facts": [
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Around 120 municipalities in the interior North and center of the country and the Algarve region are at maximum fire risk today, according to IPMA.",
+    "places": [
+     "interior Norte",
+     "centro do país",
+     "região do Algarve"
+    ],
+    "time_text": "hoje",
+    "number": 120,
+    "unit": "municípios",
+    "quote": "Cerca de 120 municípios do interior Norte e centro do país e da região do Algarve estão hoje em risco máximo de incêndio, segundo o Instituto Português do Mar e da Atmosfera (IPMA).",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "All municipalities in the districts of Bragança and Guarda and most in Viseu and Castelo Branco are at maximum fire risk.",
+    "places": [
+     "Bragança",
+     "Guarda",
+     "Viseu",
+     "Castelo Branco"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Estão sob risco máximo de incêndio todos os concelhos dos distritos de Bragança e Guarda e a maioria dos de Viseu e Castelo Branco.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Dozens of municipalities in the listed districts are also at maximum fire risk.",
+    "places": [
+     "Viana do Castelo",
+     "Braga",
+     "Porto",
+     "Aveiro",
+     "Coimbra",
+     "Leiria",
+     "Santarém",
+     "Portalegre",
+     "Faro"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Também em risco máximo estão dezenas de municípios dos distritos de Viana do Castelo, Braga, Porto, Aveiro, Coimbra, Leiria, Santarém, Portalegre e Faro.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Around 50 municipalities in the listed districts are at very high risk.",
+    "places": [
+     "Viana do Castelo",
+     "Braga",
+     "Porto",
+     "Vila Real",
+     "Aveiro",
+     "Coimbra",
+     "Viseu",
+     "Leiria",
+     "Lisboa",
+     "Castelo Branco",
+     "Portalegre",
+     "Beja"
+    ],
+    "time_text": null,
+    "number": 50,
+    "unit": "concelhos",
+    "quote": "Em risco muito elevado estão cerca de 50 concelhos nos distritos de Viana do Castelo, Braga, Porto, Vila Real, Aveiro, Coimbra, Viseu, Leiria, Lisboa, Castelo Branco, Portalegre, Beja e Faro.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Almost all of Alentejo and around 30 other municipalities in the named districts are at high risk.",
+    "places": [
+     "Alentejo",
+     "Faro",
+     "Lisboa",
+     "Setúbal",
+     "Coimbra",
+     "Leiria",
+     "Aveiro",
+     "Porto",
+     "Braga"
+    ],
+    "time_text": "hoje",
+    "number": 30,
+    "unit": "municípios",
+    "quote": "O IPMA colocou em risco elevado quase toda a região do Alentejo e outros cerca de 30 municípios nos distritos de Faro, Lisboa, Setúbal, Coimbra, Leiria, Aveiro, Porto e Braga.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Dozens of municipalities, almost all on the country's coast, are at moderate risk.",
+    "places": [
+     "Lisboa",
+     "Aveiro",
+     "Porto"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Sob risco moderado estão dezenas de municípios, quase todos no litoral do país, nos distritos de Lisboa, Aveiro e Porto.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "IPMA's fire risk has five levels, from low to maximum, with maximum issued when weather conditions such as extreme heat and low humidity significantly increase the danger of ignition and fire spread.",
+    "places": [],
+    "time_text": null,
+    "number": 5,
+    "unit": "níveis",
+    "quote": "O risco de incêndio determinado pelo IPMA tem cinco níveis, que vão de reduzido a máximo, sendo este último emitido quando as condições meteorológicas, como calor extremo e baixa humidade, aumentam significativamente o perigo de ignição e propagação de incêndios.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Portugal is on alert until Wednesday, August 13, due to the risk of forest fire.",
+    "places": [
+     "Portugal"
+    ],
+    "time_text": "até quarta-feira (13 de agosto)",
+    "number": null,
+    "unit": null,
+    "quote": "Portugal está em situação de alerta até quarta-feira (13 de agosto), devido ao risco de incêndio florestal.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "The alert is justified by continued high temperatures across the country over the coming days and a decrease in ignitions due to the imposed prohibitions.",
+    "places": [],
+    "time_text": "para os próximos dias",
+    "number": null,
+    "unit": null,
+    "quote": "A situação de alerta é justificada tendo como base dois motivos principais: a continuação de temperaturas elevadas em todo o país para os próximos dias e a diminuição de ignições devido às proibições determinadas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "IPMA forecasts a slight temperature drop in the North and Center and a slight rise in the South today.",
+    "places": [
+     "Norte",
+     "Centro",
+     "Sul"
+    ],
+    "time_text": "hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O IPMA prevê para hoje uma pequena descida de temperatura nas regiões Norte e Centro e uma pequena subida na região Sul.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "The weather will remain hot, with little cloud or clear skies, and suspended dust is forecast due to a hot air mass from North Africa crossing mainland Portugal.",
+    "places": [
+     "Norte de África"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O tempo vai permanecer quente, com céu pouco nublado ou limpo, e o IPMA mantém a previsão de poeiras em suspensão, devido à massa de ar quente do Norte de África que atravessa o território continental.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "Minimum temperatures will range from 15 degrees in Viana do Castelo and Braga to 25 in Portalegre, and maximum temperatures from 25 in Viana do Castelo to 43 in Beja and Évora.",
+    "places": [
+     "Viana do Castelo",
+     "Braga",
+     "Portalegre",
+     "Beja",
+     "Évora"
+    ],
+    "time_text": null,
+    "number": 43,
+    "unit": "º",
+    "quote": "As temperaturas mínimas vão variar entre os 15º (graus Celsius), em Viana do Castelo e Braga, e os 25º (Portalegre) e as máximas entre os 25º (Viana do Castelo) e os 43º (Beja e Évora).",
+    "quote_verified": true,
+    "number_in_quote": true
+   }
+  ]
+ },
+ {
+  "url": "https://seiadigital.pt/2025/08/13/aldeias-das-freguesias-de-arganil-seia-e-oliveira-do-hospital-na-linha-de-fogo/",
+  "final_url": null,
+  "publisher": "seiadigital.pt",
+  "page_title": "Aldeias das freguesias de Arganil, Seia e Oliveira do Hospital na linha de fogo - Seia Digital",
+  "headline": "Aldeias das freguesias de Arganil, Seia e Oliveira do Hospital na linha de fogo",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "1f1948bc-a0e7-4ad2-be85-72e745d0d80d",
+  "captured_at": "2026-11-15T01:30:32Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T14:04:32+00:00",
+  "meta_modified": "2025-08-13T15:13:07+00:00",
+  "printed_published": "13 de Agosto de 2025",
+  "printed_published_in_page": true,
+  "printed_updated": "13 de Agosto de 2025",
+  "mentions_lusa": true,
+  "markdown_chars": 8961,
+  "facts": [
+   {
+    "category": "fire_status",
+    "statement_en": "A forest fire burning in the Serra do Açor, in the municipality of Arganil, threatens several villages, and residents have been moved to safer areas.",
+    "places": [
+     "serra do Açor",
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio florestal que lavra na serra do Açor, no município de Arganil, ameaça várias aldeias que estão na linha de fogo, tendo os moradores sido retirados para zonas mais seguras, disseram autarcas locais.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began in the early hours of today in the parish of Piódão.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": "na madrugada de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na madrugada de hoje na freguesia de Piódão, estendeu-se à freguesia de Pomares, constituída por 12 aldeias, parte das quais está diretamente na linha de fogo, embora existam meios dos bombeiros nessas localidades.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire spread from Piódão to the parish of Pomares.",
+    "places": [
+     "Piódão",
+     "Pomares"
+    ],
+    "time_text": "na madrugada de hoje",
+    "number": 12,
+    "unit": "aldeias",
+    "quote": "O incêndio que começou na madrugada de hoje na freguesia de Piódão, estendeu-se à freguesia de Pomares, constituída por 12 aldeias, parte das quais está diretamente na linha de fogo, embora existam meios dos bombeiros nessas localidades.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "One fire front advanced from Piódão toward the slopes near Porto Silvado and Sobral Magro.",
+    "places": [
+     "Piódão",
+     "Porto Silvado",
+     "Sobral Magro"
+    ],
+    "time_text": "pelas 13:30h",
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Junta de Freguesia de Pomares, Amândio Dinis, disse à agência Lusa, pelas 13:30h, que uma das frentes de chamas evoluiu do Piódão para as encostas junto das localidades de Porto Silvado e Sobral Magro: “Estão lá muitos bombeiros e essa parte [da defesa das povoações] está controlada…",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The defense of the settlements was controlled, there was a lot of smoke, and Sobral Magro was safeguarded.",
+    "places": [
+     "Porto Silvado",
+     "Sobral Magro"
+    ],
+    "time_text": "pelas 13:30h",
+    "number": null,
+    "unit": null,
+    "quote": "O presidente da Junta de Freguesia de Pomares, Amândio Dinis, disse à agência Lusa, pelas 13:30h, que uma das frentes de chamas evoluiu do Piódão para as encostas junto das localidades de Porto Silvado e Sobral Magro: “Estão lá muitos bombeiros e essa parte [da defesa das povoações] está controlada…",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents of Porto Silvado and Vale do Torno were removed from their homes as a precaution, mainly because of the smoke.",
+    "places": [
+     "Porto Silvado",
+     "Vale do Torno"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O autarca disse ainda que, por precaução e devido principalmente ao fumo, foram retirados de casa moradores das localidades de Porto Silvado e Vale do Torno.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Soito da Ruiva, Gramaça and Sobral Gordo were among other nearby settlements that appeared safe from the flames.",
+    "places": [
+     "Soito da Ruiva",
+     "Gramaça",
+     "Sobral Gordo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Na freguesia, na zona do incêndio, existem mais povoações – Soito da Ruiva, Gramaça e Sobral Gordo, entre outras – que se encontram, aparentemente, a salvo das chamas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was burning slowly above Sobral Gordo, and smoke was the main problem.",
+    "places": [
+     "Sobral Gordo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“No Sobral Gordo o incêndio está a arder lá em cima [na encosta] mas devagarinho. O problema maior é o fumo, é muito fumo e muitas das pessoas são idosas, e têm sido retiradas por causa do fumo”, enfatizou.",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "Many people were elderly, and they were being removed because of the smoke.",
+    "places": [
+     "Sobral Gordo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“No Sobral Gordo o incêndio está a arder lá em cima [na encosta] mas devagarinho. O problema maior é o fumo, é muito fumo e muitas das pessoas são idosas, e têm sido retiradas por causa do fumo”, enfatizou.",
+    "quote_verified": false,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "Smoke in the valleys between steep slopes of the Serra do Açor hindered or prevented aircraft operations.",
+    "places": [
+     "serra do Açor"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Por outro lado, Amândio Dinis notou que o fumo, nas zonas de vales encaixados entre encostas escarpadas da serra do Açor, tem dificultado ou mesmo impedido a atuação dos meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire began on the slope above Piódão's historic village at around 05:00 today, allegedly caused by an electrical discharge from a thunderstorm.",
+    "places": [
+     "Piódão",
+     "Coimbra"
+    ],
+    "time_text": "por volta das 05:00h de hoje",
+    "number": 5,
+    "unit": "horas",
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 05:00h de hoje – com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra – estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e F…",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The fire allegedly originated from an electrical discharge from a thunderstorm in the area.",
+    "places": [
+     "Piódão",
+     "Coimbra"
+    ],
+    "time_text": "por volta das 05:00h de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 05:00h de hoje – com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra – estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e F…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire spread to forest areas near Chãs de Égua and Foz de Égua, where people were also removed from their homes.",
+    "places": [
+     "Chãs de Égua",
+     "Foz de Égua"
+    ],
+    "time_text": "por volta das 05:00h de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 05:00h de hoje – com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra – estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e F…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "People were removed from their homes near Chãs de Égua and Foz de Égua.",
+    "places": [
+     "Chãs de Égua",
+     "Foz de Égua"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio que começou na encosta acima da aldeia histórica do Piódão, por volta das 05:00h de hoje – com alegada origem numa descarga elétrica da trovoada que ocorreu naquela zona do interior do distrito de Coimbra – estendeu-se igualmente à zona florestal junto das localidades de Chãs de Égua e F…",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Residents removed from their homes were relocated to Casa do Povo de Vide, in the municipality of Seia, about 10 kilometers by road northeast of Piódão.",
+    "places": [
+     "Casa do Povo de Vide",
+     "Seia",
+     "Guarda",
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": 10,
+    "unit": "quilómetros",
+    "quote": "O presidente da Junta de Freguesia do Piódão, José Lopes, explicou que estes moradores foram deslocalizados para a Casa do Povo de Vide, já no concelho de Seia, distrito da Guarda, localidade situada a nordeste, a cerca de 10 quilómetros, por estrada, do Piódão.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents from Casas Figueiras, Gondufo and Cide were evacuated to Vide.",
+    "places": [
+     "Vide",
+     "Casas Figueiras",
+     "Gondufo",
+     "Cide"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Também diversas aldeias da freguesia de Vide e Cabeça, como Casas Figueiras, Gondufo e Cide, foram evacuados para Vide.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Residents of Chão Sobral and Aldeia da Gramaça were directed to Ponte das Três Entradas.",
+    "places": [
+     "Oliveira do Hospital",
+     "Chão Sobral",
+     "Aldeia da Gramaça",
+     "Ponte das Três Entradas"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No concelho vizinho de Oliveira do Hospital, moradores de Chão Sobral e da Aldeia da Gramaça foram encaminhados para a Ponte das Três Entradas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "The evacuees were older and more vulnerable people, removed to protect them.",
+    "places": [
+     "Piódão"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“São pessoas mais idosas e mais debilitadas, que foram retiradas para as salvaguardar”, frisou o autarca do Piódão.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "Firefighters were present in the historic village and surrounding areas, and some people were sheltered in the parish church because of ash and smoke.",
+    "places": [
+     "Aldeia Histórica"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No caso concreto da Aldeia Histórica, e ainda segundo José Lopes, há meios dos bombeiros dentro da povoação e em zonas circundantes, e, por causa das cinzas e do fumo, algumas pessoas foram abrigadas na igreja matriz.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "shelter",
+    "statement_en": "Some people were sheltered in the parish church because of ash and smoke.",
+    "places": [
+     "Aldeia Histórica"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "No caso concreto da Aldeia Histórica, e ainda segundo José Lopes, há meios dos bombeiros dentro da povoação e em zonas circundantes, e, por causa das cinzas e do fumo, algumas pessoas foram abrigadas na igreja matriz.",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://www.vozportucalense.pt/2025/08/13/incendios-continuam-varias-aldeias-evacuadas-nos-concelhos-de-arganil-e-de-fornos-de-algodres/",
+  "final_url": null,
+  "publisher": "vozportucalense.pt",
+  "page_title": "Incêndios continuam: várias aldeias evacuadas nos concelhos de Arganil e de Fornos de Algodres",
+  "headline": "Incêndios continuam: várias aldeias evacuadas nos concelhos de Arganil e de Fornos de Algodres",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "74ac62f9-917f-4e12-aaa9-027342bcd573",
+  "captured_at": "2026-11-15T01:31:04Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T16:05:20+00:00",
+  "meta_modified": "2025-08-13T16:05:20+00:00",
+  "printed_published": "13 Agosto, 2025",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": false,
+  "markdown_chars": 17462,
+  "facts": [
+   {
+    "category": "evacuation",
+    "statement_en": "People considered more vulnerable were removed as a precaution from eleven villages in Arganil.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": 11,
+    "unit": "aldeias",
+    "quote": "Os incêndios que lavram na zona Centro do país levaram à retirada, por precaução, de pessoas consideradas mais frágeis de onze aldeias do concelho de Arganil, adiantou à Renascença a GNR de Coimbra.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "At least four settlements in Fornos de Algodres were evacuated.",
+    "places": [
+     "Fornos de Algodres",
+     "Guarda"
+    ],
+    "time_text": null,
+    "number": 4,
+    "unit": "povoações",
+    "quote": "Também em Fornos de Algodres, concelho da Guarda, foram evacuadas, pelo menos, quatro povoações, segundo fonte da Proteção Civil.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Queiriz was facing a complicated situation because of a rural fire burning since Saturday in neighboring Trancoso.",
+    "places": [
+     "Queiriz",
+     "Fornos de Algodres",
+     "Trancoso"
+    ],
+    "time_text": "esta quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "A aldeia de Queiriz, no concelho de Fornos de Algodres, está, esta quarta-feira, a viver uma “situação complicada” devido ao incêndio rural que lavra desde sábado no concelho vizinho de Trancoso.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Piódão was threatened by the flames.",
+    "places": [
+     "Piódão",
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Também a aldeia do Piódão, Arganil, está ameaçada pelas chamas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The Covilhã fire was in mop-up and had consumed about 700 hectares.",
+    "places": [
+     "Covilhã"
+    ],
+    "time_text": null,
+    "number": 700,
+    "unit": "hectares",
+    "quote": "Já o fogo na Covilhã está em rescaldo e consumiu cerca de 700 hectares, enquanto que em Vila Real as chamas atingiram 5.500 hectares na serra do Alvão.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The Vila Real fire reached 5,500 hectares in the Alvão mountains.",
+    "places": [
+     "Vila Real",
+     "serra do Alvão"
+    ],
+    "time_text": null,
+    "number": 5500,
+    "unit": "hectares",
+    "quote": "Já o fogo na Covilhã está em rescaldo e consumiu cerca de 700 hectares, enquanto que em Vila Real as chamas atingiram 5.500 hectares na serra do Alvão.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The large fire near Piódão was believed to have originated from a thunderstorm that hit the central region overnight.",
+    "places": [
+     "Piódão",
+     "Arganil",
+     "região Centro"
+    ],
+    "time_text": "durante a noite",
+    "number": null,
+    "unit": null,
+    "quote": "Segundo o presidente da câmara de Arganil, Luís Paulo Costa, o incêndio terá tido origem numa trovoada que atingiu a região Centro durante a noite.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_time",
+    "statement_en": "A large fire broke out near the historic village of Piódão during Wednesday morning.",
+    "places": [
+     "Piódão",
+     "Arganil"
+    ],
+    "time_text": "Durante a madrugada desta quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Durante a madrugada desta quarta-feira, um incêndio de grandes dimensões deflagrou junto à aldeia histórica de Piódão, no concelho de Arganil, onde, às 14h00, estavam 566 operacionais, apoiados por 169 viaturas e sete meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00, 566 responders, 169 vehicles, and seven aircraft were at the fire near Piódão.",
+    "places": [
+     "Piódão",
+     "Arganil"
+    ],
+    "time_text": "às 14h00",
+    "number": 566,
+    "unit": "operacionais",
+    "quote": "Durante a madrugada desta quarta-feira, um incêndio de grandes dimensões deflagrou junto à aldeia histórica de Piódão, no concelho de Arganil, onde, às 14h00, estavam 566 operacionais, apoiados por 169 viaturas e sete meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Three settlements near Piódão were evacuated because of the flames: Side, Barreiros, and Casas de Figueira.",
+    "places": [
+     "Piódão",
+     "Side",
+     "Barreiros",
+     "Casas de Figueira"
+    ],
+    "time_text": null,
+    "number": 3,
+    "unit": "povoações",
+    "quote": "As chamas já obrigaram à evacuação de três povoações próximas do Piódão, segundo disse fonte da Proteção Civil à Renascença: Side, Barreiros e Casas de Figueira.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Six villages in the parish of Arganil were evacuated, according to Diário de Coimbra citing a GNR source.",
+    "places": [
+     "Arganil",
+     "Porto Silvado",
+     "Chãs d’Égua",
+     "Foz d’Égua",
+     "Fajoeira",
+     "Sobral Gordo",
+     "Sobral Magro"
+    ],
+    "time_text": null,
+    "number": 6,
+    "unit": "aldeias",
+    "quote": "Na freguesia de Arganil, segundo o Diário de Coimbra, que cita fonte da GNR, foram evacuadas seis aldeias — Porto Silvado, Chãs d’Égua, Foz d’Égua, Fajoeira, Sobral Gordo e Sobral Magro.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "The mayor of Arganil confirmed evacuation only of the first three villages, not the last two named.",
+    "places": [
+     "Arganil"
+    ],
+    "time_text": null,
+    "number": 3,
+    "unit": "aldeias",
+    "quote": "À Renascença, o autarca de Arganil não confirmou a evacuação destas duas últimas aldeias, mas apenas das três primeiras.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Authorities evacuated Queiriz, Casal do Monte, Feitais, and Carapito to protect the population.",
+    "places": [
+     "Trancoso",
+     "Fornos de Algodres",
+     "Queiriz",
+     "Casal do Monte",
+     "Feitais",
+     "Carapito"
+    ],
+    "time_text": null,
+    "number": 4,
+    "unit": "povoações",
+    "quote": "Em Trancoso, onde as chamas ameaçam uma aldeia de Fornos de Algodres, as autoridades avançaram com evacuações para proteger a população nas povoações de Queiriz, Casal do Monte, Feitais e Carapito.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "resources",
+    "statement_en": "At 14:00 on Wednesday, 521 responders, 172 vehicles, and two aircraft were at the scene in Trancoso.",
+    "places": [
+     "Trancoso"
+    ],
+    "time_text": "às 14h00 desta quarta-feira",
+    "number": 521,
+    "unit": "operacionais",
+    "quote": "No terreno estavam 521 operacionais, apoiados por 172 viaturas e dois meios aéreos às 14h00 desta quarta-feira.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was near the settlement, and firefighters and residents were protecting houses.",
+    "places": [
+     "povoação"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“O fogo está junto à povoação e a situação está complicada, com bombeiros e população a fazerem a proteção das casas”",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The front advanced intensely during the morning, coming from Aldeia Nova in Trancoso and passing localities including Casal do Monte and Aveleiros.",
+    "places": [
+     "Aldeia Nova",
+     "Trancoso",
+     "Casal do Monte",
+     "Aveleiros"
+    ],
+    "time_text": "durante a manhã",
+    "number": null,
+    "unit": null,
+    "quote": "Esta frente progrediu com intensidade durante a manhã, vinda de Aldeia Nova, no concelho de Trancoso, tendo passado por localidades como Casal do Monte e Aveleiros.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "infrastructure",
+    "statement_en": "No houses were reported affected; yards, pastures, and a forest plantation had burned.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "“Não há registo de casas afetadas, apenas quintais, pastos e um povoamento florestal que ardidos”",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "The wind rotated west, initially hindering efforts and potentially helping if it stayed in that direction.",
+    "places": [],
+    "time_text": "no início",
+    "number": null,
+    "unit": null,
+    "quote": "“Houve uma rotação do vento para oeste, o que nos prejudicou no início e pode ajudar agora, se se mantiver neste quadrante, pois poderá levar o incêndio para uma área que já ardeu”",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "There had not yet been a need to evacuate the population of Queiriz.",
+    "places": [
+     "Queiriz"
+    ],
+    "time_text": "ainda",
+    "number": null,
+    "unit": null,
+    "quote": "O oficial indicou que ainda não houve necessidade de evacuar a população de Queiriz, encontrando-se no local elementos da GNR, INEM e proteção civil municipal de Fornos de Algodres, também no distrito da Guarda.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "GNR, INEM, and Fornos de Algodres municipal civil protection personnel were at Queiriz.",
+    "places": [
+     "Queiriz",
+     "Fornos de Algodres",
+     "Guarda"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O oficial indicou que ainda não houve necessidade de evacuar a população de Queiriz, encontrando-se no local elementos da GNR, INEM e proteção civil municipal de Fornos de Algodres, também no distrito da Guarda.",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://radioboanova.sapo.pt/incendio-que-teve-inicio-no-piodao-ja-entrou-no-concelho-de-oliveira-do-hospital/",
+  "final_url": null,
+  "publisher": "radioboanova.sapo.pt",
+  "page_title": "Incêndio que teve início no Piódão já entrou no concelho de Oliveira do Hospital",
+  "headline": "Incêndio que teve início no Piódão já entrou no concelho de Oliveira do Hospital",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "71fba718-9529-4dcf-b5a1-c1fb106c341d",
+  "captured_at": "2026-11-15T01:33:18Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-13T12:20:52+01:00",
+  "meta_modified": "2025-08-13T12:57:38+01:00",
+  "printed_published": "13 de Agosto, 2025",
+  "printed_published_in_page": true,
+  "printed_updated": "2025-08-13T12:57:38+01:00",
+  "mentions_lusa": false,
+  "markdown_chars": 23907,
+  "facts": [
+   {
+    "category": "ignition_time",
+    "statement_en": "The fire broke out at around 5:00 this Wednesday.",
+    "places": [],
+    "time_text": "5h00 desta quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "No combate às chamas, que deflagraram pelas 5h00 desta quarta-feira, estão perto de 430 operacionais, apoiados por 130 viaturas e 6 meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The fire may have been caused by a dry thunderstorm discharge.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "De acordo com Luís Paulo Costa, presidente da autarquia de Arganil, na origem das chamas estará “uma descarga de trovoada seca” que com o forte vento que se fez sentir, originou diversas projeções de fogo.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "spread_direction",
+    "statement_en": "The fire spread from Piódão into the municipality of Oliveira do Hospital, entering through Monte do Colcurinho in the parish of Aldeia das Dez.",
+    "places": [
+     "Piódão",
+     "Arganil",
+     "Oliveira do Hospital",
+     "Monte do Colcurinho",
+     "Aldeia das Dez"
+    ],
+    "time_text": "esta madrugada",
+    "number": null,
+    "unit": null,
+    "quote": "A informação foi confirmada à Rádio Boa Nova pelo presidente da Câmara Municipal de Oliveira do Hospital. Segundo José Francisco Rolo, que se encontra no terreno, as chamas entraram pelo Monte do Colcurinho, freguesia de Aldeia das Dez.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Six villages had already been evacuated: Porto Silvado, Chãs d’Égua, Foz d’Égua, Fajoeira, Sobral Gordo and Sobral Magro.",
+    "places": [
+     "Porto Silvado",
+     "Chãs d’Égua",
+     "Foz d’Égua",
+     "Fajoeira",
+     "Sobral Gordo",
+     "Sobral Magro"
+    ],
+    "time_text": "já",
+    "number": 6,
+    "unit": "aldeias",
+    "quote": "Segundo fonte da GNR, seis aldeias já foram evacuadas: Porto Silvado, Chãs d’Égua, Foz d’Égua, Fajoeira, Sobral Gordo e Sobral Magro.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "All municipal roads in the area are closed.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Todas as estradas municipais da zona estão cortadas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "Nearly 430 operational personnel were fighting the fire, supported by 130 vehicles and 6 aircraft.",
+    "places": [],
+    "time_text": null,
+    "number": 430,
+    "unit": "operacionais",
+    "quote": "No combate às chamas, que deflagraram pelas 5h00 desta quarta-feira, estão perto de 430 operacionais, apoiados por 130 viaturas e 6 meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "The fire response was supported by 130 vehicles.",
+    "places": [],
+    "time_text": null,
+    "number": 130,
+    "unit": "viaturas",
+    "quote": "No combate às chamas, que deflagraram pelas 5h00 desta quarta-feira, estão perto de 430 operacionais, apoiados por 130 viaturas e 6 meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "resources",
+    "statement_en": "The fire response was supported by 6 aircraft.",
+    "places": [],
+    "time_text": null,
+    "number": 6,
+    "unit": "meios aéreos",
+    "quote": "No combate às chamas, que deflagraram pelas 5h00 desta quarta-feira, estão perto de 430 operacionais, apoiados por 130 viaturas e 6 meios aéreos.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "Strong wind was felt and caused several fire projections.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "De acordo com Luís Paulo Costa, presidente da autarquia de Arganil, na origem das chamas estará “uma descarga de trovoada seca” que com o forte vento que se fez sentir, originou diversas projeções de fogo.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was described as out of control with several active fronts.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O autarca afirma que o incêndio está “descontrolado” e com “várias frentes ativas”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Some villages were threatened by the fire.",
+    "places": [],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "De acordo com Luís Paulo Costa, “há algumas aldeias ameaçadas”.",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://beira.pt/portal/noticias/aviso-laranja-por-causa-do-calor-estendido-ate-quinta-feira-no-interior-do-pais/",
+  "final_url": null,
+  "publisher": "beira.pt",
+  "page_title": "Aviso laranja por causa do calor estendido até quinta-feira no interior do país - beira.pt",
+  "headline": "Aviso laranja por causa do calor estendido até quinta-feira no interior do país",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "a2175c82-09b2-4496-a6ba-481cf0ad0264",
+  "captured_at": "2026-11-15T01:32:36Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-12T07:55:28+00:00",
+  "meta_modified": "2025-08-12T07:55:38+00:00",
+  "printed_published": "12-08-2025",
+  "printed_published_in_page": true,
+  "printed_updated": "Atualizado a 12-08-2025 12-08-2025",
+  "mentions_lusa": true,
+  "markdown_chars": 9925,
+  "facts": [
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "The orange warning will remain in effect until Thursday at 18:00 in Bragança, Guarda, Castelo Branco, Portalegre, Évora, and Beja.",
+    "places": [
+     "Bragança",
+     "Guarda",
+     "Castelo Branco",
+     "Portalegre",
+     "Évora",
+     "Beja"
+    ],
+    "time_text": "até às 18h00 de quinta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Segundo o IPMA, vão estar até às 18h00 de quinta-feira sob aviso laranja os distritos de Bragança, Guarda, Castelo Branco, Portalegre, Évora e Beja.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "The orange warning in Vila Real, Viseu, Santarém, Lisboa, Setúbal, and Faro will change to yellow at 18:00 today.",
+    "places": [
+     "Vila Real",
+     "Viseu",
+     "Santarém",
+     "Lisboa",
+     "Setúbal",
+     "Faro"
+    ],
+    "time_text": "às 18h00 de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "Nos distritos de Vila Real, Viseu, Santarém, Lisboa, Setúbal e Faro o aviso laranja passará a amarelo às 18h00 de hoje.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "The mountainous regions of Madeira are under an orange warning until Wednesday at 18:00 because of persistently high temperatures.",
+    "places": [
+     "Madeira"
+    ],
+    "time_text": "até às 18h00 de quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Também sob aviso laranja, por causa da “persistência de valores muito elevados da temperatura”, estão as regiões montanhosas da Madeira, até às 18h00 de quarta-feira.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Viana do Castelo, Braga, and Porto are under a yellow warning until Thursday at 18:00.",
+    "places": [
+     "Viana do Castelo",
+     "Braga",
+     "Porto"
+    ],
+    "time_text": "até às 18h00 de quinta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Sob o nível amarelo, o menos grave de uma escala de três, estão até às 18h00 de quinta-feira os distritos de Viana do Castelo, Braga e Porto e até às 18h00 de hoje os distritos de Aveiro, Coimbra e Leiria.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Aveiro, Coimbra, and Leiria are under a yellow warning until 18:00 today.",
+    "places": [
+     "Aveiro",
+     "Coimbra",
+     "Leiria"
+    ],
+    "time_text": "até às 18h00 de hoje",
+    "number": null,
+    "unit": null,
+    "quote": "Sob o nível amarelo, o menos grave de uma escala de três, estão até às 18h00 de quinta-feira os distritos de Viana do Castelo, Braga e Porto e até às 18h00 de hoje os distritos de Aveiro, Coimbra e Leiria.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "Madeira's south coast is under a yellow warning until Wednesday at 18:00 because of persistent hot weather.",
+    "places": [
+     "Madeira"
+    ],
+    "time_text": "até às 18h00 de quarta-feira",
+    "number": null,
+    "unit": null,
+    "quote": "Também sob aviso amarelo, por causa da persistência do tempo quente, está a costa Sul da Madeira, até às 18h00 de quarta-feira.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_danger_warning",
+    "statement_en": "The Government renewed the alert across the country until Wednesday, August 13, due to wildfire risk.",
+    "places": [
+     "país"
+    ],
+    "time_text": "até quarta-feira, dia 13 de agosto",
+    "number": null,
+    "unit": null,
+    "quote": "O Governo renovou a situação de alerta no país até quarta-feira, dia 13 de agosto, devido ao risco de incêndio florestal.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "other",
+    "statement_en": "The alert renewal is based on continued high temperatures across the country in the coming days and a decrease in ignitions due to prohibitions.",
+    "places": [
+     "país"
+    ],
+    "time_text": "para os próximos dias",
+    "number": null,
+    "unit": null,
+    "quote": "A renovação da situação de alerta tem como base dois motivos principais: a continuação de temperaturas elevadas em todo o país para os próximos dias e a diminuição de ignições devido às proibições determinadas.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "For today, the IPMA forecasts continued hot weather, mostly clear skies and suspended dust, with possible showers and thunderstorms, especially inland.",
+    "places": [],
+    "time_text": "hoje",
+    "number": null,
+    "unit": null,
+    "quote": "O IPMA prevê para hoje a continuação do tempo quente, com céu pouco nublado e poeiras em suspensão, com possibilidade de ocorrência de aguaceiros e trovoadas, em especial no interior.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "weather",
+    "statement_en": "A slight increase in minimum temperatures and a slight increase in maximum temperatures are forecast on the northern and central coast.",
+    "places": [
+     "litoral norte e centro"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "Está igualmente prevista uma pequena subida da temperatura mínima e uma pequena subida da máxima no litoral norte e centro.",
+    "quote_verified": true,
+    "number_in_quote": null
+   }
+  ]
+ },
+ {
+  "url": "https://www.jn.pt/pais/artigo/fogo-vindo-do-piodao-com-uma-frente-ativa-em-seia/17858864",
+  "final_url": null,
+  "publisher": "jn.pt",
+  "page_title": "Fogo vindo do Piódão com uma frente ativa em Seia",
+  "headline": "Fogo vindo do Piódão com uma frente ativa em Seia",
+  "endpoint": "POST /v1/web/scrape (formats: markdown + json schema)",
+  "request_id": "d0803752-132c-4a3a-b710-2567a50c9b84",
+  "captured_at": "2026-11-15T01:34:01Z",
+  "credits": 5,
+  "markdown_success": true,
+  "json_success": true,
+  "error_code": null,
+  "is_partial": null,
+  "meta_published": "2025-08-17T14:00:00+01:00",
+  "meta_modified": "2025-08-17T14:00:00+01:00",
+  "printed_published": "17 de agosto, 2025 às 14:00",
+  "printed_published_in_page": true,
+  "printed_updated": null,
+  "mentions_lusa": true,
+  "markdown_chars": 12665,
+  "facts": [
+   {
+    "category": "fire_status",
+    "statement_en": "The fire had an active front beside the stream separating Teixeira and Teixeira de Baixo.",
+    "places": [
+     "Seia",
+     "Piódão",
+     "Teixeira",
+     "Teixeira de Baixo",
+     "Parque Natural da Serra da Estrela (PNSE)"
+    ],
+    "time_text": "este domingo",
+    "number": null,
+    "unit": null,
+    "quote": "O incêndio em curso no concelho de Seia, vindo do Piódão, tem este domingo uma frente ativa junto à ribeira que separa as localidades de Teixeira e Teixeira de Baixo, no Parque Natural da Serra da Estrela (PNSE).",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "fire_status",
+    "statement_en": "The fire was stopped at Teixeira de Baixo within a 100-metre cleared protection strip.",
+    "places": [
+     "Teixeira de Baixo"
+    ],
+    "time_text": "durante a noite",
+    "number": 100,
+    "unit": "metros",
+    "quote": "O combate durante a noite evitou males maiores e o fogo foi travado na Teixeira de Baixo, na faixa de proteção ao aglomerado, de cem metros, que estava limpa",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "threatened_place",
+    "statement_en": "Fire crews were positioned by the watercourse to prevent the flames from advancing toward Barriosa.",
+    "places": [
+     "Barriosa"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "O autarca do distrito da Guarda acrescentou que os meios estão empenhados junto à linha de água para evitar que as chamas avancem para a aldeia de Barriosa.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "resources",
+    "statement_en": "The response included 208 personnel, 47 vehicles and three tracked machines.",
+    "places": [],
+    "time_text": "No terreno",
+    "number": 208,
+    "unit": "operacionais",
+    "quote": "No terreno permanecem 208 operacionais, apoiados por 47 viaturas e três máquinas de rasto, que prosseguem o combate às chamas e à consolidação das frentes debeladas.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Evacuated residents were allowed to return home from 12:00.",
+    "places": [
+     "Zona de Concentração e Apoio à População (ZCAP)",
+     "Pavilhão Gimnodesportivo Padre Martinho",
+     "São Romão"
+    ],
+    "time_text": "a partir das 12:00",
+    "number": null,
+    "unit": null,
+    "quote": "Luciano Ribeiro afirmou que o perímetro de segurança, entretanto estabelecido na zona, permitiu o regresso, a partir das 12:00, às habitações da população que havia sido evacuada para a Zona de Concentração e Apoio à População (ZCAP), no Pavilhão Gimnodesportivo Padre Martinho, em São Romão.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "people_present",
+    "statement_en": "The evacuated residents were mainly 57 elderly people from five villages.",
+    "places": [
+     "Casal do Rei",
+     "Muro",
+     "Barriosa",
+     "Frádigas",
+     "Teixeira de Baixo"
+    ],
+    "time_text": null,
+    "number": 57,
+    "unit": "residentes idosos",
+    "quote": "Eram, sobretudo, 57 residentes idosos das aldeias Casal do Rei, Muro, Barriosa, Frádigas e Teixeira de Baixo.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "evacuation",
+    "statement_en": "Teixeira and Teixeira de Baixo were no longer confined under the Aldeia Segura plan.",
+    "places": [
+     "Teixeira",
+     "Teixeira de Baixo"
+    ],
+    "time_text": null,
+    "number": null,
+    "unit": null,
+    "quote": "\"Já as localidades de Teixeira e Teixeira de Baixo, cuja população estava concentrada num edifício central, no âmbito do plano \"Aldeia Segura\", deixaram de estar confinadas\", referiu o presidente da Câmara de Seia.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "At 12 o'clock, the EN 230 remained restricted between Pedras Lavradas and Barriosa, and the municipal road between Teixeira and Teixeira de Baixo remained closed.",
+    "places": [
+     "Estrada Nacional 230",
+     "Pedras Lavradas",
+     "Barriosa",
+     "Caminho Municipal",
+     "Teixeira",
+     "Teixeira de Baixo"
+    ],
+    "time_text": "Pelas 12 horas",
+    "number": 230,
+    "unit": "Estrada Nacional",
+    "quote": "Pelas 12 horas, apenas continuava condicionada a Estrada Nacional 230, entre as Pedras Lavradas e a Barriosa, enquanto o Caminho Municipal entre Teixeira e a Teixeira de Baixo mantém-se encerrado à circulação.",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "road_closure",
+    "statement_en": "All other roads were reopened to traffic that morning.",
+    "places": [],
+    "time_text": "esta manhã",
+    "number": null,
+    "unit": null,
+    "quote": "Todas as restantes vias foram reabertas à circulação esta manhã.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "ignition_cause",
+    "statement_en": "The Seia fire came from Piódão, where it started on 13 August at about 5 o'clock.",
+    "places": [
+     "Seia",
+     "Piódão",
+     "Arganil",
+     "Coimbra"
+    ],
+    "time_text": "13 de agosto, pelas 5 horas",
+    "number": 13,
+    "unit": "agosto",
+    "quote": "O fogo que está afetar o concelho de Seia veio de Piódão, no concelho de Arganil, no distrito de Coimbra, onde deflagrou a 13 de agosto, pelas 5 horas, segundo o site da Autoridade Nacional de Emergência e Proteção Civil (ANEPC).",
+    "quote_verified": true,
+    "number_in_quote": true
+   },
+   {
+    "category": "weather",
+    "statement_en": "High temperatures prompted the declaration of a state of alert, in force until Sunday.",
+    "places": [
+     "Portugal continental",
+     "regiões Norte e Centro"
+    ],
+    "time_text": "desde julho",
+    "number": null,
+    "unit": null,
+    "quote": "Portugal continental tem sido afetado por múltiplos incêndios rurais desde julho, sobretudo nas regiões Norte e Centro, num contexto de temperaturas elevadas que motivou a declaração do estado de alerta, em vigor até domingo.",
+    "quote_verified": true,
+    "number_in_quote": null
+   },
+   {
+    "category": "other",
+    "statement_en": "The fires caused one death and several injuries, mostly minor, and damaged homes, agricultural and livestock operations, and forest area.",
+    "places": [],
+    "time_text": null,
+    "number": 1,
+    "unit": "morto",
+    "quote": "Os fogos provocaram um morto e vários feridos, na maioria sem gravidade, e destruíram total ou parcialmente casas de primeira e segunda habitação, bem como explorações agrícolas e pecuárias e área florestal.",
+    "quote_verified": true,
+    "number_in_quote": false
+   },
+   {
+    "category": "resources",
+    "statement_en": "Two Fire Boss aircraft were expected to arrive on Monday to reinforce firefighting.",
+    "places": [
+     "Portugal"
+    ],
+    "time_text": "na segunda-feira",
+    "number": 2,
+    "unit": "aviões Fire Boss",
+    "quote": "Portugal ativou o Mecanismo Europeu de Proteção Civil, ao abrigo do qual deverão chegar, na segunda-feira, dois aviões Fire Boss para reforço do combate aos incêndios.",
+    "quote_verified": true,
+    "number_in_quote": false
+   }
+  ]
+ }
+]

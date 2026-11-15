@@ -31,6 +31,23 @@ Task 0: **one client**. Make `crates/firecast/src/intel.rs` use the
 redaction and usage accounting exist once. Keep firecast's credit budget and
 "what-if/live/historical" modes as callers of that client.
 
+### Findings from the first real capture (15 Nov 2026, Arganil 13–14 Aug 2025)
+
+The early-stage demo ([DEMO_DATA.md](DEMO_DATA.md)) was captured live through
+Context.dev: 9 searches and 25 scrapes for 129 credits. Build on these results:
+
+| Finding | Consequence |
+|---|---|
+| `news/search` returned off-topic Portuguese results; `sourceCountry: "pt"` is rejected (accepted list has no PT); Portuguese publisher domains returned 0 | Use `web/search` + `web/scrape` for Portuguese news. Keep `news/search` for international outlets. Record the coverage gap as a monitor status, never as "no news" |
+| `web/search` found the right regional and national pages, but returns no publication date | Take publication time from the scrape's `metadata.publishedTime`/`modifiedTime` and the printed date |
+| `web/scrape` with markdown + JSON schema cost 5 credits per page; search cost 2 per 15–20 results | Budget numbers for section 7 |
+| 2 of 24 pages `WEBSITE_BLOCKED` (correiodabeiraserra.com) | Failure state with the code; no retry loop |
+| 251/267 extracted quotes verified verbatim; 16 not | Rule 1 is necessary; unverified facts stay out of automation |
+| Printed time and metadata disagreed by 1 h on one site; a live-updated page (Público) carried facts from 9 h after its publication time; one page had a date but no time | Time rules in DEMO_DATA.md "Accuracy rules" §3; port them as tests |
+| The extractor labelled villagers gathering in a square as an "event" | Category checks (an event needs a named event in the quote) |
+| Fogos.pt incident page shows present-day meteo and resource counters next to the historical status table | Only the status table, coordinates and nature are historical; exclude the rest when replaying |
+| The same Lusa story appeared on rr.pt, Sábado and Observador | Lineage grouping by headline works for agency copy |
+
 ## 2. Verify the provider contract (before writing more code)
 
 For each endpoint we call (`web/scrape`, `web/search`, `news/search`,

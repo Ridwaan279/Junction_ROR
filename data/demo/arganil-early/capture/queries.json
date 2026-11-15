@@ -1,0 +1,180 @@
+{
+ "date_window_ms": {
+  "from": 1755043200000,
+  "to": 1755158399999,
+  "from_iso": "2025-08-13T00:00:00Z",
+  "to_iso": "2025-08-14T07:59:59.999Z"
+ },
+ "searches": [
+  {
+   "name": "news_incendio_arganil",
+   "endpoint": "POST /v1/news/search",
+   "body": {
+    "searchBy": {
+     "type": "natural_language",
+     "query": "incêndio Arganil Piódão"
+    },
+    "filterBy": {
+     "date": {
+      "from": 1755043200000,
+      "to": 1755158399999
+     },
+     "articleLanguage": [
+      "pt"
+     ]
+    },
+    "limit": 20
+   }
+  },
+  {
+   "name": "news_domains",
+   "endpoint": "POST /v1/news/search",
+   "body": {
+    "searchBy": {
+     "type": "natural_language",
+     "query": "incêndio Arganil Piódão"
+    },
+    "filterBy": {
+     "sourceDomain": [
+      "observador.pt",
+      "rr.pt",
+      "jn.pt"
+     ],
+     "date": {
+      "from": 1755043200000,
+      "to": 1755158399999
+     }
+    },
+    "limit": 20
+   }
+  },
+  {
+   "name": "news_country",
+   "endpoint": "POST /v1/news/search",
+   "body": {
+    "searchBy": {
+     "type": "natural_language",
+     "query": "incêndio Arganil Piódão"
+    },
+    "filterBy": {
+     "sourceCountry": [
+      "pt"
+     ],
+     "date": {
+      "from": 1755043200000,
+      "to": 1755158399999
+     }
+    },
+    "limit": 20
+   }
+  },
+  {
+   "name": "news_en",
+   "endpoint": "POST /v1/news/search",
+   "body": {
+    "searchBy": {
+     "type": "natural_language",
+     "query": "Portugal wildfire Arganil Piodao"
+    },
+    "filterBy": {
+     "articleLanguage": [
+      "en"
+     ],
+     "date": {
+      "from": 1755043200000,
+      "to": 1755158399999
+     }
+    },
+    "limit": 20
+   }
+  },
+  {
+   "name": "web_incendio",
+   "endpoint": "POST /v1/web/search",
+   "body": {
+    "query": "incêndio Arganil Piódão 13 agosto 2025 trovoada",
+    "numResults": 20,
+    "languages": [
+     "pt"
+    ],
+    "country": "PT"
+   }
+  },
+  {
+   "name": "web_evacuacao",
+   "endpoint": "POST /v1/web/search",
+   "body": {
+    "query": "Piódão evacuação aldeias incêndio 13 agosto 2025 Pomares Arganil",
+    "numResults": 15,
+    "languages": [
+     "pt"
+    ],
+    "country": "PT"
+   }
+  },
+  {
+   "name": "web_estradas",
+   "endpoint": "POST /v1/web/search",
+   "body": {
+    "query": "estrada cortada incêndio Arganil Piódão agosto 2025 EN 230 trânsito",
+    "numResults": 15,
+    "languages": [
+     "pt"
+    ],
+    "country": "PT"
+   }
+  },
+  {
+   "name": "web_festas",
+   "endpoint": "POST /v1/web/search",
+   "body": {
+    "query": "festas agosto 2025 Arganil Piódão programa festa aldeia",
+    "numResults": 15,
+    "languages": [
+     "pt"
+    ],
+    "country": "PT"
+   }
+  },
+  {
+   "name": "web_ipma",
+   "endpoint": "POST /v1/web/search",
+   "body": {
+    "query": "IPMA aviso tempo quente 13 agosto 2025 Coimbra perigo de incêndio máximo trovoada",
+    "numResults": 15,
+    "languages": [
+     "pt"
+    ],
+    "country": "PT"
+   }
+  }
+ ],
+ "scrape_urls": [
+  "https://www.diariocoimbra.pt/2025/08/13/fogo-de-piodao-com-origem-em-descarga-de-trovoada/",
+  "https://sicnoticias.pt/especiais/incendios-em-portugal/2025-08-13-video-incendio-em-arganil-teve-origem-numa-trovoada-seca-b393ef54",
+  "https://correiodabeiraserra.com/trovoada-seca-podera-estar-na-origem-do-incendio-florestal-em-arganil/",
+  "https://www.jn.pt/pais/artigo/fogo-obriga-a-evacuar-pelo-menos-nove-aldeias-em-piodao-/17858354",
+  "https://seiadigital.pt/2025/08/13/incendio-no-piodao-obriga-a-evacuar-aldeias/",
+  "https://seiadigital.pt/2025/08/13/aldeias-das-freguesias-de-arganil-seia-e-oliveira-do-hospital-na-linha-de-fogo/",
+  "https://www.asbeiras.pt/incendios-varias-aldeias-na-linha-de-fogo-em-arganil-nas-freguesias-de-piodao-e-pomares/",
+  "https://www.vozportucalense.pt/2025/08/13/incendios-continuam-varias-aldeias-evacuadas-nos-concelhos-de-arganil-e-de-fornos-de-algodres/",
+  "https://radioboanova.sapo.pt/oliveira-do-hospital-ativa-plano-municipal-de-emergencia-e-protecao-civil/",
+  "https://www.jn.pt/pais/artigo/frente-de-fogo-em-arganil-em-perigo-de-chegar-a-pampilhosa-da-serra/17858447",
+  "https://observador.pt/2025/08/14/incendios-festa-de-verao-do-piodao-em-arganil-cancelada/",
+  "https://correiodabeiraserra.com/incendio-leva-ao-cancelamento-da-festa-de-verao-do-piodao/",
+  "https://www.noticiasdecoimbra.pt/casal-passa-ferias-no-piodao-e-encontra-o-inferno-chamas-estavam-mesmo-a-porta-da-nossa-casa/",
+  "https://www.theportugalnews.com/br/noticias/2025-08-12/aviso-de-clima-quente-em-portugal-estendido-quando-as-temperaturas-atingem-44c/599824",
+  "https://www.altominho.tv/site/2025/08/11/incendios-cerca-de-120-concelhos-em-risco-maximo/",
+  "https://beira.pt/portal/noticias/aviso-laranja-por-causa-do-calor-estendido-ate-quinta-feira-no-interior-do-pais/",
+  "https://fogos.pt/pt/fogo/20251075979",
+  "https://www.publico.pt/2025/08/13/sociedade/noticia/incendios-ermidassado-dominado-vila-real-trancoso-continuam-activos-2143809",
+  "https://www.rtp.pt/noticias/pais/incendio-obriga-a-evacuar-aldeias-no-piodao_v1676155",
+  "https://radioboanova.sapo.pt/incendio-que-teve-inicio-no-piodao-ja-entrou-no-concelho-de-oliveira-do-hospital/",
+  "https://www.sabado.pt/portugal/detalhe/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-pioda",
+  "https://rr.pt/noticia/pais/2025/08/13/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-piodao/436045/",
+  "https://observador.pt/2025/08/13/trovoada-seca-provocou-fogo-em-arganil-junto-a-aldeia-do-piodao/",
+  "https://www.jn.pt/pais/artigo/fogo-vindo-do-piodao-com-uma-frente-ativa-em-seia/17858864",
+  "https://fogos.pt/fogo/20251075979/detalhe"
+ ],
+ "scrape_body": "see scrape.py (formats markdown + json, jsonParams schema and instructions, timeoutOpts return-partial)"
+}
