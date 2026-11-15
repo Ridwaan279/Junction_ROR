@@ -76,6 +76,34 @@ fn empty_requires_literal_visible_statement_and_validated_coverage() {
 }
 
 #[test]
+fn public_table_empty_marker_does_not_override_unknown_coverage() {
+    // Synthetic response using the public UI label, without captured incident data.
+    let mut response = page(
+        json!([]),
+        "#### Sem registo de incêndios",
+        "unknown",
+        json!("Sem registo de incêndios"),
+    );
+    response.url = "https://fogos.pt/pt/tabela".into();
+    let result =
+        emberwatch_intelligence::fogos::normalize_fogos_with_coverage(&context(), &response, true)
+            .unwrap();
+    assert_eq!(result.health, SourceHealth::Partial);
+    assert!(!result.coverage.complete);
+    assert!(!result.coverage.explicit_empty);
+
+    response.json.data.as_mut().unwrap()["coverage"] = json!("complete");
+    assert_eq!(
+        normalize_fogos(&context(), &response).unwrap().health,
+        SourceHealth::Partial
+    );
+    let validated =
+        emberwatch_intelligence::fogos::normalize_fogos_with_coverage(&context(), &response, true)
+            .unwrap();
+    assert_eq!(validated.health, SourceHealth::EmptyVerified);
+}
+
+#[test]
 fn nullable_fields_lineage_usage_and_retry_identity_are_preserved() {
     let row = json!({"external_id":"synthetic-42", "locality":"Local sintético", "municipality":"Águeda", "raw_type":"Incêndio rural", "raw_status":"Em Curso", "visible_excerpt":"Local sintético — Águeda — Em Curso"});
     let response = page(

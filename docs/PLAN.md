@@ -493,6 +493,15 @@ See each crate/web README for current behavior and validation details.
 B now provides a Rust Context REST client, conservative Fogos extraction,
 IPMA weather/risk normalization, Portuguese report handling and signed webhook
 verification. Immutable observation versions preserve revised source captures.
+On 15 November, Codex Context MCP OAuth/tool discovery and a separate encrypted
+application key were verified. A fresh REST table scrape matched the browser's
+`Sem registo de incêndios` label and correctly retained unknown coverage; the
+current compiled Rust client independently reproduced it with partial health.
+Populated incident rows and national completeness remain unverified; recurring
+ingestion stays disabled. Formatting/lint and 61 Rust tests passed (one optional
+DB test skipped). The ordinary probe build hit Windows Application Control
+(4551); the live Rust check used the current test-built executable. See
+DATA_SOURCES for request metadata and the root README for secure setup/probes.
 C provides tested illustrative spread, wind blending, reserve-aware A* routing,
 replanning, seeded state simulation and cited PT/EN text. D provides the bilingual
 Next.js/MapLibre/deck.gl workspace, source panels, local replay and API/SSE sync.

@@ -298,6 +298,8 @@ fn explicit_empty_statement(text: &str) -> bool {
         "não existem ocorrências",
         "nenhuma ocorrência",
         "sem incêndios ativos",
+        "sem registo de incêndios",
+        "sem registo de incendios",
         "não há incêndios",
         "no active incidents",
         "no active fires",

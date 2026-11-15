@@ -54,8 +54,18 @@ cargo +stable test -p emberwatch-intelligence
 cargo +stable clippy -p emberwatch-intelligence --all-targets -- -D warnings
 cargo +stable run -p emberwatch-intelligence --example probe -- ipma
 # After setting CONTEXT_DEV_API_KEY server-side; one bounded feasibility request:
-cargo +stable run -p emberwatch-intelligence --example probe -- fogos
+cargo +stable run -p emberwatch-intelligence --example probe -- fogos table
+# Alternative reviewed pages: fogos list / fogos map. Default: table.
 ```
+
+Windows can use `infra/context.ps1` from the repository root for masked key setup,
+encrypted account-local storage, usage checks, and the probe/server process. See
+the root README. `-Action probe -UseBuilt` can use a current test-built executable
+without rebuilding; stale/missing executables are rejected. Optional
+`CONTEXT_PROBE_CAPTURE=1` saves public-page output and
+request/usage metadata under ignored `.state/context-probe`; never commit those
+captures as licensed fixtures. Each probe is a fresh billed request with an
+8-second render wait, a 30-second provider deadline, and no automatic retry.
 
 Fixtures are synthetic test literals, not captured third-party incident records.
 Fogos live extraction success/coverage and redistribution permission are separate;
