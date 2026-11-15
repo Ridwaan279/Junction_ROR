@@ -128,10 +128,12 @@ Answers from the user (first round):
 | Visual style | Realistic satellite imagery with a dark ops-room UI | Satellite basemap on 3D terrain (a free, attributable imagery source with terms checked, e.g. Sentinel-2 cloudless); dark panels and controls; fire, smoke and drones glow on top |
 | Demo flow | Runs on real-time data; a button switches to the previous simulation | Default view is **live** (current Portugal data through the server). A clear button switches to the **historical replay** (Arganil/Piódão 2025, real data), and back. Live never shows replay data and vice versa; the mode badge is always visible |
 
-Open point to confirm with the user: what the live view shows when there is no
-active fire (proposal: Portugal in 3D with today's fire-danger and weather layers,
-the time of the last successful capture, and the replay button highlighted; a
-failed capture is shown as a failure, never as "no fires").
+Live view with no active fire (user decision): the screen clearly says there is
+no active fire right now, e.g. "Sem incêndios ativos neste momento / No active
+fires right now", with the time of the last successful check and the sources
+checked. That message is shown only after a successful capture that positively
+shows no active incidents; if a capture fails or is partial, the screen says the
+check failed instead. The replay button stays visible next to the message.
 
 Starting proposal: one operations screen replaces the current workspace/historical split. Layout:
 
@@ -445,13 +447,27 @@ commands, so the bridge can be added without changing the UI.
 
 ## 10. Kickoff prompt for Agent 2
 
-Paste into the other agent once Gate 0 is pushed:
+Agent 2 works on **its own branch** cut from `origin/claude/fervent-clarke-m9qsko`
+(its cloud session's assigned branch is fine). It never pushes to
+`claude/fervent-clarke-m9qsko`; Agent 1 merges Agent 2's branch at each gate.
+Paste this into the other agent:
 
-> Read AGENTS.md, docs/WORKPLAN.md and docs/CONTEXT_DEV_ACCURACY.md. You are
-> Agent 2. Branch from `origin/claude/fervent-clarke-m9qsko` (Gate 0 = commit
-> `9a061da` or later). You write only the paths in the
-> "Agent 2" column of WORKPLAN section 2. Start with CONTEXT_DEV_ACCURACY.md, then
-> WORKPLAN 5.1 → 5.5 in order. Output replay data in the section 7 shapes to
-> `web/public/generated/`. Keep secrets server-side; never invent model IDs,
-> quotas, counts or timestamps. Hand off at each gate with the scope check
-> output and the section 8 results.
+> You are Agent 2 (intelligence, planning and Gemini) on EmberWatch. Fetch
+> `origin/claude/fervent-clarke-m9qsko` and create your own branch from it; work
+> and push only there. Read AGENTS.md, docs/WORKPLAN.md (sections 2, 5, 7, 8),
+> docs/CONTEXT_DEV_ACCURACY.md and docs/DEMO_DATA.md. You write only the paths in
+> the "Agent 2" column of WORKPLAN section 2; never edit `web/**` except
+> `web/public/generated/**`. Work in this order: (1) CONTEXT_DEV_ACCURACY.md
+> tasks 0–5, using the real Arganil captures in `data/demo/arganil-early/` as the
+> first golden pages; (2) WORKPLAN 5.0b (port the capture scripts to Rust, finer
+> early frames); (3) 5.1 stations, 5.2 fleet sizing, 5.3 smoke-aware 3D routes;
+> (4) 5.4 people at risk and nearby events; (5) 5.5 Gemini advisor. The live
+> view needs an honest "no active fires" signal (WORKPLAN 4.2): expose, per
+> source, whether the last capture succeeded and whether it positively showed no
+> active incidents. Use only real data that was public at the time; never invent
+> model IDs, quotas, counts, events or timestamps. Context.dev's key is injected
+> by the environment proxy (`CONTEXT_DEV_API_KEY` may be a placeholder); Gemini
+> needs `GEMINI_API_KEY`, `GEMINI_MODEL` and network access to
+> `generativelanguage.googleapis.com`. At each gate, push your branch and hand off:
+> commit, `git diff --name-only <base>..HEAD` scope check, `cargo fmt/clippy/test`
+> results, open issues and env var names.
