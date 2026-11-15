@@ -10,7 +10,9 @@
 //! Experimental research software: outputs are uncalibrated for Portugal and are
 //! never operational guidance.
 pub mod contour;
+pub mod early_demo;
 pub mod environment;
+pub mod fleet;
 pub mod forecast;
 pub mod fuel;
 pub mod geo;
@@ -20,6 +22,7 @@ pub mod intel;
 pub mod landcover;
 pub mod moisture;
 pub mod rothermel;
+pub mod routing;
 pub mod smoke;
 pub mod solar;
 pub mod sources;

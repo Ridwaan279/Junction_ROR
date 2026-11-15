@@ -1,0 +1,12 @@
+{
+  "captured_at": "2026-11-15T04:08:52.533Z",
+  "request_url": "https://api.openstreetmap.org/api/0.6/nodes.json?nodes=25623904,24960091,1084227094",
+  "attribution": "© OpenStreetMap contributors",
+  "licence": "ODbL 1.0",
+  "licence_url": "https://www.openstreetmap.org/copyright",
+  "note": "City place-node coordinates only. All station locations, inventory and availability are hypothetical demonstration assumptions; no real depot or emergency-service capability is represented.",
+  "overpass_attempts": [
+    "overpass-api.de: POST HTTP 406; GET timeout",
+    "overpass.kumi.systems: GET timeout"
+  ]
+}

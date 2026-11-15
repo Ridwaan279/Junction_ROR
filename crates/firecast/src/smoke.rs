@@ -10,12 +10,12 @@
 //! * Wildfire smoke fills the convection column, so emissions are spread uniformly
 //!   between the surface and the effective plume height (a vertical line source of
 //!   five sub-sources) instead of being released at a single elevated point.
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 pub const PM25_EMISSION_FACTOR_G_PER_KG: f64 = 17.0;
 pub const CONVECTIVE_FRACTION: f64 = 0.65;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Stability {
     A,
     B,
@@ -122,7 +122,7 @@ pub fn stability_class(
     row[insolation]
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PlumeSource {
     /// Local metres.
     pub x: f64,
@@ -136,7 +136,7 @@ pub struct PlumeSource {
     pub age_s: f64,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PlumeMet {
     pub wind10_mps: f64,
     /// Transport wind at plume level, m/s, and the bearing (radians) it blows toward.

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "demo-osm-24960091",
+    "name": "Viseu — hypothetical station",
+    "position": [
+      -7.9138664,
+      40.6574713
+    ],
+    "simulated": true,
+    "drones_total": 12,
+    "drones_available": 12,
+    "coordinate_source": "https://www.openstreetmap.org/node/24960091"
+  },
+  {
+    "id": "demo-osm-25623904",
+    "name": "Coimbra — hypothetical station",
+    "position": [
+      -8.4291478,
+      40.2111874
+    ],
+    "simulated": true,
+    "drones_total": 12,
+    "drones_available": 12,
+    "coordinate_source": "https://www.openstreetmap.org/node/25623904"
+  },
+  {
+    "id": "demo-osm-1084227094",
+    "name": "Guarda — hypothetical station",
+    "position": [
+      -7.2662964,
+      40.5378408
+    ],
+    "simulated": true,
+    "drones_total": 12,
+    "drones_available": 12,
+    "coordinate_source": "https://www.openstreetmap.org/node/1084227094"
+  }
+]

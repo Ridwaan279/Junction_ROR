@@ -427,12 +427,15 @@ dependencies = [
  "emberwatch-intelligence",
  "emberwatch-response",
  "futures",
+ "hex",
  "png",
  "reqwest",
  "serde",
  "serde_json",
+ "sha2",
  "thiserror",
  "tokio",
+ "tower",
 ]
 
 [[package]]

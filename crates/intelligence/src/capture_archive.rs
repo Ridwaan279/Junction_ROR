@@ -131,10 +131,34 @@ pub fn archive(
             "No matching original Markdown captures found; retained provenance was not changed.",
         ));
     }
-    preserve(
-        &private_directory.join("pages-before-hashes.json"),
-        &original_pages,
-    )?;
+    let backup = private_directory.join("pages-before-hashes.json");
+    if backup.exists() {
+        let strip_hashes = |mut value: Value| {
+            if let Some(items) = value.as_array_mut() {
+                for page in items {
+                    if let Some(page) = page.as_object_mut() {
+                        for key in [
+                            "markdown_sha256",
+                            "raw_response_sha256",
+                            "markdown_hash_basis",
+                        ] {
+                            page.remove(key);
+                        }
+                    }
+                }
+            }
+            value
+        };
+        let previous: Value = serde_json::from_slice(&fs::read(&backup)?)
+            .map_err(|_| io::Error::other("Invalid original pages backup"))?;
+        if strip_hashes(previous) != strip_hashes(pages.clone()) {
+            return Err(io::Error::other(
+                "Retained pages changed since the original archive; refusing to replace the backup.",
+            ));
+        }
+    } else {
+        preserve(&backup, &original_pages)?;
+    }
     // All IDs were checked before publishing any hash changes.
     fs::write(
         pages_file,
@@ -187,6 +211,16 @@ mod tests {
         )
         .unwrap();
         assert_eq!(report.hashed_pages, 1);
+        assert_eq!(
+            archive(
+                &base.join("raw"),
+                &base.join("private"),
+                &base.join("pages.json")
+            )
+            .unwrap()
+            .hashed_pages,
+            1
+        );
         let pages: Value =
             serde_json::from_slice(&fs::read(base.join("pages.json")).unwrap()).unwrap();
         assert_eq!(pages[0]["markdown_sha256"], digest(md.as_bytes()));
